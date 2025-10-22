@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Draggable} from './components/Draggable'
 import { DndContext } from '@dnd-kit/core';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button"
 
