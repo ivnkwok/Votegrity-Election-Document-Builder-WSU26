@@ -132,7 +132,7 @@ export default function App() {
     <DndContext onDragEnd={handleDragEnd}>
     <div className="flex">
       <div className="w-2/5 border-black border-2 p-4 h-screen">
-        <h2 className='text-center'>Palette/Core Navigation</h2>
+        <h2 className="text-center scroll-m-20 pb-4 text-3xl font-semibold tracking-tight first:mt-0">Palette/Core Navigation</h2>
         <Select>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Templates" />
@@ -157,32 +157,20 @@ export default function App() {
         
           {/* Save/Load + Preview buttons */}
           <div className="mt-4 flex flex-col gap-2">
-            <button
-              onClick={handleSaveLayout}
-              className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100"
-            >
-              Save Layout
-            </button>
-            <label className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100">
-              Load Layout
-              <input
-                type="file"
-                accept="application/json"
-                onChange={handleLoadLayout}
-                className="hidden"
-              />
-            </label>
-            <Button
-            onClick={handlePreviewPDF}
-            variant="outline"
-            // className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100"
-            >
-              Open PDF Preview
+            <Button variant="outline" onClick={handleSaveLayout}>Save Layout</Button>
+            <Button variant="outline" asChild>
+              <label className="cursor">
+                Load Layout
+                <input type="file" accept="application/json" onChange={handleLoadLayout} className="hidden"/>
+              </label>
             </Button>
+            <Button variant="outline" onClick={handlePreviewPDF}>Open PDF Preview</Button>
           </div>
+          
       </div>
       {/* Canvas Area */}
-        <div className="w-3/5 border-black border-2 bg-slate-200 space-y-5 mb-5">
+        <div className="w-3/5 border-black border-2 bg-slate-200 space-y-5 mb-5 p-4">
+          <h2 className="text-center scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0">Canvas (Drag-and-Drop Area)</h2>
           {/* Letter size page area for dropping components */}
           <div
             id="page"
@@ -192,9 +180,6 @@ export default function App() {
             <h2 className="pt-10 text-center text-xl font-bold">
               This is a sample page for PDF preview.
             </h2>
-            <p className="mt-5 text-center">
-              Testing 123...
-            </p>
           </div>
         </div>
     </div>
