@@ -3,6 +3,7 @@ import {Draggable} from './components/Draggable'
 import { DndContext } from '@dnd-kit/core';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { Button } from "@/components/ui/button"
 
 // --- Type Definitions ---
 
@@ -120,11 +121,12 @@ export default function App() {
   };
 
   return (
+
     <DndContext onDragEnd={handleDragEnd}>
     <div className="flex">
-      <div className="w-2/5 border-black border-2 p-4">
+      <div className="w-2/5 border-black border-2 p-4 h-screen">
         <h2 className='text-center'>Palette/Core Navigation</h2>
-        <select className="border-black border-2 w-full text-lg h-[3rem]" id="Templates" title="Templates">
+        <select className="border-black border-2 w-full h-[3rem]" id="Templates" title="Templates">
           <option selected disabled hidden>Templates</option>
           <option value="Ballot Template">Ballot Template</option>
           <option value="Notice Template">Notice Template</option>
@@ -159,23 +161,21 @@ export default function App() {
                 className="hidden"
               />
             </label>
-            <button
+            <Button
             onClick={handlePreviewPDF}
-            className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100"
+            variant="outline"
+            // className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100"
             >
               Open PDF Preview
-            </button>
+            </Button>
           </div>
       </div>
       {/* Canvas Area */}
         <div className="w-3/5 border-black border-2 bg-slate-200 space-y-5 mb-5">
-          <h1 className="mt-5 text-center text-2xl font-bold">
-            Canvas - Drag and Drop Area
-          </h1>
           {/* Letter size page area for dropping components */}
           <div
             id="page"
-            className="mx-auto mb-16 bg-white rounded-md shadow-xl print:shadow-none"
+            className="mx-auto mb-16 bg-white rounded-md shadow-xl print:shadow-none h-screen"
             style={{ width: '8.5in', height: '11in' }}
           >
             <h2 className="pt-10 text-center text-xl font-bold">
