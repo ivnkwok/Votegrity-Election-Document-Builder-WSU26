@@ -4,6 +4,13 @@ import { DndContext } from '@dnd-kit/core';
 import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 // --- Type Definitions ---
 
@@ -126,12 +133,16 @@ export default function App() {
     <div className="flex">
       <div className="w-2/5 border-black border-2 p-4 h-screen">
         <h2 className='text-center'>Palette/Core Navigation</h2>
-        <select className="border-black border-2 w-full h-[3rem]" id="Templates" title="Templates">
-          <option selected disabled hidden>Templates</option>
-          <option value="Ballot Template">Ballot Template</option>
-          <option value="Notice Template">Notice Template</option>
-          <option value="Candidate Statement Template">Candidate Statement Template</option>
-        </select>
+        <Select>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Templates" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="Ballot Template">Ballot Template</SelectItem>
+          <SelectItem value="Notice Template">Notice Template</SelectItem>
+          <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
+        </SelectContent>
+        </Select>
         <div className="flex flex-wrap">
         {tools.map((tool) => (
           <div className="w-1/2">
