@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import {Draggable} from './components/Draggable'
 import { DndContext } from '@dnd-kit/core';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 // --- Type Definitions ---
 
@@ -75,10 +77,52 @@ export default function App() {
     reader.readAsText(file);
   };
 
+  const handlePreviewPDF = async () => {
+    const page = document.getElementById("page");             // Grab the DOM node we want to export
+    if (!page) throw new Error("Could not find #page element.");
+
+    // Force light color scheme so dark-mode CSS doesn't invert colors in the snapshot
+    document.documentElement.style.colorScheme = "light";
+
+    // Render the node to a canvas at 2x scale for sharper text; white background avoids transparency
+    const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff" });
+    const imgData = canvas.toDataURL("image/png");            // Convert canvas to a PNG data URL
+
+    // Create a portrait, US Letter PDF with inch units for exact sizing
+    const pdf = new jsPDF({
+      unit: "in",
+      format: "letter",
+      orientation: "portrait",
+    });
+
+    // Place the image to fill the whole page: x=0, y=0, width=8.5in, height=11in
+    pdf.addImage(imgData, "PNG", 0, 0, 8.5, 11);
+
+    // Instantly downloads the PDF (not ideal)
+    //pdf.save("test.pdf");
+
+    // Replace the old pdf.save("test.pdf") with code to open in new tab instead
+    const blob = pdf.output("blob");
+    const url = URL.createObjectURL(blob);
+
+    // Open a blank tab immediately
+    const newTab = window.open("", "_blank");
+    if (newTab) {
+      newTab.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } else {
+      // Fallback if blocked
+      const fallbackWindow = window.open(url, "_blank");
+      if (!fallbackWindow) {
+        pdf.save("test.pdf");
+      }
+    }
+  };
+
   return (
     <DndContext onDragEnd={handleDragEnd}>
     <div className="flex">
-      <div className="h-screen w-2/5 border-black border-2 p-4">
+      <div className="w-2/5 border-black border-2 p-4">
         <h2 className='text-center'>Palette/Core Navigation</h2>
         <select className="border-black border-2 w-full text-lg h-[3rem]" id="Templates" title="Templates">
           <option selected disabled hidden>Templates</option>
@@ -90,7 +134,7 @@ export default function App() {
         {tools.map((tool) => (
           <div className="w-1/2">
             <Draggable key={tool.id} id={tool.id}>
-              <div className="p-1 border-black border-2 h-[4rem] flex items-center justify-center">
+              <div className="p-1 border-black border-2 h-16 flex items-center justify-center">
                 {tool.content}
               </div>
             </Draggable>
@@ -98,15 +142,15 @@ export default function App() {
         ))}
         </div>
         
-          {/* Save & Load buttons */}
+          {/* Save/Load + Preview buttons */}
           <div className="mt-4 flex flex-col gap-2">
             <button
               onClick={handleSaveLayout}
-              className="border-2 border-black px-2 py-1 bg-white text-center cursor-pointer"
+              className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100"
             >
               Save Layout
             </button>
-            <label className="border-2 border-black px-2 py-1 bg-gray-100 text-center cursor-pointer">
+            <label className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100">
               Load Layout
               <input
                 type="file"
@@ -115,11 +159,33 @@ export default function App() {
                 className="hidden"
               />
             </label>
+            <button
+            onClick={handlePreviewPDF}
+            className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100"
+            >
+              Open PDF Preview
+            </button>
           </div>
       </div>
-      <div className="h-screen w-3/5 border-black border-2">
-          
-      </div>
+      {/* Canvas Area */}
+        <div className="w-3/5 border-black border-2 bg-slate-200 space-y-5 mb-5">
+          <h1 className="mt-5 text-center text-2xl font-bold">
+            Canvas - Drag and Drop Area
+          </h1>
+          {/* Letter size page area for dropping components */}
+          <div
+            id="page"
+            className="mx-auto mb-16 bg-white rounded-md shadow-xl print:shadow-none"
+            style={{ width: '8.5in', height: '11in' }}
+          >
+            <h2 className="pt-10 text-center text-xl font-bold">
+              This is a sample page for PDF preview.
+            </h2>
+            <p className="mt-5 text-center">
+              Testing 123...
+            </p>
+          </div>
+        </div>
     </div>
     </DndContext>
   );
