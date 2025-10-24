@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
 import {Draggable} from './components/Draggable'
 import { DndContext } from '@dnd-kit/core';
-import html2canvas from 'html2canvas-pro';
-import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button"
+import { previewElementAsPdf } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -85,46 +84,8 @@ export default function App() {
     reader.readAsText(file);
   };
 
-  const handlePreviewPDF = async () => {
-    const page = document.getElementById("page");             // Grab the DOM node we want to export
-    if (!page) throw new Error("Could not find #page element.");
-
-    // Force light color scheme so dark-mode CSS doesn't invert colors in the snapshot
-    document.documentElement.style.colorScheme = "light";
-
-    // Render the node to a canvas at 2x scale for sharper text; white background avoids transparency
-    const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff" });
-    const imgData = canvas.toDataURL("image/png");            // Convert canvas to a PNG data URL
-
-    // Create a portrait, US Letter PDF with inch units for exact sizing
-    const pdf = new jsPDF({
-      unit: "in",
-      format: "letter",
-      orientation: "portrait",
-    });
-
-    // Place the image to fill the whole page: x=0, y=0, width=8.5in, height=11in
-    pdf.addImage(imgData, "PNG", 0, 0, 8.5, 11);
-
-    // Instantly downloads the PDF (not ideal)
-    //pdf.save("test.pdf");
-
-    // Replace the old pdf.save("test.pdf") with code to open in new tab instead
-    const blob = pdf.output("blob");
-    const url = URL.createObjectURL(blob);
-
-    // Open a blank tab immediately
-    const newTab = window.open("", "_blank");
-    if (newTab) {
-      newTab.location.href = url;
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    } else {
-      // Fallback if blocked
-      const fallbackWindow = window.open(url, "_blank");
-      if (!fallbackWindow) {
-        pdf.save("test.pdf");
-      }
-    }
+  const handlePreviewPDF = () => {
+    previewElementAsPdf("page");
   };
 
   return (
