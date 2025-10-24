@@ -154,24 +154,34 @@ export default function App() {
           </div>
         ))}
         </div>
-        
-          {/* Save/Load + Preview buttons */}
-          <div className="mt-4 flex flex-col gap-2">
-            <button
-              onClick={handleSaveLayout}
-              className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100"
+        {/* Save/Load + Preview buttons */}
+        <div className="mt-4 flex flex-col gap-2">
+          {/* Save Layout Button */}
+          <Button
+            onClick={handleSaveLayout}
+            variant="outline"
+            className="border-2 border-black hover:bg-slate-100"
+          >
+            Save Layout
+          </Button>
+
+          {/* Load Layout Button with hidden input */}
+          <div className= "mt-4 flex flex-col gap-2">
+            <input
+              id="loadLayoutInput"
+              type="file"
+              accept="application/json"
+              onChange={handleLoadLayout}
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              className="border-2 border-black hover:bg-slate-100"
+              onClick={() => document.getElementById("loadLayoutInput")?.click()}
             >
-              Save Layout
-            </button>
-            <label className="rounded-md border-2 border-black px-2 py-1 bg-white text-center cursor-pointer hover:bg-slate-100">
               Load Layout
-              <input
-                type="file"
-                accept="application/json"
-                onChange={handleLoadLayout}
-                className="hidden"
-              />
-            </label>
+            </Button>
+          </div>
             <Button
             onClick={handlePreviewPDF}
             variant="outline"
