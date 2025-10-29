@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Draggable} from './components/Draggable'
+import { Draggable } from './components/Draggable'
 import { DndContext } from '@dnd-kit/core';
 import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
@@ -25,15 +25,6 @@ interface CanvasItem {
   content: string;
 }
 
-interface DraggableProps {
-  id: string;
-  children: React.ReactNode;
-}
-
-interface DroppableProps {
-  id: string;
-  children: React.ReactNode;
-}
 
 export default function App() {
   const tools = [
