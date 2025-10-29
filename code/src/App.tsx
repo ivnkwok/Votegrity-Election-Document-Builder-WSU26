@@ -15,11 +15,6 @@ import {
 
 // --- Type Definitions ---
 
-interface Tool {
-  id: string;
-  content: string;
-}
-
 interface CanvasItem {
   id: string;
   content: string;
@@ -34,10 +29,6 @@ export default function App() {
     { id: 'candidate-body', content: 'Candidate Body'},
   ]
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
-
-  const draggableMarkup = (
-    <Draggable id="draggable">Drag me</Draggable>
-  );
 
   const handleSaveLayout = () => {
     const json = JSON.stringify(canvasItems, null, 2);
