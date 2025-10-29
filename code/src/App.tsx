@@ -4,6 +4,7 @@ import { DndContext } from '@dnd-kit/core';
 import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button"
+import { DraggableTool } from './components/Tool'
 import {
   Select,
   SelectContent,
@@ -145,13 +146,9 @@ export default function App() {
         </Select>
         <div className="flex flex-wrap">
         {tools.map((tool) => (
-          <div className="w-1/2">
-            <Draggable key={tool.id} id={tool.id}>
-              <div className="p-1 border-black border-2 h-16 flex items-center justify-center">
-                {tool.content}
-              </div>
-            </Draggable>
-          </div>
+          // <div className="w-1/2 border-black">
+            <DraggableTool id={tool.id} toolText={tool.content}></DraggableTool>
+          // </div>
         ))}
         </div>
         
