@@ -144,7 +144,7 @@ export default function App() {
           <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
         </SelectContent>
         </Select>
-        <div className="flex flex-wrap">
+        <div className="py-5 grid grid-cols-2 gap-2">
         {tools.map((tool) => (
           // <div className="w-1/2 border-black">
             <DraggableTool id={tool.id} toolText={tool.content}></DraggableTool>

@@ -43,7 +43,7 @@ export function DraggableTool({ id, toolText }: DraggableToolProps) {
   };
 
   return (
-    <Item ref={setNodeRef} style={toolStyle} {...listeners} {...attributes} variant='outline' className='w-1/2 text-center'>
+    <Item ref={setNodeRef} style={toolStyle} {...listeners} {...attributes} variant='outline' className='text-center '>
         <ItemContent>
          {toolText}
         </ItemContent>
