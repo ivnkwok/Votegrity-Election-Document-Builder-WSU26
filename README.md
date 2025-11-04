@@ -48,7 +48,7 @@ You can set up the project locally by following these steps:
 git clone https://github.com/ivnkwok/WSU-Capstone-2025.git
 
 # 2. Navigate into the project directory
-cd https://github.com/ivnkwok/WSU-Capstone-2025.git
+cd ./code
 
 # 3. Install dependencies
 npm install
