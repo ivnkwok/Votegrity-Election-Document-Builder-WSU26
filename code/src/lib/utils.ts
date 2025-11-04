@@ -45,3 +45,35 @@ export async function previewElementAsPdf(elementId: string) {
     pdf.save("preview.pdf");
   }
 }
+
+export interface CanvasItem {
+  id: string;
+  type: "text" | "box";
+  content?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  styles?: Record<string, any>;
+}
+
+// Reads a JSON layout file and maps it to CanvasItem[]
+export async function loadLayoutFromFile(file: File): Promise<CanvasItem[]> {
+  const text = await file.text();
+  const json = JSON.parse(text);
+
+  if (!json || !Array.isArray(json.components)) {
+    throw new Error("Invalid layout file — missing components array.");
+  }
+
+  return json.components.map((c: any) => ({
+    id: c.id,
+    type: c.type,
+    content: c.content || "",
+    x: c.position?.x ?? 0,
+    y: c.position?.y ?? 0,
+    width: c.size?.width ?? 100,
+    height: c.size?.height ?? 50,
+    styles: c.styles || {},
+  }));
+}

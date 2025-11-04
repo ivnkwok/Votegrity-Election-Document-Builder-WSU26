@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Draggable} from './components/Draggable'
 import { DndContext } from '@dnd-kit/core';
 import { Button } from "@/components/ui/button"
-import { previewElementAsPdf } from "@/lib/utils";
+import { previewElementAsPdf, loadLayoutFromFile } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -20,7 +20,13 @@ interface Tool {
 
 interface CanvasItem {
   id: string;
-  content: string;
+  type: 'text' | 'box';
+  content?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  styles?: React.CSSProperties;
 }
 
 interface DraggableProps {
@@ -58,64 +64,51 @@ export default function App() {
 
     URL.revokeObjectURL(url);
   };
-  const handleLoadLayout = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleLoadLayout = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const res = e.target?.result
-        if (typeof res !== 'string') {
-          alert('Failed to read file content.')
-          return;
-        }
-        const json = JSON.parse(res);
-        if (Array.isArray(json)) {
-          //problem with this line
-          // setCanvasItems(json)
-        } else {
-          alert('Invalid layout file');
-        }
-      } catch (err) {
-        alert('Error parsing layout JSON');
-      }
-    };
-    reader.readAsText(file);
+    try {
+      const items = await loadLayoutFromFile(file);
+      setCanvasItems(items);
+    } catch (e) {
+      alert('Invalid JSON layout. Please check the file format.');
+      console.error(e);
+    } finally {
+      event.target.value = '';
+    }
   };
 
-  const handlePreviewPDF = () => {
-    previewElementAsPdf("page");
-  };
+  const handlePreviewPDF = () => previewElementAsPdf('page');
 
   return (
-
     <DndContext onDragEnd={handleDragEnd}>
-    <div className="flex">
-      <div className="w-2/5 border-black border-2 p-4 h-screen">
-        <h2 className="text-center scroll-m-20 pb-4 text-3xl font-semibold tracking-tight first:mt-0">Palette/Core Navigation</h2>
-        <Select>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Templates" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Ballot Template">Ballot Template</SelectItem>
-          <SelectItem value="Notice Template">Notice Template</SelectItem>
-          <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
-        </SelectContent>
-        </Select>
-        <div className="flex flex-wrap">
-        {tools.map((tool) => (
-          <div className="w-1/2">
-            <Draggable key={tool.id} id={tool.id}>
-              <div className="p-1 border-black border-2 h-16 flex items-center justify-center">
-                {tool.content}
+      <div className="flex">
+        <div className="w-2/5 border-black border-2 p-4 h-screen">
+          <h2 className="text-center scroll-m-20 pb-4 text-3xl font-semibold tracking-tight first:mt-0">Palette/Core Navigation</h2>
+          <Select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Templates" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Ballot Template">Ballot Template</SelectItem>
+              <SelectItem value="Notice Template">Notice Template</SelectItem>
+              <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="flex flex-wrap">
+            {tools.map((tool) => (
+              <div className="w-1/2" key={tool.id}>
+                <Draggable id={tool.id}>
+                  <div className="p-1 border-black border-2 h-16 flex items-center justify-center">
+                    {tool.content}
+                  </div>
+                </Draggable>
               </div>
-            </Draggable>
+            ))}
           </div>
-        ))}
-        </div>
-        
+          
           {/* Save/Load + Preview buttons */}
           <div className="mt-4 flex flex-col gap-2">
             <Button variant="outline" onClick={handleSaveLayout}>Save Layout</Button>
@@ -127,23 +120,36 @@ export default function App() {
             </Button>
             <Button variant="outline" onClick={handlePreviewPDF}>Open PDF Preview</Button>
           </div>
-          
-      </div>
-      {/* Canvas Area */}
-        <div className="w-3/5 border-black border-2 bg-slate-200 space-y-5 mb-5 p-4">
-          <h2 className="text-center scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0">Canvas (Drag-and-Drop Area)</h2>
-          {/* Letter size page area for dropping components */}
+        </div>
+
+        {/* Canvas Area */}
+        <div className="w-3/5 border-black border-2 bg-slate-200 p-4">
+          <h2 className="text-center text-3xl font-semibold">Canvas (Drag-and-Drop Area)</h2>
           <div
             id="page"
-            className="mx-auto mb-16 bg-white rounded-md shadow-xl print:shadow-none h-screen"
-            style={{ width: '8.5in', height: '11in' }}
+            className="mx-auto mt-4 bg-white rounded-md shadow relative"
+            style={{ width: '8.5in', height: '11in', position: 'relative' }}
           >
-            <h2 className="pt-10 text-center text-xl font-bold">
-              This is a sample page for PDF preview.
-            </h2>
+            {canvasItems.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  position: 'absolute',
+                  left: item.x,
+                  top: item.y,
+                  width: item.width,
+                  height: item.height,
+                  overflow: 'hidden',
+                  border: item.type === 'box' ? '1px solid #000' : undefined,
+                  ...item.styles,
+                }}
+              >
+                {item.type === 'text' && <div style={{ whiteSpace: 'pre-wrap' }}>{item.content}</div>}
+              </div>
+            ))}
           </div>
         </div>
-    </div>
+      </div>
     </DndContext>
   );
 
