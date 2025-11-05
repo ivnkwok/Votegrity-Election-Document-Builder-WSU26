@@ -1,5 +1,6 @@
 // db.js
 import pkg from 'pg';
+import { json } from 'stream/consumers';
 const { Client } = pkg;
 
 // --- Configure connection ---
