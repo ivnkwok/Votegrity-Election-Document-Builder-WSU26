@@ -156,7 +156,7 @@ export default function App() {
           <div
             id="page"
             className="mx-auto bg-white rounded-md shadow-xl print:shadow-none h-screen"
-            style={{ width: '8.5in', height: '11in', transform: 'scale(0.9)'}}
+            style={{ width: '8.5in', height: '11in', position:'relative'}}
           >
             <h2 className="pt-10 text-center text-xl font-bold">
               This is a sample page for PDF preview.
@@ -190,8 +190,16 @@ export default function App() {
       const canvasRect = document.getElementById('page')?.getBoundingClientRect();
       if (!canvasRect) return;
 
-      const x = active.rect.current.initial.left + delta.x - canvasRect.left;
-      const y = active.rect.current.initial.top + delta.y - canvasRect.top;
+      console.log(active)
+      console.log(delta)
+      console.log(active.rect.current)
+
+      console.log(active.rect.current.translated.left + canvasRect.left + active.rect.current.translated.width/2)
+
+      const x = Math.max(0, active.rect.current.translated.left - canvasRect.left + active.rect.current.translated.width/2);
+      const y = Math.max(0, active.rect.current.translated.top - canvasRect.top + active.rect.current.translated.height/2);
+
+      
 
       const draggedTool = tools.find(tool => tool.id === draggedToolId);
 
