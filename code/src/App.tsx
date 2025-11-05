@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
-import { Draggable } from './components/Draggable'
 import { DndContext } from '@dnd-kit/core';
 import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button"
 import { DraggableTool } from './components/Tool'
+import { Droppable } from './components/Droppable';
 import {
   Select,
   SelectContent,
@@ -18,8 +18,9 @@ import {
 interface CanvasItem {
   id: string;
   content: string;
+  x: number;
+  y: number;
 }
-
 
 export default function App() {
   const tools = [
@@ -148,30 +149,50 @@ export default function App() {
           
       </div>
       {/* Canvas Area */}
-        <div className="w-3/5 border-black border-2 bg-slate-200 space-y-5 mb-5 p-4">
-          <h2 className="text-center scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0">Canvas (Drag-and-Drop Area)</h2>
+        <div className="w-3/5 border-black border-2 bg-slate-200 pt-4">
+          {/* <h2 className="text-center scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0">Canvas (Drag-and-Drop Area)</h2> */}
           {/* Letter size page area for dropping components */}
+          <Droppable id="canvas">
           <div
             id="page"
-            className="mx-auto mb-16 bg-white rounded-md shadow-xl print:shadow-none h-screen"
-            style={{ width: '8.5in', height: '11in' }}
+            className="mx-auto bg-white rounded-md shadow-xl print:shadow-none h-screen"
+            style={{ width: '8.5in', height: '11in', transform: 'scale(0.9)'}}
           >
             <h2 className="pt-10 text-center text-xl font-bold">
               This is a sample page for PDF preview.
             </h2>
+            {canvasItems.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    position: 'absolute',
+                    left: `${item.x}px`,
+                    top: `${item.y}px`,
+                    border: '1px dashed #ccc', // Added for visibility
+                    padding: '4px',
+                  }}
+                >
+                  {item.content}
+                </div>
+              ))}
           </div>
+          </Droppable>
         </div>
     </div>
     </DndContext>
   );
 
   function handleDragEnd(event: any) {
-    const { active, over } = event;
+    const { active, over, delta } = event;
     //if dropped onto canvas
     if (over && over.id === 'canvas') {
       const draggedToolId = active.id;
+      const canvasRect = document.getElementById('page')?.getBoundingClientRect();
+      if (!canvasRect) return;
 
-      //find the tool that was dragged
+      const x = active.rect.current.initial.left + delta.x - canvasRect.left;
+      const y = active.rect.current.initial.top + delta.y - canvasRect.top;
+
       const draggedTool = tools.find(tool => tool.id === draggedToolId);
 
       if (draggedTool) {
@@ -179,6 +200,8 @@ export default function App() {
         const newItem = {
           id: `${draggedTool.id}-${Date.now()}`,
           content: draggedTool.content,
+          x: x,
+          y: y,
         };
         setCanvasItems((items) => [...items, newItem]);
       }

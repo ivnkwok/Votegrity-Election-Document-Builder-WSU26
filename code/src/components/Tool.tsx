@@ -38,12 +38,8 @@ export function DraggableTool({ id, toolText }: DraggableToolProps) {
       }
     : {};
 
-  const toolStyle: React.CSSProperties = {
-    ...style
-  };
-
   return (
-    <Item ref={setNodeRef} style={toolStyle} {...listeners} {...attributes} variant='outline' className='w- text-center bg-white'>
+    <Item ref={setNodeRef} style={style} {...listeners} {...attributes} variant='outline' className='w- text-center bg-white'>
         <ItemContent>
          {toolText}
         </ItemContent>
