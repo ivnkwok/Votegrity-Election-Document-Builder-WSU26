@@ -150,7 +150,7 @@ export default function App() {
       </div>
       {/* Canvas Area */}
         <div className="w-3/5 border-black border-2 bg-slate-200 pt-4">
-          {/* <h2 className="text-center scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0">Canvas (Drag-and-Drop Area)</h2> */}
+          <h2 className="text-center scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0">Canvas (Drag-and-Drop Area)</h2>
           {/* Letter size page area for dropping components */}
           <Droppable id="canvas">
           <div
