@@ -168,7 +168,7 @@ export default function App() {
                     position: 'absolute',
                     left: `${item.x}px`,
                     top: `${item.y}px`,
-                    border: '1px dashed #ccc', // Added for visibility
+                    border: '1px dashed #ccc',
                     padding: '4px',
                   }}
                 >
