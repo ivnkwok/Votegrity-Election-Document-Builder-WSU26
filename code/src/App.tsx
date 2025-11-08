@@ -196,8 +196,8 @@ export default function App() {
 
       console.log(active.rect.current.translated.left + canvasRect.left + active.rect.current.translated.width/2)
 
-      const x = Math.max(0, active.rect.current.translated.left - canvasRect.left + active.rect.current.translated.width/2);
-      const y = Math.max(0, active.rect.current.translated.top - canvasRect.top + active.rect.current.translated.height/2);
+      const x = Math.max(0, active.rect.current.translated.left - canvasRect.left);
+      const y = Math.max(0, active.rect.current.translated.top - canvasRect.top );
 
       
 
