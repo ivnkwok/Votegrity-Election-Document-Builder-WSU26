@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { DndContext } from '@dnd-kit/core';
 import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
@@ -30,6 +30,43 @@ export default function App() {
     { id: 'candidate-body', content: 'Candidate Body'},
   ]
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (!selectedId) return;
+        const movement = e.shiftKey ? 10 : 1; // hold shift to move faster
+        setCanvasItems(prev =>
+          prev.map(item => {
+            if (item.id !== selectedId) return item;
+            let { x, y } = item;
+            switch (e.key) {
+              case 'ArrowUp':
+                y -= movement;
+                break;
+              case 'ArrowDown':
+                y += movement;
+                break;
+              case 'ArrowLeft':
+                x -= movement;
+                break;
+              case 'ArrowRight':
+                x += movement;
+                break;
+              default:
+                return item;
+            }
+            e.preventDefault();
+            return { ...item, x: Math.max(0, x), y: Math.max(0, y) };
+          })
+        );
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedId]);
+  
+  const handleSelectItem = (id: string) => setSelectedId(id);
 
   const handleSaveLayout = () => {
     const json = JSON.stringify(canvasItems, null, 2);
@@ -157,6 +194,7 @@ export default function App() {
             id="page"
             className="mx-auto bg-white rounded-md shadow-xl print:shadow-none h-screen"
             style={{ width: '8.5in', height: '11in', position:'relative'}}
+            onClick={() => setSelectedId(null)}
           >
             <h2 className="pt-10 text-center text-xl font-bold">
               This is a sample page for PDF preview.
@@ -164,12 +202,18 @@ export default function App() {
             {canvasItems.map((item) => (
                 <div
                   key={item.id}
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent deselecting when clicking item
+                    handleSelectItem(item.id);
+                  }}
                   style={{
                     position: 'absolute',
                     left: `${item.x}px`,
                     top: `${item.y}px`,
-                    border: '1px dashed #ccc',
+                    border: item.id === selectedId ? '2px solid blue' : '1px dashed #ccc',
                     padding: '4px',
+                    cursor: 'pointer',
+                    backgroundColor: 'white',
                   }}
                 >
                   {item.content}
@@ -216,3 +260,4 @@ export default function App() {
     }
   }
 };
+
