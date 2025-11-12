@@ -5,6 +5,7 @@ import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button";
 import { DraggableTool } from './components/Tool';
 import { Droppable } from './components/Droppable';
+import { previewElementAsPdf, loadLayoutFromFile } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -79,142 +80,77 @@ export default function App() {
 
   const handleSelectItem = (id: string) => setSelectedId(id);
 
-  // --- SAVE Layout (New Schema) ---
   const handleSaveLayout = () => {
-    const layout = {
-      version: "1.0.0",
-      canvas: {
-        width: 816,
-        height: 1056,
-        background: "#ffffff",
-        unit: "px",
-      },
-      components: canvasItems.map(item => ({
-        id: item.id,
-        type: item.type,
-        position: { x: item.x, y: item.y },
-        size: { width: item.width ?? 200, height: item.height ?? 40 },
-        content: item.content,
-        flags: {
-          isMoveable: item.flags?.isMoveable ?? true,
-          isEditable: item.flags?.isEditable ?? true,
-          minQuantity: item.flags?.minQuantity ?? 0,
-          maxQuantity: item.flags?.maxQuantity ?? 1,
-        },
-        styles: item.styles ?? {
-          fontFamily: "Inter, ui-sans-serif, system-ui",
-          fontSize: 14,
-          fontWeight: 400,
-          color: "#111827",
-          textAlign: "left",
-        },
-      })),
-    };
+    const exportData = {
+    version: "1.0.0",
+    canvas: { width: 816, height: 1056, background: "#ffffff", unit: "px" },
+    components: canvasItems.map(item => ({
+      id: item.id,
+      type: item.type,
+      content: item.type === "text" ? item.content || "" : "",
+      position: { x: item.x, y: item.y },
+      size: { width: item.width, height: item.height },
+      styles: item.styles || {},
+      flags: {isMoveable: true, isEditable: item.type === "text", minQuantity: item.type === "box" ? 0 : 1, maxQuantity: 1}
+    }))
+  };
 
-    const json = JSON.stringify(layout, null, 2);
+    // Convert to JSON string
+    const json = JSON.stringify(exportData, null, 2);
+
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
-    a.download = "canvasLayout.json";
+    a.download = "layout.json";
     a.click();
-
     URL.revokeObjectURL(url);
   };
 
-  // --- LOAD Layout (Supports Both Old & New Formats) ---
-  const handleLoadLayout = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLoadLayout = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const res = e.target?.result;
-        if (typeof res !== "string") {
-          alert("Failed to read file content.");
-          return;
-        }
-
-        const json = JSON.parse(res);
-
-        // New schema
-        if (json?.components && Array.isArray(json.components)) {
-          const mapped: CanvasItem[] = json.components.map((c: any) => ({
-            id: String(c.id ?? ""),
-            type: String(c.type ?? "text"),
-            content: String(c.content ?? c.type ?? ""),
-            x: Number(c.position?.x ?? 0),
-            y: Number(c.position?.y ?? 0),
-            width: Number(c.size?.width ?? 200),
-            height: Number(c.size?.height ?? 40),
-            flags: {
-              isMoveable: Boolean(c.flags?.isMoveable ?? true),
-              isEditable: Boolean(c.flags?.isEditable ?? true),
-              minQuantity: Number(c.flags?.minQuantity ?? 0),
-              maxQuantity: Number(c.flags?.maxQuantity ?? 1),
-            },
-            styles: c.styles ?? {},
-          }));
-          setCanvasItems(mapped);
-        }
-        // Old schema (flat array)
-        else if (Array.isArray(json)) {
-          const validated: CanvasItem[] = json.map((item) => ({
-            id: String(item.id ?? ""),
-            type: String(item.type ?? "text"),
-            content: String(item.content ?? ""),
-            x: Number(item.x ?? 0),
-            y: Number(item.y ?? 0),
-            flags: {
-              isMoveable: true,
-              isEditable: true,
-              minQuantity: 0,
-              maxQuantity: 1,
-            },
-          }));
-          setCanvasItems(validated);
-        } else {
-          alert("Invalid layout format");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Error parsing layout JSON");
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  // --- PDF Preview ---
-  const handlePreviewPDF = async () => {
-    const page = document.getElementById("page");
-    if (!page) throw new Error("Could not find #page element.");
-
-    document.documentElement.style.colorScheme = "light";
-    const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff" });
-    const imgData = canvas.toDataURL("image/png");
-
-    const pdf = new jsPDF({
-      unit: "in",
-      format: "letter",
-      orientation: "portrait",
-    });
-
-    pdf.addImage(imgData, "PNG", 0, 0, 8.5, 11);
-
-    const blob = pdf.output("blob");
-    const url = URL.createObjectURL(blob);
-
-    const newTab = window.open("", "_blank");
-    if (newTab) {
-      newTab.location.href = url;
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    } else {
-      const fallbackWindow = window.open(url, "_blank");
-      if (!fallbackWindow) pdf.save("test.pdf");
+    try {
+      const items = await loadLayoutFromFile(file);
+      setCanvasItems(items);
+    } catch (e) {
+      alert('Invalid JSON layout. Please check the file format.');
+      console.error(e);
+    } finally {
+      event.target.value = '';
     }
   };
+
+    // --- PDF Preview ---
+    const handlePreviewPDF = async () => {
+      const page = document.getElementById("page");
+      if (!page) throw new Error("Could not find #page element.");
+
+      document.documentElement.style.colorScheme = "light";
+      const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/png");
+
+      const pdf = new jsPDF({
+        unit: "in",
+        format: "letter",
+        orientation: "portrait",
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, 8.5, 11);
+
+      const blob = pdf.output("blob");
+      const url = URL.createObjectURL(blob);
+
+      const newTab = window.open("", "_blank");
+      if (newTab) {
+        newTab.location.href = url;
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      } else {
+        const fallbackWindow = window.open(url, "_blank");
+        if (!fallbackWindow) pdf.save("test.pdf");
+      }
+    };
 
   // --- RENDER ---
   return (
