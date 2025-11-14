@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
-import { Button } from "@/components/ui/button"
-import { previewElementAsPdf, loadLayoutFromFile } from '@/lib/utils';
+import html2canvas from 'html2canvas-pro';
+import jsPDF from 'jspdf';
+import { Button } from "@/components/ui/button";
+import { DraggableTool } from './components/Tool';
+import { Droppable } from './components/Droppable';
 import {
   Select,
   SelectContent,
@@ -17,19 +20,15 @@ interface CanvasItem {
   content?: string;
   x: number;
   y: number;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
+  flags?: {
+    isMoveable: boolean;
+    isEditable: boolean;
+    minQuantity: number;
+    maxQuantity: number;
+  };
   styles?: React.CSSProperties;
-}
-
-interface DraggableProps {
-  id: string;
-  children: React.ReactNode;
-}
-
-interface DroppableProps {
-  id: string;
-  children: React.ReactNode;
 }
 
 export default function App() {
@@ -80,55 +79,153 @@ export default function App() {
 
   const handleSelectItem = (id: string) => setSelectedId(id);
 
+  // --- SAVE Layout (New Schema) ---
   const handleSaveLayout = () => {
-    const exportData = {
-    version: "1.0.0",
-    canvas: { width: 816, height: 1056, background: "#ffffff", unit: "px" },
-    components: canvasItems.map(item => ({
-      id: item.id,
-      type: item.type,
-      content: item.type === "text" ? item.content || "" : "",
-      position: { x: item.x, y: item.y },
-      size: { width: item.width, height: item.height },
-      styles: item.styles || {},
-      flags: {isMoveable: true, isEditable: item.type === "text", minQuantity: item.type === "box" ? 0 : 1, maxQuantity: 1}
-    }))
-  };
+    const layout = {
+      version: "1.0.0",
+      canvas: {
+        width: 816,
+        height: 1056,
+        background: "#ffffff",
+        unit: "px",
+      },
+      components: canvasItems.map(item => ({
+        id: item.id,
+        type: item.type,
+        position: { x: item.x, y: item.y },
+        size: { width: item.width ?? 200, height: item.height ?? 40 },
+        content: item.content,
+        flags: {
+          isMoveable: item.flags?.isMoveable ?? true,
+          isEditable: item.flags?.isEditable ?? true,
+          minQuantity: item.flags?.minQuantity ?? 0,
+          maxQuantity: item.flags?.maxQuantity ?? 1,
+        },
+        styles: item.styles ?? {
+          fontFamily: "Inter, ui-sans-serif, system-ui",
+          fontSize: 14,
+          fontWeight: 400,
+          color: "#111827",
+          textAlign: "left",
+        },
+      })),
+    };
 
-    // Convert to JSON string
-    const json = JSON.stringify(exportData, null, 2);
-
+    const json = JSON.stringify(layout, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
-    a.download = "layout.json";
+    a.download = "canvasLayout.json";
     a.click();
+
     URL.revokeObjectURL(url);
   };
 
-  const handleLoadLayout = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // --- LOAD Layout (Supports Both Old & New Formats) ---
+  const handleLoadLayout = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    try {
-      const items = await loadLayoutFromFile(file);
-      setCanvasItems(items);
-    } catch (e) {
-      alert('Invalid JSON layout. Please check the file format.');
-      console.error(e);
-    } finally {
-      event.target.value = '';
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const res = e.target?.result;
+        if (typeof res !== "string") {
+          alert("Failed to read file content.");
+          return;
+        }
+
+        const json = JSON.parse(res);
+
+        // New schema
+        if (json?.components && Array.isArray(json.components)) {
+          const mapped: CanvasItem[] = json.components.map((c: any) => ({
+            id: String(c.id ?? ""),
+            type: String(c.type ?? "text"),
+            content: String(c.content ?? c.type ?? ""),
+            x: Number(c.position?.x ?? 0),
+            y: Number(c.position?.y ?? 0),
+            width: Number(c.size?.width ?? 200),
+            height: Number(c.size?.height ?? 40),
+            flags: {
+              isMoveable: Boolean(c.flags?.isMoveable ?? true),
+              isEditable: Boolean(c.flags?.isEditable ?? true),
+              minQuantity: Number(c.flags?.minQuantity ?? 0),
+              maxQuantity: Number(c.flags?.maxQuantity ?? 1),
+            },
+            styles: c.styles ?? {},
+          }));
+          setCanvasItems(mapped);
+        }
+        // Old schema (flat array)
+        else if (Array.isArray(json)) {
+          const validated: CanvasItem[] = json.map((item) => ({
+            id: String(item.id ?? ""),
+            type: String(item.type ?? "text"),
+            content: String(item.content ?? ""),
+            x: Number(item.x ?? 0),
+            y: Number(item.y ?? 0),
+            flags: {
+              isMoveable: true,
+              isEditable: true,
+              minQuantity: 0,
+              maxQuantity: 1,
+            },
+          }));
+          setCanvasItems(validated);
+        } else {
+          alert("Invalid layout format");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error parsing layout JSON");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // --- PDF Preview ---
+  const handlePreviewPDF = async () => {
+    const page = document.getElementById("page");
+    if (!page) throw new Error("Could not find #page element.");
+
+    document.documentElement.style.colorScheme = "light";
+    const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff" });
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF({
+      unit: "in",
+      format: "letter",
+      orientation: "portrait",
+    });
+
+    pdf.addImage(imgData, "PNG", 0, 0, 8.5, 11);
+
+    const blob = pdf.output("blob");
+    const url = URL.createObjectURL(blob);
+
+    const newTab = window.open("", "_blank");
+    if (newTab) {
+      newTab.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } else {
+      const fallbackWindow = window.open(url, "_blank");
+      if (!fallbackWindow) pdf.save("test.pdf");
     }
   };
 
-  const handlePreviewPDF = () => previewElementAsPdf('page');
-
+  // --- RENDER ---
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <div className="flex">
+        {/* Sidebar */}
         <div className="w-2/5 border-black border-2 p-4 h-screen">
-          <h2 className="text-center scroll-m-20 pb-4 text-3xl font-semibold tracking-tight first:mt-0">Palette/Core Navigation</h2>
+          <h2 className="text-center scroll-m-20 pb-4 text-3xl font-semibold tracking-tight first:mt-0">
+            Palette/Core Navigation
+          </h2>
+
           <Select>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Templates" />
@@ -139,19 +236,14 @@ export default function App() {
               <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
             </SelectContent>
           </Select>
-          <div className="flex flex-wrap">
+
+          <div className="py-5 grid grid-cols-2 gap-2">
             {tools.map((tool) => (
-              <div className="w-1/2" key={tool.id}>
-                <Draggable id={tool.id}>
-                  <div className="p-1 border-black border-2 h-16 flex items-center justify-center">
-                    {tool.content}
-                  </div>
-                </Draggable>
-              </div>
+              <DraggableTool key={tool.id} id={tool.id} toolText={tool.content} />
             ))}
           </div>
-          
-          {/* Save/Load + Preview buttons */}
+
+          {/* Save/Load/Preview Buttons */}
           <div className="mt-4 flex flex-col gap-2">
             <Button variant="outline" onClick={handleSaveLayout}>Save Layout</Button>
             <Button variant="outline" asChild>
@@ -165,31 +257,37 @@ export default function App() {
         </div>
 
         {/* Canvas Area */}
-        <div className="w-3/5 border-black border-2 bg-slate-200 p-4">
-          <h2 className="text-center text-3xl font-semibold">Canvas (Drag-and-Drop Area)</h2>
-          <div
-            id="page"
-            className="mx-auto mt-4 bg-white rounded-md shadow relative"
-            style={{ width: '8.5in', height: '11in', position: 'relative' }}
-          >
-            {canvasItems.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  position: 'absolute',
-                  left: item.x,
-                  top: item.y,
-                  width: item.width,
-                  height: item.height,
-                  overflow: 'hidden',
-                  border: item.type === 'box' ? '1px solid #000' : undefined,
-                  ...item.styles,
-                }}
-              >
-                {item.type === 'text' && <div style={{ whiteSpace: 'pre-wrap' }}>{item.content}</div>}
-              </div>
-            ))}
-          </div>
+        <div className="w-3/5 border-black border-2 bg-slate-200 pt-4">
+          <h2 className="text-center text-3xl font-semibold tracking-tight">Canvas (Drag-and-Drop Area)</h2>
+          <Droppable id="canvas">
+            <div
+              id="page"
+              className="mx-auto bg-white rounded-md shadow-xl print:shadow-none h-screen"
+              style={{ width: "8.5in", height: "11in", position: "relative" }}
+              onClick={() => setSelectedId(null)}
+            >
+              {canvasItems.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectItem(item.id);
+                  }}
+                  style={{
+                    position: "absolute",
+                    left: `${item.x}px`,
+                    top: `${item.y}px`,
+                    border: item.id === selectedId ? "2px solid blue" : "1px dashed #ccc",
+                    padding: "4px",
+                    cursor: "pointer",
+                    backgroundColor: "white",
+                  }}
+                >
+                  {item.content}
+                </div>
+              ))}
+            </div>
+          </Droppable>
         </div>
       </div>
     </DndContext>
