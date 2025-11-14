@@ -224,7 +224,7 @@ export default function App() {
                 <input type="file" accept="application/json" onChange={handleLoadLayout} className="hidden" />
               </label>
             </Button>
-            <Button variant="outline" onClick={handlePreviewPDF}>Open PDF Preview</Button>
+            <Button variant="outline" onClick={() => { setSelectedId(null); requestAnimationFrame(() => { handlePreviewPDF(); }) }}>Open PDF Preview</Button>
           </div>
         </div>
 
