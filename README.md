@@ -1,44 +1,86 @@
-# Votegrity
+# Web-Based Election Document Builder
 
-This project is a drag and drop pdf creator that allows for streamlined election document creation while also being flexible enough accommodate for any document type. While this is like Google Docs or Microsoft Word, it is more restrictive so that eventually, outside election administrators will be able to create and format their own election documents while conforming to Votegrity’s document style. Google Docs and Microsoft Word are both very powerful document creators, and while they are currently used, they are not the ideal solution due to the absolute freedom they provide to the document creator.
+## Project Summary
 
-# Application Stack
+### One-sentence description of the project
 
-## Front End
-- Typescript
-- React
-- TailwindCSS (note current version of Tailwind not working with
-- shadcn
-- Recharts
-- Zustand
-- Zod
-- ESLint
-- Prettier
-- Vite
+An intuitive, web-based election document builder that allows Votegrity staff to quickly create, edit, and export personalized election documents through a drag-and-drop interface.
 
-## Backend
-- Python (3.13.5)
-- FastAPI
-- SQLModel
-- Pydantic
-- Alembic
-- Ruff
-- Docker
-- PostgreSQL
+### Additional information about the project
 
-## Hosting
-- Azure Cloud Infrastructure (see EMS System Architecture)
-- Backend API deployed to App Containers
-- Frontend Static Web Apps
-- PostgreSQL Flexible Server
+Votegrity provides voting services for HOAs, unions, and other organizations. As the company grows, it faces challenges in generating customized election documents efficiently. This project provides a web-based editor that simplifies and speeds up the creation of these documents using reusable components, customizable templates, and PDF export functionality. The tool enhances scalability and streamlines document workflows by reducing manual formatting work.
 
-## Serverless Infrastructure
-This app will be deployed to AWS as we will be migrating our existing applicatoins to AWS in the future.
+## Installation
 
-### AWS Services
-- CloudFormation (CDK) TBD
-- CloudFront
-- S3 Website
-- API Gateway
-- Lambda
-- PostgreSQL or DynamoDB
+### Prerequisites
+
+Ensure the following tools are installed on your machine before proceeding:
+
+- **Git** (≥ 2.30)
+- **npm** (≥ 9.0)
+- (Optional) **VS Code** with the **ESLint** and **Prettier** extensions for development convenience
+
+You can verify installation using:
+
+```bash
+git --version
+npm --version
+```
+
+### Add-ons
+
+This project uses the following core libraries and add-ons:
+
+- **React** — Frontend library for building UI components.
+- **TypeScript** — Adds static typing to JavaScript for maintainability and clarity.
+- **Vite** — Lightweight and fast development server and bundler.
+- **Tailwind CSS** — Utility-first CSS framework for responsive and modern styling.
+- **@dnd-kit/core** — Provides drag-and-drop functionality for UI components.
+- **html2canvas-pro** and **jsPDF** — Enable client-side PDF export from HTML content.
+- **shadcn/ui** — Prebuilt, composable UI components styled with Tailwind.
+
+### Installation Steps
+
+You can set up the project locally by following these steps:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/ivnkwok/WSU-Capstone-2025.git
+
+# 2. Navigate into the project directory
+cd ./code
+
+# 3. Install dependencies
+npm install
+
+# 4. Start the development server
+npm run dev
+```
+
+Then, open your browser and navigate to the address shown in the terminal (usually `http://localhost:5173`).
+
+### Loading Sample or Real Data
+
+You can test loading a JSON template file by clicking **Load Template** on the webpage and then locating the sample-json.json found at `WSU-Capstone-2025/data/sample-json.json`.
+
+## Functionality
+
+This application includes the following major features:
+
+1. **Drag-and-Drop Document Builder** — Users can drag predefined document components (e.g., candidate name, return address, logos) onto a page.
+2. **Template System** — Provides preset layouts for different document types (e.g., ballots, candidate statements, notices).
+3. **PDF Export** — Generates downloadable or previewable PDF versions of the created election documents.
+4. **User Interface Controls** — Allows resizing, positioning, and removing components dynamically.
+5. **Customization Options** — TODO: Add specifics like color changes, text editing, or data binding if implemented.
+
+### Walkthrough
+
+1. Open the app in your browser.
+2. Select a document type or start with a blank canvas.
+3. Drag elements from the sidebar (e.g., Votegrity logo, candidate photo) onto the canvas.
+4. Adjust layout as desired.
+5. Click “Export to PDF” to generate the final document.
+
+## Known Problems
+
+## Additional Documentation
