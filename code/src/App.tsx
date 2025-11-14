@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
-import html2canvas from 'html2canvas-pro';
-import jsPDF from 'jspdf';
 import { Button } from "@/components/ui/button";
 import { DraggableTool } from './components/Tool';
 import { Droppable } from './components/Droppable';
+import { previewElementAsPdf } from '@/lib/utils.ts';
 import {
   Select,
   SelectContent,
@@ -187,34 +186,7 @@ export default function App() {
   };
 
   // --- PDF Preview ---
-  const handlePreviewPDF = async () => {
-    const page = document.getElementById("page");
-    if (!page) throw new Error("Could not find #page element.");
-
-    document.documentElement.style.colorScheme = "light";
-    const canvas = await html2canvas(page, { scale: 2, backgroundColor: "#ffffff" });
-    const imgData = canvas.toDataURL("image/png");
-
-    const pdf = new jsPDF({
-      unit: "in",
-      format: "letter",
-      orientation: "portrait",
-    });
-
-    pdf.addImage(imgData, "PNG", 0, 0, 8.5, 11);
-
-    const blob = pdf.output("blob");
-    const url = URL.createObjectURL(blob);
-
-    const newTab = window.open("", "_blank");
-    if (newTab) {
-      newTab.location.href = url;
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    } else {
-      const fallbackWindow = window.open(url, "_blank");
-      if (!fallbackWindow) pdf.save("test.pdf");
-    }
-  };
+  const handlePreviewPDF = () => { previewElementAsPdf("page"); };
 
   // --- RENDER ---
   return (
