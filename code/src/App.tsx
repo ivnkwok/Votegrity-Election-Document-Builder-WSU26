@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import { Button } from "@/components/ui/button";
 import { DraggableTool } from './components/Tool';
-import { Droppable } from './components/Droppable';
 import { previewElementAsPdf } from '@/lib/utils.ts';
 import { saveLayout, loadLayout } from '@/services/layoutService';
 import { useKeyboardMovement } from './hooks/useKeyboardMovement';
