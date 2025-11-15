@@ -6,6 +6,7 @@ import { Droppable } from './components/Droppable';
 import { previewElementAsPdf } from '@/lib/utils.ts';
 import { saveLayout, loadLayout } from '@/services/layoutService';
 import { useKeyboardMovement } from './hooks/useKeyboardMovement';
+import { Canvas } from './components/Canvas/Canvas';
 import type { CanvasItem } from '@/lib/utils';
 import {
   Select,
@@ -30,8 +31,6 @@ export default function App() {
   useKeyboardMovement(selectedId, setCanvasItems);
 
   // ------------ HANDLERS ------------
-  // --- Select Item ---
-  const handleSelectItem = (id: string) => setSelectedId(id);
 
   // --- Load Layout ---
   const handleLoadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,39 +88,10 @@ export default function App() {
             <Button variant="outline" onClick={() => { setSelectedId(null); requestAnimationFrame(() => { handlePreviewPDF(); }) }}>Open PDF Preview</Button>
           </div>
         </div>
-
         {/* Canvas Area */}
         <div className="w-3/5 border-black border-2 bg-slate-200 pt-4">
           <h2 className="text-center text-3xl font-semibold tracking-tight">Canvas (Drag-and-Drop Area)</h2>
-          <Droppable id="canvas">
-            <div
-              id="page"
-              className="mx-auto bg-white rounded-md shadow-xl print:shadow-none h-screen"
-              style={{ width: "8.5in", height: "11in", position: "relative" }}
-              onClick={() => setSelectedId(null)}
-            >
-              {canvasItems.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectItem(item.id);
-                  }}
-                  style={{
-                    position: "absolute",
-                    left: `${item.x}px`,
-                    top: `${item.y}px`,
-                    border: item.id === selectedId ? "2px solid blue" : "1px dashed #ccc",
-                    padding: "4px",
-                    cursor: "pointer",
-                    backgroundColor: "white",
-                  }}
-                >
-                  {item.content}
-                </div>
-              ))}
-            </div>
-          </Droppable>
+          <Canvas canvasItems={canvasItems} selectedId={selectedId} setSelectedId={setSelectedId}/>
         </div>
       </div>
     </DndContext>
