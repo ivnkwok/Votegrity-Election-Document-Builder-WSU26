@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import { Button } from "@/components/ui/button";
 import { DraggableTool } from './components/Tool';
 import { Droppable } from './components/Droppable';
 import { previewElementAsPdf } from '@/lib/utils.ts';
-import { saveLayout, loadLayout } from '@/services/layoutService.ts';
+import { saveLayout, loadLayout } from '@/services/layoutService';
+import { useKeyboardMovement } from './hooks/useKeyboardMovement';
 import type { CanvasItem } from '@/lib/utils';
 import {
   Select,
@@ -25,43 +26,14 @@ export default function App() {
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // --- Keyboard Arrow Movement ---
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!selectedId) return;
-      const movement = e.shiftKey ? 10 : 1;
-      setCanvasItems(prev =>
-        prev.map(item => {
-          if (item.id !== selectedId) return item;
-          let { x, y } = item;
-          switch (e.key) {
-            case 'ArrowUp':
-              y -= movement;
-              break;
-            case 'ArrowDown':
-              y += movement;
-              break;
-            case 'ArrowLeft':
-              x -= movement;
-              break;
-            case 'ArrowRight':
-              x += movement;
-              break;
-            default:
-              return item;
-          }
-          e.preventDefault();
-          return { ...item, x: Math.max(0, x), y: Math.max(0, y) };
-        })
-      );
-    };
+  // Enable keyboard (arrow key) pixel nudge for selected items
+  useKeyboardMovement(selectedId, setCanvasItems);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId]);
-
+  // ------------ HANDLERS ------------
+  // --- Select Item ---
   const handleSelectItem = (id: string) => setSelectedId(id);
 
+  // --- Load Layout ---
   const handleLoadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
