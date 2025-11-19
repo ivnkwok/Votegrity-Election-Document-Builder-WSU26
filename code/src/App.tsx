@@ -274,19 +274,30 @@ export default function App() {
 
   function handleDragEnd(event: any) {
     const { active, over, delta } = event;
-
-    // 1. Handle Moving Existing Items on Canvas
+    const canvasRect = document.getElementById("page")?.getBoundingClientRect();
+    // existing item drag
     const isExistingItem = canvasItems.find((item) => item.id === active.id);
 
     if (isExistingItem) {
       setCanvasItems((prev) =>
         prev.map((item) => {
           if (item.id === active.id) {
-            return {
-              ...item,
-              x: item.x + delta.x,
-              y: item.y + delta.y,
-            };
+            if (canvasRect){
+              // active drag data
+              let translated = active.rect.current.translated
+
+              let newX = translated.left - canvasRect.left
+              let newY = translated.top - canvasRect.top
+              
+              let w = translated.width
+              let h = translated.height
+
+              return {
+                ...item,
+                x: Math.max(0, Math.min(newX, canvasRect.width - w)),
+                y: Math.max(0, Math.min(newY, canvasRect.height - h)),
+              };
+            }
           }
           return item;
         })
@@ -294,10 +305,9 @@ export default function App() {
       return;
     }
 
-    // 2. Handle Dropping New Tools from Sidebar
+    // new item drag
     if (over && over.id === "canvas") {
       const draggedToolId = active.id;
-      const canvasRect = document.getElementById("page")?.getBoundingClientRect();
       if (!canvasRect) return;
 
       // Calculate position relative to canvas
