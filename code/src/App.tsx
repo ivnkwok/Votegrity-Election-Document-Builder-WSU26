@@ -277,15 +277,14 @@ export default function App() {
     const canvasRect = document.getElementById("page")?.getBoundingClientRect();
     // existing item drag
     const isExistingItem = canvasItems.find((item) => item.id === active.id);
+    //active drag data
+    let translated = active.rect.current.translated
 
     if (isExistingItem) {
       setCanvasItems((prev) =>
         prev.map((item) => {
           if (item.id === active.id) {
             if (canvasRect){
-              // active drag data
-              let translated = active.rect.current.translated
-
               let newX = translated.left - canvasRect.left
               let newY = translated.top - canvasRect.top
               
@@ -311,8 +310,11 @@ export default function App() {
       if (!canvasRect) return;
 
       // Calculate position relative to canvas
-      const x = Math.max(0, active.rect.current.translated.left - canvasRect.left);
-      const y = Math.max(0, active.rect.current.translated.top - canvasRect.top);
+      let newX = translated.left - canvasRect.left
+      let newY = translated.top - canvasRect.top
+      
+      let w = translated.width
+      let h = translated.height
 
       const draggedTool = tools.find((tool) => tool.id === draggedToolId);
       if (draggedTool) {
@@ -320,8 +322,8 @@ export default function App() {
           id: `${draggedTool.id}-${Date.now()}`,
           type: 'text',
           content: draggedTool.content,
-          x,
-          y,
+          x: Math.max(0, Math.min(newX, canvasRect.width)),
+          y: Math.max(0, Math.min(newY, canvasRect.height)),
           width: 200,
           height: 40,
           flags: {
