@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import { Button } from "@/components/ui/button";
+import { Draggable } from './components/Draggable';
 import { DraggableTool } from './components/Tool';
 import { Droppable } from './components/Droppable';
 import { previewElementAsPdf } from '@/lib/utils.ts';
@@ -239,24 +240,30 @@ export default function App() {
               onClick={() => setSelectedId(null)}
             >
               {canvasItems.map((item) => (
-                <div
+                <Draggable
                   key={item.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectItem(item.id);
-                  }}
+                  id={item.id}
                   style={{
                     position: "absolute",
                     left: `${item.x}px`,
                     top: `${item.y}px`,
-                    border: item.id === selectedId ? "2px solid blue" : "1px dashed #ccc",
-                    padding: "4px",
-                    cursor: "pointer",
-                    backgroundColor: "white",
                   }}
                 >
-                  {item.content}
-                </div>
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectItem(item.id);
+                    }}
+                    style={{
+                      border: item.id === selectedId ? "2px solid blue" : "1px dashed #ccc",
+                      padding: "4px",
+                      cursor: "grab", // Changed cursor to indicate draggable
+                      backgroundColor: "white",
+                    }}
+                  >
+                    {item.content}
+                  </div>
+                </Draggable>
               ))}
             </div>
           </Droppable>
@@ -266,12 +273,34 @@ export default function App() {
   );
 
   function handleDragEnd(event: any) {
-    const { active, over } = event;
+    const { active, over, delta } = event;
+
+    // 1. Handle Moving Existing Items on Canvas
+    const isExistingItem = canvasItems.find((item) => item.id === active.id);
+
+    if (isExistingItem) {
+      setCanvasItems((prev) =>
+        prev.map((item) => {
+          if (item.id === active.id) {
+            return {
+              ...item,
+              x: item.x + delta.x,
+              y: item.y + delta.y,
+            };
+          }
+          return item;
+        })
+      );
+      return;
+    }
+
+    // 2. Handle Dropping New Tools from Sidebar
     if (over && over.id === "canvas") {
       const draggedToolId = active.id;
       const canvasRect = document.getElementById("page")?.getBoundingClientRect();
       if (!canvasRect) return;
 
+      // Calculate position relative to canvas
       const x = Math.max(0, active.rect.current.translated.left - canvasRect.left);
       const y = Math.max(0, active.rect.current.translated.top - canvasRect.top);
 
