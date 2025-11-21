@@ -1,5 +1,6 @@
 import { Droppable } from "@/components/Droppable";
 import type { CanvasItem } from "@/lib/utils";
+import { CanvasItemRenderer } from "./CanvasItemRenderer";
 
 interface CanvasProps {
   canvasItems: CanvasItem[];
@@ -40,15 +41,7 @@ export function Canvas({ canvasItems, selectedId, setSelectedId }: CanvasProps) 
               whiteSpace: "pre-wrap",
             }}
           >
-            {item.type === "image" ? (
-              <img
-                src={item.content}
-                alt="Votegrity Logo"
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            ) : (
-              item.content
-            )}
+            <CanvasItemRenderer item={item} />
           </div>
         ))}
       </div>

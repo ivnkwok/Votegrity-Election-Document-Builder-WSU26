@@ -48,7 +48,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     defaultWidth: 200,
     defaultHeight: 60,
     flags: { isMoveable: true, isEditable: true, minQuantity: 0, maxQuantity: 1 },
-    styles: { fontSize: 12 },
+    styles: { fontSize: 14 },
   },
   {
     id: "votegrity-logo",
