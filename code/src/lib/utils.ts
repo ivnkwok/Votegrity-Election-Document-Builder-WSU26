@@ -4,6 +4,24 @@ import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 
 
+export interface CanvasItem {
+  id: string;
+  type: 'text' | 'box';
+  content?: string;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  flags?: {
+    isMoveable: boolean;
+    isEditable: boolean;
+    minQuantity: number;
+    maxQuantity: number;
+  };
+  styles?: React.CSSProperties;
+}
+
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -44,17 +62,6 @@ export async function previewElementAsPdf(elementId: string) {
     // Popup blocked — fallback to download
     pdf.save("preview.pdf");
   }
-}
-
-export interface CanvasItem {
-  id: string;
-  type: "text" | "box";
-  content?: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  styles?: Record<string, any>;
 }
 
 // Reads a JSON layout file and maps it to CanvasItem[]
