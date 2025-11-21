@@ -37,9 +37,18 @@ export function Canvas({ canvasItems, selectedId, setSelectedId }: CanvasProps) 
               backgroundColor: "white",
               width: item.width,
               height: item.height,
+              whiteSpace: "pre-wrap",
             }}
           >
-            {item.content}
+            {item.type === "image" ? (
+              <img
+                src={item.content}
+                alt="Votegrity Logo"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            ) : (
+              item.content
+            )}
           </div>
         ))}
       </div>
