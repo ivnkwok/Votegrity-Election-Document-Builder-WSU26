@@ -1,6 +1,7 @@
 import { Droppable } from "@/components/Droppable";
 import { Draggable } from "@/components/Draggable";
 import type { CanvasItem } from "@/lib/utils";
+import { CanvasItemRenderer } from "./CanvasItemRenderer";
 
 interface CanvasProps {
   canvasItems: CanvasItem[];
