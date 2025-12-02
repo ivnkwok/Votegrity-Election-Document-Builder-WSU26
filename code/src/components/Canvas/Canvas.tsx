@@ -43,7 +43,7 @@ export function Canvas({ canvasItems, selectedId, setSelectedId }: CanvasProps) 
               zIndex: item.id === selectedId ? 50 : 1,
             }}
           >
-            {item.content}
+            <CanvasItemRenderer item={item} />
           </Draggable>
         ))}
       </div>

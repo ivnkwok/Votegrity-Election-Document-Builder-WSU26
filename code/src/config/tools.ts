@@ -27,7 +27,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     defaultContent: "Candidate Name",
     defaultWidth: 250,
     defaultHeight: 40,
-    flags: { isMoveable: true, isEditable: true, minQuantity: 0, maxQuantity: 1 },
+    flags: { isMoveable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 },
     styles: { fontSize: 20, fontWeight: 600 },
   },
   {
@@ -37,7 +37,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     defaultContent: "Lorem ipsum candidate bio here...",
     defaultWidth: 350,
     defaultHeight: 120,
-    flags: { isMoveable: true, isEditable: true, minQuantity: 0, maxQuantity: 1 },
+    flags: { isMoveable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 },
     styles: { fontSize: 14, lineHeight: "1.4" },
   },
   {
