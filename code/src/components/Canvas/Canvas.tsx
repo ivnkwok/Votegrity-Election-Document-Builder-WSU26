@@ -1,5 +1,6 @@
 import { Droppable } from "@/components/Droppable";
 import type { CanvasItem } from "@/lib/utils";
+import { CanvasItemRenderer } from "./CanvasItemRenderer";
 
 interface CanvasProps {
   canvasItems: CanvasItem[];
@@ -37,9 +38,10 @@ export function Canvas({ canvasItems, selectedId, setSelectedId }: CanvasProps) 
               backgroundColor: "white",
               width: item.width,
               height: item.height,
+              whiteSpace: "pre-wrap",
             }}
           >
-            {item.content}
+            <CanvasItemRenderer item={item} />
           </div>
         ))}
       </div>

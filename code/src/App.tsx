@@ -14,14 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TOOL_DEFINITIONS } from './config/tools';
 
 export default function App() {
-  const tools = [
-    { id: 'candidate-name', content: 'Candidate Name' },
-    { id: 'candidate-photo', content: 'Candidate Photo' },
-    { id: 'votegrity-logo', content: 'Votegrity Logo' },
-    { id: 'candidate-body', content: 'Candidate Body' },
-  ];
+  const tools = TOOL_DEFINITIONS; // Load tool definitions
 
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -71,7 +67,7 @@ export default function App() {
 
           <div className="py-5 grid grid-cols-2 gap-2">
             {tools.map((tool) => (
-              <DraggableTool key={tool.id} id={tool.id} toolText={tool.content} />
+              <DraggableTool key={tool.id} id={tool.id} toolText={tool.label} />
             ))}
           </div>
 
@@ -89,7 +85,7 @@ export default function App() {
         </div>
         {/* Canvas Area */}
         <div className="w-3/5 border-black border-2 bg-slate-200 pt-4">
-          <h2 className="text-center text-3xl font-semibold tracking-tight">Canvas (Drag-and-Drop Area)</h2>
+          <h2 className="text-center text-3xl font-semibold tracking-tight pb-4">Canvas (Drag-and-Drop Area)</h2>
           <Canvas canvasItems={canvasItems} selectedId={selectedId} setSelectedId={setSelectedId}/>
         </div>
       </div>
@@ -108,22 +104,22 @@ export default function App() {
 
       const draggedTool = tools.find((tool) => tool.id === draggedToolId);
       if (draggedTool) {
+        const toolDef = TOOL_DEFINITIONS.find(t => t.id === draggedToolId);
+        if (!toolDef) return;
+
         const newItem: CanvasItem = {
-          id: `${draggedTool.id}-${Date.now()}`,
-          type: 'text',
-          content: draggedTool.content,
+          id: `${toolDef.id}-${Date.now()}`,
+          type: toolDef.type,
+          content: toolDef.type === "text" ? toolDef.defaultContent : toolDef.imageSrc,
           x,
           y,
-          width: 200,
-          height: 40,
-          flags: {
-            isMoveable: true,
-            isEditable: true,
-            minQuantity: 0,
-            maxQuantity: 1,
-          },
+          width: toolDef.defaultWidth,
+          height: toolDef.defaultHeight,
+          flags: toolDef.flags,
+          styles: toolDef.styles ?? {},
         };
-        setCanvasItems((items) => [...items, newItem]);
+
+        setCanvasItems(items => [...items, newItem]);
       }
     }
   }
