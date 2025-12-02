@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import { Button } from "@/components/ui/button";
+import { Draggable } from './components/Draggable';
 import { DraggableTool } from './components/Tool';
 import { previewElementAsPdf } from '@/lib/utils.ts';
 import { saveLayout, loadLayout } from '@/services/layoutService';
@@ -97,14 +98,48 @@ export default function App() {
   );
 
   function handleDragEnd(event: any) {
-    const { active, over } = event;
+    const { active, over, delta } = event;
+    const canvasRect = document.getElementById("page")?.getBoundingClientRect();
+    // existing item drag
+    const isExistingItem = canvasItems.find((item) => item.id === active.id);
+    //active drag data
+    let translated = active.rect.current.translated
+
+    if (isExistingItem) {
+      setCanvasItems((prev) =>
+        prev.map((item) => {
+          if (item.id === active.id) {
+            if (canvasRect){
+              let newX = translated.left - canvasRect.left
+              let newY = translated.top - canvasRect.top
+              
+              let w = translated.width
+              let h = translated.height
+
+              return {
+                ...item,
+                x: Math.max(0, Math.min(newX, canvasRect.width - w)),
+                y: Math.max(0, Math.min(newY, canvasRect.height - h)),
+              };
+            }
+          }
+          return item;
+        })
+      );
+      return;
+    }
+
+    // new item drag
     if (over && over.id === "canvas") {
       const draggedToolId = active.id;
-      const canvasRect = document.getElementById("page")?.getBoundingClientRect();
       if (!canvasRect) return;
 
-      const x = Math.max(0, active.rect.current.translated.left - canvasRect.left);
-      const y = Math.max(0, active.rect.current.translated.top - canvasRect.top);
+      // Calculate position relative to canvas
+      let newX = translated.left - canvasRect.left
+      let newY = translated.top - canvasRect.top
+      
+      let w = translated.width
+      let h = translated.height
 
       const draggedTool = tools.find((tool) => tool.id === draggedToolId);
       if (draggedTool) {
@@ -112,8 +147,8 @@ export default function App() {
           id: `${draggedTool.id}-${Date.now()}`,
           type: 'text',
           content: draggedTool.content,
-          x,
-          y,
+          x: Math.max(0, Math.min(newX, canvasRect.width)),
+          y: Math.max(0, Math.min(newY, canvasRect.height)),
           width: 200,
           height: 40,
           flags: {
