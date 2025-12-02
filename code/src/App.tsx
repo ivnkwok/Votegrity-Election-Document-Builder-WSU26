@@ -126,6 +126,7 @@ export default function App() {
           return item;
         })
       );
+      setSelectedId(active.id)
       return;
     }
 
@@ -159,6 +160,8 @@ export default function App() {
           },
         };
         setCanvasItems((items) => [...items, newItem]);
+
+        setSelectedId(active.id)
       }
     }
   }
