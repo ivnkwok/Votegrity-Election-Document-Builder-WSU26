@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { CanvasItem } from "@/lib/utils";
 
+// Hook to enable keyboard movement of selected canvas items using arrow keys (pixel nudge).
 export function useKeyboardMovement(
   selectedId: string | null,
   setCanvasItems: React.Dispatch<React.SetStateAction<CanvasItem[]>>

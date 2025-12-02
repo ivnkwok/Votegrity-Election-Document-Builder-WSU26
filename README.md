@@ -59,9 +59,9 @@ npm run dev
 
 Then, open your browser and navigate to the address shown in the terminal (usually `http://localhost:5173`).
 
-### Loading Sample or Real Data
+### Saving and Loading Templates
 
-You can test loading a JSON template file by clicking **Load Template** on the webpage and then locating the sample-json.json found at `WSU-Capstone-2025/data/sample-json.json`.
+You can test saving and loading templates by dragging components from the canvas, clicking **Save Template** on the webpage, refreshing the page, and clicking **Load Template** to load the previously saved template.
 
 ## Functionality
 
@@ -72,6 +72,10 @@ This application includes the following major features:
 3. **PDF Export** — Generates downloadable or previewable PDF versions of the created election documents.
 4. **User Interface Controls** — Allows resizing, positioning, and removing components dynamically.
 5. **Customization Options** — TODO: Add specifics like color changes, text editing, or data binding if implemented.
+
+### Hidden functionality
+
+* **Pixel Nudge** — Users can select a dropped item on the canvas and use the arrow keys (up, down, left, right) to nudge the component around the canvas. Hold **shift** while nudging to increase pixel movement amount from 1px -> 10px
 
 ### Walkthrough
 
