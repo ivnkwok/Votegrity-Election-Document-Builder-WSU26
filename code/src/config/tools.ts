@@ -18,7 +18,7 @@ export interface ToolDefinition {
   styles?: React.CSSProperties;
 }
 
-// List of tool definitions (can be expanded as neeeded)
+// List of tool definitions (can be expanded as neeeded, read /config/TOOL_DEFINITIONS_README.md for details)
 export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     id: "candidate-name",

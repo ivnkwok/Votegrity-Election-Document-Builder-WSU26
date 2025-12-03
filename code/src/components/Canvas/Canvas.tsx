@@ -9,6 +9,7 @@ interface CanvasProps {
   setSelectedId: (id: string | null) => void;
 }
 
+// Renders the main canvas area where items are displayed and can be selected.
 export function Canvas({ canvasItems, selectedId, setSelectedId }: CanvasProps) {
   return (
     <Droppable id="canvas">
