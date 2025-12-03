@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import { Button } from "@/components/ui/button";
 import { DraggableTool } from './components/Tool';
+import { SidebarTools } from './components/Sidebar/SidebarTools';
 import { previewElementAsPdf } from '@/lib/utils.ts';
 import { saveLayout, loadLayout } from '@/services/layoutService';
 import { useKeyboardMovement } from './hooks/useKeyboardMovement';
@@ -73,11 +74,7 @@ export default function App() {
             </SelectContent>
           </Select>
 
-          <div className="py-5 grid grid-cols-2 gap-2">
-            {tools.map((tool) => (
-              <DraggableTool key={tool.id} id={tool.id} toolText={tool.label} />
-            ))}
-          </div>
+          <SidebarTools tools={tools} />
 
           {/* Save/Load/Preview Buttons */}
           <div className="mt-4 flex flex-col gap-2">
