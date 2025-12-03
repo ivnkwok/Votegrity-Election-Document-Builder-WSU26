@@ -1,4 +1,5 @@
 import { Droppable } from "@/components/Droppable";
+import { Draggable } from "@/components/Draggable";
 import type { CanvasItem } from "@/lib/utils";
 import { CanvasItemRenderer } from "./CanvasItemRenderer";
 
@@ -23,8 +24,9 @@ export function Canvas({ canvasItems, selectedId, setSelectedId }: CanvasProps) 
         onClick={() => setSelectedId(null)}
       >
         {canvasItems.map((item) => (
-          <div
+          <Draggable
             key={item.id}
+            id={item.id}
             onClick={(e) => {
               e.stopPropagation();
               setSelectedId(item.id);
@@ -33,17 +35,17 @@ export function Canvas({ canvasItems, selectedId, setSelectedId }: CanvasProps) 
               position: "absolute",
               left: `${item.x}px`,
               top: `${item.y}px`,
-              border: item.id === selectedId ? "2px solid blue" : "1px dashed #ccc",
-              padding: "4px",
-              cursor: "pointer",
-              backgroundColor: "white",
               width: item.width,
               height: item.height,
-              whiteSpace: "pre-wrap",
+              border: item.id === selectedId ? "2px solid blue" : "1px dashed #ccc",
+              padding: "4px",
+              cursor: "grab",
+              backgroundColor: "white",
+              zIndex: item.id === selectedId ? 50 : 1,
             }}
           >
-            <CanvasItemRenderer item={item} /> { /* Renders the item based on its type */ }
-          </div>
+            <CanvasItemRenderer item={item} />
+          </Draggable>
         ))}
       </div>
     </Droppable>
