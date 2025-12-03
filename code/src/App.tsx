@@ -1,13 +1,9 @@
-import React, { useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
-import { Button } from "@/components/ui/button";
-import { Draggable } from './components/Draggable';
-import { DraggableTool } from './components/Tool';
-import { previewElementAsPdf } from '@/lib/utils.ts';
-import { saveLayout, loadLayout } from '@/services/layoutService';
-import { useKeyboardMovement } from './hooks/useKeyboardMovement';
+import { useAppController } from "./hooks/useAppController";
+import { SidebarActions } from "@/components/Sidebar/SidebarActions";
+import { SidebarTools } from './components/Sidebar/SidebarTools';
+import { PropertiesPanel } from './components/Sidebar/PropertiesPanel';
 import { Canvas } from './components/Canvas/Canvas';
-import type { CanvasItem } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -20,155 +16,66 @@ import { TOOL_DEFINITIONS } from './config/tools';
 export default function App() {
   const tools = TOOL_DEFINITIONS; // Load tool definitions
 
-  const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  // Enable keyboard (arrow key) pixel nudge for selected items
-  useKeyboardMovement(selectedId, setCanvasItems);
-
-  // ------------ HANDLERS ------------
-
-  // --- Load Layout ---
-  const handleLoadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const items = await loadLayout(file);
-      setCanvasItems(items);
-    } catch (err) {
-      console.error(err);
-      alert("Error loading layout.");
-    }
-  };
-
-  // --- PDF Preview ---
-  const handlePreviewPDF = () => { previewElementAsPdf("page"); };
+  // Use the app controller hook to manage state and handlers
+  const {
+    canvasItems,
+    selectedId,
+    setSelectedId,
+    handleLoadFile,
+    handlePreviewPDF,
+    handleDragEnd,
+    save,
+  } = useAppController();
 
   // --- RENDER ---
   return (
     <DndContext onDragEnd={handleDragEnd}>
+
+      {/* App Header */}
+      <header className="w-full h-14 border-b border-gray-300 bg-slate-200 flex items-center px-6 shadow-sm">
+        <h1 className="text-xl font-semibold">Votegrity Election Document Builder</h1>
+      </header>
+
       <div className="flex">
-        {/* Sidebar */}
-        <div className="w-2/5 border-black border-2 p-4 h-screen">
-          <h2 className="text-center scroll-m-20 pb-4 text-3xl font-semibold tracking-tight first:mt-0">
-            Palette/Core Navigation
-          </h2>
+      
+        {/* Sidebar Area */}
+        <div className="w-[380px] h-screen bg-white border-r border-gray-300 flex flex-col">
 
-          <Select>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Templates" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Ballot Template">Ballot Template</SelectItem>
-              <SelectItem value="Notice Template">Notice Template</SelectItem>
-              <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex-1 space-y-6 p-4">
 
-          <div className="py-5 grid grid-cols-2 gap-2">
-            {tools.map((tool) => (
-              <DraggableTool key={tool.id} id={tool.id} toolText={tool.label} />
-            ))}
+            <Select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Templates" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Ballot Template">Ballot Template</SelectItem>
+                <SelectItem value="Notice Template">Notice Template</SelectItem>
+                <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <SidebarTools tools={tools} />
+
+            <SidebarActions
+              onSave={save}
+              onLoad={handleLoadFile}
+              onPreview={() => { 
+                setSelectedId(null); 
+                requestAnimationFrame(handlePreviewPDF); 
+              }} 
+            />
+
+            <PropertiesPanel item={canvasItems.find(i => i.id === selectedId)} />
+
           </div>
-
-          {/* Save/Load/Preview Buttons */}
-          <div className="mt-4 flex flex-col gap-2">
-            <Button variant="outline" onClick={() => saveLayout(canvasItems)}>Save Layout</Button>
-            <Button variant="outline" asChild>
-              <label className="cursor-pointer">
-                Load Layout
-                <input type="file" accept="application/json" onChange={handleLoadFile} className="hidden" />
-              </label>
-            </Button>
-            <Button variant="outline" onClick={() => { setSelectedId(null); requestAnimationFrame(() => { handlePreviewPDF(); }) }}>Open PDF Preview</Button>
-          </div>
-                    {/* --- Properties Panel (Read-Only) --- */}
-          {selectedId && (
-            <div className="mt-4 p-4 border rounded-md bg-white shadow">
-              <h3 className="font-semibold mb-2">Selected Component</h3>
-
-              {(() => {
-                const item = canvasItems.find(i => i.id === selectedId);
-                if (!item) return null;
-
-                return (
-                  <div className="text-sm space-y-2">
-                    <div><strong>ID:</strong> {item.id}</div>
-                    <div><strong>Type:</strong> {item.type}</div>
-                    <div><strong>Content:</strong> {item.content}</div>
-                    <div><strong>Position:</strong> x = {item.x}, y = {item.y}</div>
-                    <div><strong>Size:</strong> {item.width ?? 200} × {item.height ?? 40}</div>
-                    <div><strong>Moveable:</strong> {item.flags?.isMoveable ? "Yes" : "No"}</div>
-                    <div><strong>Editable:</strong> {item.flags?.isEditable ? "Yes" : "No"}</div>
-                    <div><strong>Min Qty:</strong> {item.flags?.minQuantity}</div>
-                    <div><strong>Max Qty:</strong> {item.flags?.maxQuantity}</div>
-                  </div>
-                );
-              })()}
-            </div>
-          )}
         </div>
+
         {/* Canvas Area */}
-        <div className="w-3/5 border-black border-2 bg-slate-200 pt-4">
-          <h2 className="text-center text-3xl font-semibold tracking-tight pb-4">Canvas (Drag-and-Drop Area)</h2>
+        <div className="flex-1 p-6 bg-gray-100 overflow-auto">
           <Canvas canvasItems={canvasItems} selectedId={selectedId} setSelectedId={setSelectedId}/>
         </div>
       </div>
+
     </DndContext>
   );
-
-  function handleDragEnd(event: any) {
-    const { active, over } = event;
-
-    // Moving an existing canvas item
-    const existingItem = canvasItems.find(i => i.id === active.id);
-    const canvasRect = document.getElementById("page")?.getBoundingClientRect();
-    const translated = active.rect.current.translated;
-
-    if (existingItem && canvasRect) {
-      setCanvasItems(prev =>
-        prev.map(item => {
-          if (item.id !== active.id) return item;
-
-          const newX = translated.left - canvasRect.left;
-          const newY = translated.top - canvasRect.top;
-
-          return {
-            ...item,
-            x: Math.max(0, Math.min(newX, canvasRect.width - (item.width ?? 0))),
-            y: Math.max(0, Math.min(newY, canvasRect.height - (item.height ?? 0))),
-          };
-        })
-      );
-      setSelectedId(existingItem.id);
-      return;
-    }
-
-    // Adding a new tool to canvas
-    if (over && over.id === "canvas" && canvasRect) {
-      const toolId = active.id;
-      const toolDef = TOOL_DEFINITIONS.find(t => t.id === toolId);
-      if (!toolDef) return;
-
-      const newId = `${toolDef.id}-${Date.now()}`;
-      const x = translated.left - canvasRect.left;
-      const y = translated.top - canvasRect.top;
-
-      const newItem: CanvasItem = {
-        id: newId,
-        type: toolDef.type,
-        content: toolDef.type === "text" ? toolDef.defaultContent : toolDef.imageSrc,
-        x: Math.max(0, x),
-        y: Math.max(0, y),
-        width: toolDef.defaultWidth,
-        height: toolDef.defaultHeight,
-        flags: { ...toolDef.flags },
-        styles: toolDef.styles ?? {},
-      };
-
-      setCanvasItems(items => [...items, newItem]);
-      setSelectedId(newId);
-    }
-  }
 }

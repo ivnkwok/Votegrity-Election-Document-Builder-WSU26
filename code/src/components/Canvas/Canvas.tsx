@@ -15,7 +15,7 @@ export function Canvas({ canvasItems, selectedId, setSelectedId }: CanvasProps) 
     <Droppable id="canvas">
       <div
         id="page"
-        className="mx-auto bg-white rounded-md shadow-xl print:shadow-none h-screen"
+        className="mx-auto bg-white shadow-lg rounded-md border border-gray-300"
         style={{
           width: "8.5in",
           height: "11in",
