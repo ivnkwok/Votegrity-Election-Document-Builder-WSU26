@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
-import { Button } from "@/components/ui/button";
+import { useAppController } from "./hooks/useAppController";
 import { SidebarActions } from "@/components/Sidebar/SidebarActions";
 import { SidebarTools } from './components/Sidebar/SidebarTools';
 import { PropertiesPanel } from './components/Sidebar/PropertiesPanel';
-import { previewElementAsPdf } from '@/lib/utils.ts';
-import { saveLayout, loadLayout } from '@/services/layoutService';
-import { useKeyboardMovement } from './hooks/useKeyboardMovement';
-import { useCanvasDnd } from "./hooks/useCanvasDnd";
 import { Canvas } from './components/Canvas/Canvas';
-import type { CanvasItem } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -22,37 +16,16 @@ import { TOOL_DEFINITIONS } from './config/tools';
 export default function App() {
   const tools = TOOL_DEFINITIONS; // Load tool definitions
 
-  const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  // Enable keyboard (arrow key) pixel nudge for selected items
-  useKeyboardMovement(selectedId, setCanvasItems);
-
-  // ------------ HANDLERS ------------
-
-  // --- Load Layout ---
-  const handleLoadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const items = await loadLayout(file);
-      setCanvasItems(items);
-    } catch (err) {
-      console.error(err);
-      alert("Error loading layout.");
-    }
-  };
-
-  // --- PDF Preview ---
-  const handlePreviewPDF = () => { previewElementAsPdf("page"); };
-
-  // --- Drag-and-Drop ---
-  const handleDragEnd = useCanvasDnd({
+  // Use the app controller hook to manage state and handlers
+  const {
     canvasItems,
-    setCanvasItems,
+    selectedId,
     setSelectedId,
-  });
+    handleLoadFile,
+    handlePreviewPDF,
+    handleDragEnd,
+    save,
+  } = useAppController();
 
   // --- RENDER ---
   return (
@@ -78,11 +51,11 @@ export default function App() {
           <SidebarTools tools={tools} />
 
           <SidebarActions
-            onSave={() => saveLayout(canvasItems)}
+            onSave={save}
             onLoad={handleLoadFile}
             onPreview={() => { 
               setSelectedId(null); 
-              requestAnimationFrame(() => { handlePreviewPDF(); }); 
+              requestAnimationFrame(handlePreviewPDF); 
             }} 
           />
 
