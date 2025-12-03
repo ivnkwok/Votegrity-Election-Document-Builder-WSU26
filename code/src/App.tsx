@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import { Button } from "@/components/ui/button";
-import { DraggableTool } from './components/Tool';
+import { SidebarActions } from "@/components/Sidebar/SidebarActions";
 import { SidebarTools } from './components/Sidebar/SidebarTools';
 import { PropertiesPanel } from './components/Sidebar/PropertiesPanel';
 import { previewElementAsPdf } from '@/lib/utils.ts';
@@ -77,20 +77,17 @@ export default function App() {
 
           <SidebarTools tools={tools} />
 
-          {/* Save/Load/Preview Buttons */}
-          <div className="mt-4 flex flex-col gap-2">
-            <Button variant="outline" onClick={() => saveLayout(canvasItems)}>Save Layout</Button>
-            <Button variant="outline" asChild>
-              <label className="cursor-pointer">
-                Load Layout
-                <input type="file" accept="application/json" onChange={handleLoadFile} className="hidden" />
-              </label>
-            </Button>
-            <Button variant="outline" onClick={() => { setSelectedId(null); requestAnimationFrame(() => { handlePreviewPDF(); }) }}>Open PDF Preview</Button>
-          </div>
+          <SidebarActions
+            onSave={() => saveLayout(canvasItems)}
+            onLoad={handleLoadFile}
+            onPreview={() => { 
+              setSelectedId(null); 
+              requestAnimationFrame(() => { handlePreviewPDF(); }); 
+            }} 
+          />
 
           <PropertiesPanel item={canvasItems.find(i => i.id === selectedId)} />
-            
+
         </div>
         {/* Canvas Area */}
         <div className="w-3/5 border-black border-2 bg-slate-200 pt-4">
