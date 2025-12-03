@@ -7,7 +7,7 @@ interface SidebarToolsProps {
 
 export function SidebarTools({ tools }: SidebarToolsProps) {
   return (
-    <div className="py-5 grid grid-cols-2 gap-2">
+    <div className="py-5 grid grid-cols-2 gap-3 pt-3">
       {tools.map((tool) => (
         <DraggableTool
           key={tool.id}

@@ -30,44 +30,52 @@ export default function App() {
   // --- RENDER ---
   return (
     <DndContext onDragEnd={handleDragEnd}>
+
+      {/* App Header */}
+      <header className="w-full h-14 border-b border-gray-300 bg-slate-200 flex items-center px-6 shadow-sm">
+        <h1 className="text-xl font-semibold">Votegrity Election Document Builder</h1>
+      </header>
+
       <div className="flex">
-        {/* Sidebar */}
-        <div className="w-2/5 border-black border-2 p-4 h-screen">
-          <h2 className="text-center scroll-m-20 pb-4 text-3xl font-semibold tracking-tight first:mt-0">
-            Palette/Core Navigation
-          </h2>
+      
+        {/* Sidebar Area */}
+        <div className="w-[380px] h-screen bg-white border-r border-gray-300 flex flex-col">
 
-          <Select>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Templates" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Ballot Template">Ballot Template</SelectItem>
-              <SelectItem value="Notice Template">Notice Template</SelectItem>
-              <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex-1 space-y-6 p-4">
 
-          <SidebarTools tools={tools} />
+            <Select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Templates" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Ballot Template">Ballot Template</SelectItem>
+                <SelectItem value="Notice Template">Notice Template</SelectItem>
+                <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <SidebarActions
-            onSave={save}
-            onLoad={handleLoadFile}
-            onPreview={() => { 
-              setSelectedId(null); 
-              requestAnimationFrame(handlePreviewPDF); 
-            }} 
-          />
+            <SidebarTools tools={tools} />
 
-          <PropertiesPanel item={canvasItems.find(i => i.id === selectedId)} />
+            <SidebarActions
+              onSave={save}
+              onLoad={handleLoadFile}
+              onPreview={() => { 
+                setSelectedId(null); 
+                requestAnimationFrame(handlePreviewPDF); 
+              }} 
+            />
 
+            <PropertiesPanel item={canvasItems.find(i => i.id === selectedId)} />
+
+          </div>
         </div>
+
         {/* Canvas Area */}
-        <div className="w-3/5 border-black border-2 bg-slate-200 pt-4">
-          <h2 className="text-center text-3xl font-semibold tracking-tight pb-4">Canvas (Drag-and-Drop Area)</h2>
+        <div className="flex-1 p-6 bg-gray-100 overflow-auto">
           <Canvas canvasItems={canvasItems} selectedId={selectedId} setSelectedId={setSelectedId}/>
         </div>
       </div>
+
     </DndContext>
   );
 }

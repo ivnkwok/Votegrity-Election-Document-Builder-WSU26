@@ -42,30 +42,52 @@ export function useCanvasDnd({
         return;
       }
 
-      // --- ADD NEW TOOL ---
-      if (over && over.id === "canvas" && canvasRect) {
-        const toolId = active.id;
-        const toolDef = TOOL_DEFINITIONS.find(t => t.id === toolId);
-        if (!toolDef) return;
+      if (canvasRect) {
+        // Cursor absolute position
+        const pointerX = translated.left;
+        const pointerY = translated.top;
 
-        const newId = `${toolDef.id}-${Date.now()}`;
-        const x = translated.left - canvasRect.left;
-        const y = translated.top - canvasRect.top;
+        // Check if the pointer is actually inside the canvas bounds
+        const insideCanvas =
+            pointerX >= canvasRect.left &&
+            pointerX <= canvasRect.right &&
+            pointerY >= canvasRect.top &&
+            pointerY <= canvasRect.bottom;
 
-        const newItem: CanvasItem = {
-          id: newId,
-          type: toolDef.type,
-          content: toolDef.type === "text" ? toolDef.defaultContent : toolDef.imageSrc,
-          x: Math.max(0, x),
-          y: Math.max(0, y),
-          width: toolDef.defaultWidth,
-          height: toolDef.defaultHeight,
-          flags: { ...toolDef.flags },
-          styles: toolDef.styles ?? {},
-        };
+        // If not inside canvas, do nothing
+        if (!insideCanvas) {
+            return;
+        }
 
-        setCanvasItems(items => [...items, newItem]);
-        setSelectedId(newId);
+        // Only handle drops on the canvas area
+        if (over && over.id === "canvas") {
+            const toolId = active.id;
+            const toolDef = TOOL_DEFINITIONS.find(t => t.id === toolId);
+            if (!toolDef) return;
+
+            const newId = `${toolDef.id}-${Date.now()}`;
+
+            const rawX = translated.left - canvasRect.left;
+            const rawY = translated.top - canvasRect.top;
+
+            const x = Math.max(0, Math.min(rawX, canvasRect.width - toolDef.defaultWidth));
+            const y = Math.max(0, Math.min(rawY, canvasRect.height - toolDef.defaultHeight));
+
+            const newItem: CanvasItem = {
+            id: newId,
+            type: toolDef.type,
+            content: toolDef.type === "text" ? toolDef.defaultContent : toolDef.imageSrc,
+            x,
+            y,
+            width: toolDef.defaultWidth,
+            height: toolDef.defaultHeight,
+            flags: { ...toolDef.flags },
+            styles: toolDef.styles ?? {},
+            };
+
+            setCanvasItems(items => [...items, newItem]);
+            setSelectedId(newId);
+        }
       }
     },
     [canvasItems, setCanvasItems, setSelectedId]
