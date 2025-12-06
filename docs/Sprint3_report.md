@@ -1,4 +1,4 @@
-Sprint 2 Report (Dates from Sprint 1 to Sprint 2)
+Sprint 2 Report (Sprint 2 End to 12/5/25)
 
 1. Video Presentation:
 
