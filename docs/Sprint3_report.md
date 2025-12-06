@@ -26,11 +26,9 @@ https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137580477&
 
 ## Incomplete Issues/User Stories
  Here are links to issues we worked on but did not complete in this sprint:
- 
-https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137318446&issue=ivnkwok%7CWSU-Capstone-2025%7C8
-We decided to focus more on core functionalities for the prototype and the ability to save to Postgres database was not integral to the functionality of our project.
-https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137576095&issue=ivnkwok%7CWSU-Capstone-2025%7C11
-Actively working in progress. Currently has some functionality but not complete.
+ https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137576764&issue=ivnkwok%7CWSU-Capstone-2025%7C13
+Main issue was mail merge as we focused on core functionalities and are hoping to continue 
+
 
 ## Code Files for Review
 Please review the following code files, which were actively developed during this sprint, for quality:
