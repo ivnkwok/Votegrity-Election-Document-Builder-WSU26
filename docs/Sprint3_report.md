@@ -27,25 +27,25 @@ https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137580477&
 ## Incomplete Issues/User Stories
  Here are links to issues we worked on but did not complete in this sprint:
  https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137576764&issue=ivnkwok%7CWSU-Capstone-2025%7C13
-Main issue was mail merge as we focused on core functionalities and are hoping to continue 
+Most issues like mail merge were not in progress becasuse we were focused on more essential functionalities and are hoping to eventually get to these features once our foundation is commplete.
 
 
 ## Code Files for Review
 Please review the following code files, which were actively developed during this sprint, for quality:
-https://github.com/ivnkwok/WSU-Capstone-2025/blob/Saving/code/src/App.tsx
-https://github.com/ivnkwok/WSU-Capstone-2025/blob/drag-drop/code/src/App.tsx
 https://github.com/ivnkwok/WSU-Capstone-2025/blob/main/code/src/App.tsx
- 
+https://github.com/ivnkwok/WSU-Capstone-2025/blob/main/code/src/test/CanvasTextItem.test.tsx
+https://github.com/ivnkwok/WSU-Capstone-2025/blob/main/code/src/components/Sidebar/PropertiesPanel.tsx
+
 ## Retrospective Summary
 Here's what went well:
 Production of features
-Clear ideas from client
+Clear feedback from client
  
 Here's what we'd like to improve:
-Hopefully we will have a more cohesive work cycle
-Ability to merge our work more smoothly
+Hopefully effectively produce our reports properly
+Have a cleaner work flow next semester
 
 Here are changes we plan to implement in the next sprint:
 Continue to have clear communication with other team members
-Consistently meet and update our clients on our work.
-Discuss how our features will be interacting with each other.
+Clearly communicate and discuss future plans
+Ensure our implementations are clean and healthy for future work
