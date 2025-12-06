@@ -4,23 +4,25 @@ Sprint 2 Report (Dates from Sprint 1 to Sprint 2)
 
 
 2. New Features
-a.	Saving components to a Json file
-b.	Loading document from a Json file.
-c.	Components addition to canvas.
+a.	Pixel Nudge with arrow keys
+b.	Adding a properties tab
+c.	Working on re-drag and drop after placing on canvas
 
 3. Work Summary (Developer Facing)
 
-We worked with our client to get the foundations of how we will be storing the information on the canvas as well as adding components to our canvas. We have a better idea of what our finished prototype will be for the end of semester presentation. This includes what features we should have ready to present as well as expectations for what we will be producing in later sprints. We had some issues with some disorientation at the start of the sprint with assignments of features, but we were able to reorganize and identify who wanted what roles and were able to work effectively on the project.
+We focused mostly on refactoring and code cleanup. Daniel worked mostly on this so when we pick up development next semester our code would be much cleaner and easier to work with. We additionally setup our properties tab
+so we can eventually get editing components to work properly. Essentially we have been setting ourselves up for a solid start for our next semester.
 
 4. Unfinished Work
 
-We still need to connect our features as we have been mostly working in separate branches on separate features. A future issue we are currently aware of is separate users having separate documents saved. Currently we are focusing on the functionality of our file editor currently and saving under specific users will come in future sprints. Next for our project I believe we wanted to focus on ways users can edit a component on the canvas like other file editors like word.
+We have yet to touch mail merge becuase we have been focusing mostly on core functionality. We hope to get to this feature in the next semester when we have are deliverable project. We have a solid grasp on what is needed
+before we begin mail merge and hope to have this feature ready when the time comes for deployment.
 
 ## Completed Issues/User Stories
 Here are links to the issues that we completed in this sprint:
-https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137312696&issue=ivnkwok%7CWSU-Capstone-2025%7C5
-https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137312941&issue=ivnkwok%7CWSU-Capstone-2025%7C6
-https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137313269&issue=ivnkwok%7CWSU-Capstone-2025%7C7
+https://github.com/users/ivnkwok/projects/3?pane=issue&itemId=139457506&issue=ivnkwok%7CWSU-Capstone-2025%7C16
+https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=140821120&issue=ivnkwok%7CWSU-Capstone-2025%7C23
+https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137580477&issue=ivnkwok%7CWSU-Capstone-2025%7C14
 
 ## Incomplete Issues/User Stories
  Here are links to issues we worked on but did not complete in this sprint:
