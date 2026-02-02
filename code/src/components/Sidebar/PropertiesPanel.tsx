@@ -16,17 +16,28 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
 
       <div className="text-sm space-y-3">
 
-        <div><strong>ID:</strong> {item.id}</div>
+        {/* ID (EDITABLE) */}
+        <div>
+          <label className="font-medium">ID</label>
+          <input
+            className="w-full border rounded px-2 py-1 mt-1"
+            value={item.id}
+            onChange={e =>
+              onChange(item.id, { id: e.target.value })
+            }
+          />
+        </div>
+
         <div><strong>Type:</strong> {item.type}</div>
 
+        {/* Content */}
         <div>
           <strong>Content:</strong> {item.content}
         </div>
 
-        {/* X / Y POSITION */}
+        {/* POSITION */}
         <div>
           <strong>Position</strong>
-
           <div className="flex gap-2 mt-1">
             <label className="flex items-center gap-1">
               X
@@ -56,7 +67,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
           </div>
         </div>
 
-        {/* Readonl size */}
+        {/* Size */}
         <div>
           <strong>Size:</strong> {item.width ?? 200} × {item.height ?? 40}
         </div>
@@ -71,4 +82,3 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
     </div>
   );
 }
-
