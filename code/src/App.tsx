@@ -25,6 +25,7 @@ export default function App() {
     handlePreviewPDF,
     handleDragEnd,
     save,
+    updateItem,
   } = useAppController();
 
   // --- RENDER ---
@@ -64,8 +65,9 @@ export default function App() {
                 requestAnimationFrame(handlePreviewPDF); 
               }} 
             />
-
-            <PropertiesPanel item={canvasItems.find(i => i.id === selectedId)} />
+            <PropertiesPanel item={canvasItems.find(i => i.id === selectedId)} 
+              onChange={updateItem}  
+            />
 
           </div>
         </div>
