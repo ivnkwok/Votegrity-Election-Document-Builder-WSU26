@@ -58,5 +58,14 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     defaultWidth: 160,
     defaultHeight: 90,
     flags: { isMoveable: true, isEditable: false, minQuantity: 1, maxQuantity: 1 },
-  }
+  },
+  {
+    id: "upload-test",
+    label: "Upload Test",
+    type: "image",
+    imageSrc: "",
+    defaultWidth: 160,
+    defaultHeight: 90,
+    flags: { isMoveable: true, isEditable: true, minQuantity: 1, maxQuantity: 1 },
+  },
 ];
