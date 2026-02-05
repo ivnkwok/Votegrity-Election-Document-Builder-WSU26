@@ -1,4 +1,5 @@
 import type { CanvasItem } from "@/lib/utils";
+import type { ChangeEvent } from "react";
 
 interface PropertiesPanelProps {
   item: CanvasItem | undefined;
@@ -9,6 +10,17 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
   if (!item) return null;
 
   const isMoveable = item.flags?.isMoveable !== false;
+
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        onChange(item.id, {content: reader.result as string})
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   return (
     <div className="mt-4 p-4 border rounded-md bg-white shadow">
@@ -32,7 +44,29 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
 
         {/* Content */}
         <div>
-          <strong>Content:</strong> {item.content}
+          <strong className="block mb-1">Content:</strong>
+          {item.id.includes("upload-test") ? (
+            <div className="space-y-2">
+              <input
+                type="file"
+                accept="image/*"
+                className="w-full text-xs"
+                onChange={handleImageUpload}
+              />
+              {item.content && (
+                <div className="mt-2">
+                  <p className="text-[10px] text-gray-500 mb-1">Preview:</p>
+                  <img 
+                    src={item.content} 
+                    alt="Preview" 
+                    className="max-h-20 rounded border" 
+                  />
+                </div>
+              )}
+            </div>
+          ) : (
+            <span className="text-gray-600">{item.content || "No content"}</span>
+          )}
         </div>
 
         {/* POSITION */}
