@@ -1,5 +1,5 @@
 import type { CanvasItem } from "@/lib/utils";
-import type { ChangeEvent } from "react";
+import { useRef, type ChangeEvent } from "react";
 
 interface PropertiesPanelProps {
   item: CanvasItem | undefined;
@@ -8,6 +8,8 @@ interface PropertiesPanelProps {
 
 export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
   if (!item) return null;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isMoveable = item.flags?.isMoveable !== false;
 
@@ -49,10 +51,15 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
             <div className="space-y-2">
               <input
                 type="file"
+                ref={fileInputRef}
                 accept="image/*"
-                className="w-full text-xs"
+                className="hidden"
                 onChange={handleImageUpload}
               />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full hover:bg-gray-200 text-black font-medium py-2 px-4 rounded transition-colors border border-gray-300"
+              >Upload Image</button>
               {item.content && (
                 <div className="mt-2">
                   <p className="text-[10px] text-gray-500 mb-1">Preview:</p>
