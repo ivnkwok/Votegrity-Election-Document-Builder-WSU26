@@ -29,6 +29,21 @@ export function useAppController() {
     }
   }, []);
 
+  const updateItem = (id: string, updates: Partial<CanvasItem>) => {
+    setCanvasItems(items =>
+      items.map(item =>
+        item.id === id
+          ? { ...item, ...updates }
+          : item
+      )
+    );
+
+    // If the ID changed, update selection too
+    if (updates.id) {
+      setSelectedId(updates.id);
+    }
+  };
+
   // PDF preview handler
   const handlePreviewPDF = useCallback(() => {
     previewElementAsPdf("page");
@@ -58,5 +73,7 @@ export function useAppController() {
 
     // convenience wrappers
     save: () => saveLayout(canvasItems),
+    // Changes to proeprties
+    updateItem,
   };
 }
