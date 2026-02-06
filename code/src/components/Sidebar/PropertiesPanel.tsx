@@ -58,7 +58,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full hover:bg-gray-200 text-black font-medium py-2 px-4 rounded transition-colors border border-gray-300"
+                className="w-full hover:bg-gray-200 text-black font-medium py-2 px-4 rounded border border-gray-300"
               >Upload Image</button>
               {item.content && (
                 <div className="mt-2">
