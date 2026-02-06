@@ -1,5 +1,4 @@
 import type { CanvasItem } from "@/lib/utils";
-import { useRef, type ChangeEvent } from "react";
 
 interface PropertiesPanelProps {
   item: CanvasItem | undefined;
@@ -9,20 +8,7 @@ interface PropertiesPanelProps {
 export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
   if (!item) return null;
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const isMoveable = item.flags?.isMoveable !== false;
-
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        onChange(item.id, {content: reader.result as string})
-      }
-      reader.readAsDataURL(file)
-    }
-  }
 
   return (
     <div className="mt-4 p-4 border rounded-md bg-white shadow">
@@ -46,34 +32,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
 
         {/* Content */}
         <div>
-          <strong className="block mb-1">Content:</strong>
-          {item.id.includes("upload-test") ? (
-            <div className="space-y-2">
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full hover:bg-gray-200 text-black font-medium py-2 px-4 rounded border border-gray-300"
-              >Upload Image</button>
-              {item.content && (
-                <div className="mt-2">
-                  <p className="text-[10px] text-gray-500 mb-1">Preview:</p>
-                  <img 
-                    src={item.content} 
-                    alt="Preview" 
-                    className="max-h-20 rounded border" 
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <span className="text-gray-600">{item.content || "No content"}</span>
-          )}
+          <strong>Content:</strong> {item.content}
         </div>
 
         {/* POSITION */}
