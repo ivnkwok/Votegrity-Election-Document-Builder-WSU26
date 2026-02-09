@@ -34,7 +34,15 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
 
         {/* Content */}
         <div>
-          <strong>Content:</strong> {item.content}
+          <label className="font-medium">Content</label>
+          <input
+            className="w-full border rounded px-2 py-1 mt-1"
+            value={item.content ?? ""}
+            onChange={e =>
+              onChange(item.id, { content: e.target.value })
+            }
+            disabled={item.flags?.isEditable === false}
+          />
         </div>
         {/* TEXT STYLING */}
         {isText && (
@@ -126,10 +134,34 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
         </div>
 
         {/* Size */}
-        <div>
-          <strong>Size:</strong> {item.width ?? 200} × {item.height ?? 40}
-        </div>
+          <div>
+            <strong>Size</strong>
+            <div className="flex gap-2 mt-1">
+              <label className="flex items-center gap-1">
+                W
+                <input
+                  type="number"
+                  className="w-20 border rounded px-1 py-0.5"
+                  value={item.width ?? 200}
+                  onChange={e =>
+                    onChange(item.id, { width: Number(e.target.value) })
+                  }
+                />
+              </label>
 
+              <label className="flex items-center gap-1">
+                H
+                <input
+                  type="number"
+                  className="w-20 border rounded px-1 py-0.5"
+                  value={item.height ?? 40}
+                  onChange={e =>
+                    onChange(item.id, { height: Number(e.target.value) })
+                  }
+                />
+              </label>
+            </div>
+          </div>
         {/* Flags */}
         <div><strong>Moveable:</strong> {isMoveable ? "Yes" : "No"}</div>
         <div><strong>Editable:</strong> {item.flags?.isEditable ? "Yes" : "No"}</div>
