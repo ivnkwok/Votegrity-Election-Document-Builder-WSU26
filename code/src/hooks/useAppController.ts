@@ -209,6 +209,75 @@ export function useAppController() {
     setSelectedId,
   });
 
+  /** Handle imported PDF pages - creates a new page for each PDF page with the image filling the canvas */
+  const handlePdfImport = useCallback(
+    (images: { dataUrl: string; pageNumber: number }[]) => {
+      if (images.length === 0) return;
+
+      // Save current page state first
+      setPagesById((prev) => ({ ...prev, [activePageId]: canvasItems }));
+
+      const timestamp = Date.now();
+      const newPageIds: string[] = [];
+
+      // Create a new page for each PDF page
+      images.forEach((img, idx) => {
+        const newPageId = `pdf-page-${timestamp}-${idx}`;
+        const newPageName = `PDF Page ${img.pageNumber}`;
+
+        // Create a single item that fills the entire canvas (8.5" x 11" = 816px x 1056px)
+        const item: CanvasItem = {
+          id: `pdf-img-${timestamp}-${idx}`,
+          type: "image",
+          content: img.dataUrl,
+          x: 0,
+          y: 0,
+          width: 816,   // Full canvas width (8.5 inches)
+          height: 1056, // Full canvas height (11 inches)
+          flags: {
+            isMoveable: false,  // Lock to page so it doesn't move
+            isEditable: false,
+            minQuantity: 1,
+            maxQuantity: 1,
+          },
+          styles: {},
+        };
+
+        // Add the new page to our state
+        setPagesById((prev) => ({ ...prev, [newPageId]: [item] }));
+        setPageNamesById((prev) => ({ ...prev, [newPageId]: newPageName }));
+        newPageIds.push(newPageId);
+      });
+
+      // Add all new pages to the page order
+      setPageOrder((prev) => [...prev, ...newPageIds]);
+
+      // Switch to the first imported page
+      if (newPageIds.length > 0) {
+        const firstPageId = newPageIds[0];
+        setActivePageId(firstPageId);
+        setCanvasItems(pagesById[firstPageId] ?? [{ 
+          id: `pdf-img-${timestamp}-0`,
+          type: "image",
+          content: images[0].dataUrl,
+          x: 0,
+          y: 0,
+          width: 816,
+          height: 1056,
+          flags: {
+            isMoveable: false,
+            isEditable: false,
+            minQuantity: 1,
+            maxQuantity: 1,
+          },
+          styles: {},
+        }]);
+        setSelectedId(null);
+      }
+    },
+    [activePageId, canvasItems, pagesById, setActivePageId, setCanvasItems, setPageNamesById, setPagesById, setPageOrder, setSelectedId]
+  );
+
   return {
     // state
     canvasItems,
@@ -225,6 +294,7 @@ export function useAppController() {
     handleLoadFile,
     handlePreviewPDF,
     handleDragEnd,
+    handlePdfImport,
     switchPage,
     addPage,
     duplicatePage,

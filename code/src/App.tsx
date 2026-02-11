@@ -4,6 +4,7 @@ import { SidebarActions } from "@/components/Sidebar/SidebarActions";
 import { SidebarTools } from './components/Sidebar/SidebarTools';
 import { PropertiesPanel } from './components/Sidebar/PropertiesPanel';
 import { Canvas } from './components/Canvas/Canvas';
+import { PdfUploader } from './components/PdfUploader';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMemo } from "react";
@@ -27,6 +28,7 @@ export default function App() {
     handleLoadFile,
     handlePreviewPDF,
     handleDragEnd,
+    handlePdfImport,
     save,
     updateItem,
     pageOrder,
@@ -138,6 +140,8 @@ export default function App() {
             </div>
 
             <SidebarTools tools={tools} />
+
+            <PdfUploader onPdfPagesExtracted={handlePdfImport} />
 
             <SidebarActions
               onSave={save}
