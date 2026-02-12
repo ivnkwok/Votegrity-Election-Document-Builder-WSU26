@@ -23,13 +23,24 @@ export function useCanvasDnd({
       const translated = active.rect.current.translated;
 
       // --- MOVE EXISTING ITEM ---
-      if (existingItem && canvasRect) {
+      const { delta } = event;
+
+      if (existingItem) {
+        // If it was basically a click, don't update position
+        if (!delta || (delta.x === 0 && delta.y === 0)) {
+          setSelectedId(existingItem.id);
+          return;
+        }
+
+        const canvasRect = document.getElementById("page")?.getBoundingClientRect();
+        if (!canvasRect) return;
+
         setCanvasItems(prev =>
           prev.map(item => {
             if (item.id !== active.id) return item;
 
-            const newX = translated.left - canvasRect.left;
-            const newY = translated.top - canvasRect.top;
+            const newX = item.x + delta.x;
+            const newY = item.y + delta.y;
 
             return {
               ...item,
@@ -38,9 +49,11 @@ export function useCanvasDnd({
             };
           })
         );
+
         setSelectedId(existingItem.id);
         return;
       }
+
 
       if (canvasRect) {
         // Cursor absolute position
