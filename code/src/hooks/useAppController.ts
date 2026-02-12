@@ -209,6 +209,21 @@ export function useAppController() {
     setSelectedId,
   });
 
+  const updateItem = (id: string, updates: Partial<CanvasItem>) => {
+    setCanvasItems(items =>
+      items.map(item =>
+        item.id === id
+          ? { ...item, ...updates }
+          : item
+      )
+    );
+
+    // If the ID changed, update selection too
+    if (updates.id) {
+      setSelectedId(updates.id);
+    }
+  };
+
   /** Handle imported PDF pages - creates a new page for each PDF page with the image filling the canvas */
   const handlePdfImport = useCallback(
     (images: { dataUrl: string; pageNumber: number }[]) => {
@@ -301,6 +316,7 @@ export function useAppController() {
     deletePage,
     renamePage,
     movePage,
+    updateItem,
 
 
     // save whole document
