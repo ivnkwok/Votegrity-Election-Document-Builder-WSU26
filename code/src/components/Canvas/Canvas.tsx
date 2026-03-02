@@ -32,12 +32,13 @@ export function Canvas({ canvasItems, selectedId, setSelectedId }: CanvasProps) 
               setSelectedId(item.id);
             }}
             style={{
+              boxSizing: "border-box",
               position: "absolute",
               left: `${item.x}px`,
               top: `${item.y}px`,
               width: item.width,
               height: item.height,
-              border: item.id === selectedId ? "2px solid blue" : "1px dashed #ccc",
+              outline: item.id === selectedId ? "2px dashed #ccc" : "2px solid transparent",
               padding: "4px",
               cursor: "grab",
               backgroundColor: "white",
