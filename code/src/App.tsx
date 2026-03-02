@@ -12,7 +12,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TOOL_DEFINITIONS } from './config/tools';
-
+import rawElectionData from "@/Data/Test_Questions.json";
+import { parseElectionData } from "@/utils/parseElectionData";
+//Can be read by f12 in browser
+const parsed = parseElectionData(rawElectionData);
+console.log(parsed);
 export default function App() {
   const tools = TOOL_DEFINITIONS; // Load tool definitions
 
@@ -27,7 +31,7 @@ export default function App() {
     save,
     updateItem,
   } = useAppController();
-
+  
   // --- RENDER ---
   return (
     <DndContext onDragEnd={handleDragEnd}>
