@@ -12,6 +12,8 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isMoveable = item.flags?.isMoveable !== false;
+  const isText = item.type === "text";
+  const styles = item.styles || {};
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -75,6 +77,62 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
             <span className="text-gray-600">{item.content || "No content"}</span>
           )}
         </div>
+        {/* TEXT STYLING */}
+        {isText && (
+          <div className="pt-2 border-t space-y-3">
+            <strong>Text Style</strong>
+
+            {/* Font Size */}
+            <div>
+              <label className="font-medium">Font Size</label>
+              <input
+                type="number"
+                className="w-full border rounded px-2 py-1 mt-1"
+                value={parseInt(styles.fontSize as string) || 16}
+                onChange={e =>
+                  onChange(item.id, {
+                    styles: { ...styles, fontSize: `${e.target.value}px` },
+                  })
+                }
+              />
+            </div>
+
+            {/* Color */}
+            <div>
+              <label className="font-medium">Color</label>
+              <input
+                type="color"
+                className="w-full h-8 mt-1"
+                value={(styles.color as string) || "#000000"}
+                onChange={e =>
+                  onChange(item.id, {
+                    styles: { ...styles, color: e.target.value },
+                  })
+                }
+              />
+            </div>
+
+            {/* Font Family */}
+            <div>
+              <label className="font-medium">Font</label>
+              <select
+                className="w-full border rounded px-2 py-1 mt-1"
+                value={(styles.fontFamily as string) || "Arial"}
+                onChange={e =>
+                  onChange(item.id, {
+                    styles: { ...styles, fontFamily: e.target.value },
+                  })
+                }
+              >
+                <option value="Arial">Arial</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Courier New">Courier New</option>
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* POSITION */}
         <div>
@@ -109,10 +167,34 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
         </div>
 
         {/* Size */}
-        <div>
-          <strong>Size:</strong> {item.width ?? 200} × {item.height ?? 40}
-        </div>
+          <div>
+            <strong>Size</strong>
+            <div className="flex gap-2 mt-1">
+              <label className="flex items-center gap-1">
+                W
+                <input
+                  type="number"
+                  className="w-20 border rounded px-1 py-0.5"
+                  value={item.width ?? 200}
+                  onChange={e =>
+                    onChange(item.id, { width: Number(e.target.value) })
+                  }
+                />
+              </label>
 
+              <label className="flex items-center gap-1">
+                H
+                <input
+                  type="number"
+                  className="w-20 border rounded px-1 py-0.5"
+                  value={item.height ?? 40}
+                  onChange={e =>
+                    onChange(item.id, { height: Number(e.target.value) })
+                  }
+                />
+              </label>
+            </div>
+          </div>
         {/* Flags */}
         <div><strong>Moveable:</strong> {isMoveable ? "Yes" : "No"}</div>
         <div><strong>Editable:</strong> {item.flags?.isEditable ? "Yes" : "No"}</div>
@@ -121,5 +203,6 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
 
       </div>
     </div>
+    
   );
 }
