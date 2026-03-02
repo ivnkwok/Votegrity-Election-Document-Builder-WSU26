@@ -4,6 +4,10 @@ import { SidebarActions } from "@/components/Sidebar/SidebarActions";
 import { SidebarTools } from './components/Sidebar/SidebarTools';
 import { PropertiesPanel } from './components/Sidebar/PropertiesPanel';
 import { Canvas } from './components/Canvas/Canvas';
+import { PdfUploader } from './components/PdfUploader';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -24,9 +28,27 @@ export default function App() {
     handleLoadFile,
     handlePreviewPDF,
     handleDragEnd,
+    handlePdfImport,
     save,
     updateItem,
+    pageOrder,
+    activePageId,
+    pageNamesById,
+    switchPage,
+    addPage,
+    duplicatePage,
+    deletePage,
+    renamePage,
+    movePage,
   } = useAppController();
+
+  const activePageIndex = useMemo(
+    () => pageOrder.indexOf(activePageId),
+    [pageOrder, activePageId]
+  );
+
+  const canMoveUp = activePageIndex > 0;
+  const canMoveDown = activePageIndex >= 0 && activePageIndex < pageOrder.length - 1;
 
   // --- RENDER ---
   return (
@@ -55,15 +77,81 @@ export default function App() {
               </SelectContent>
             </Select>
 
+            {/* --- Page Selector --- */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-gray-700">Page</div>
+
+              <Select value={activePageId} onValueChange={switchPage}>
+                <Input
+                  value={pageNamesById[activePageId] ?? ""}
+                  placeholder="Rename page"
+                  onChange={(e) => renamePage(e.target.value, activePageId)}
+                />
+
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => movePage(activePageId, -1)}
+                    disabled={!canMoveUp}
+                  >
+                    Move Up
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => movePage(activePageId, 1)}
+                    disabled={!canMoveDown}
+                  >
+                    Move Down
+                  </Button>
+                </div>
+
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select page" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pageOrder.map((pageId) => (
+                    <SelectItem key={pageId} value={pageId}>
+                      {pageNamesById[pageId] ?? pageId}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={addPage}>
+                  + Add
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={duplicatePage}>
+                  Duplicate
+                </Button>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={deletePage}
+                disabled={pageOrder.length <= 1}
+              >
+                Delete Page
+              </Button>
+            </div>
+
             <SidebarTools tools={tools} />
+
+            <PdfUploader onPdfPagesExtracted={handlePdfImport} />
 
             <SidebarActions
               onSave={save}
               onLoad={handleLoadFile}
-              onPreview={() => { 
-                setSelectedId(null); 
-                requestAnimationFrame(handlePreviewPDF); 
-              }} 
+              onPreview={() => {
+                setSelectedId(null);
+                requestAnimationFrame(() => {
+                  void handlePreviewPDF();
+                });
+              }}
             />
             <PropertiesPanel item={canvasItems.find(i => i.id === selectedId)} 
               onChange={updateItem}  
