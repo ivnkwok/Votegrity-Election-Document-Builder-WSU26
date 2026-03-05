@@ -1,5 +1,21 @@
 import type { CanvasItem } from "@/lib/utils";
 
+function toCanvasItemType(value: unknown): CanvasItem["type"] {
+  if (value === "image" || value === "box" || value === "text") {
+    return value;
+  }
+  return "text";
+}
+
+function toRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
+}
+
+function toNumber(value: unknown, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
 export type LayoutDocument = {
   version: "2.0.0";
   canvas: {
@@ -11,7 +27,7 @@ export type LayoutDocument = {
   pages: Array<{
     id: string;
     name: string;
-    components: any[];
+    components: unknown[];
   }>;
 };
 
@@ -21,50 +37,52 @@ export type LoadedDocument = {
   pagesById: Record<string, CanvasItem[]>;
 };
 
-// -------------------------------
-// SAVE LAYOUT (v1 single-page) - kept for backward compatibility
-// -------------------------------
-export function saveLayout(canvasItems: CanvasItem[]) {
-  const layout = {
-    version: "1.0.0",
-    canvas: {
-      width: 816,
-      height: 1056,
-      background: "#ffffff",
-      unit: "px",
+function toDocumentComponent(item: CanvasItem) {
+  return {
+    id: item.id,
+    type: item.type,
+    position: { x: item.x, y: item.y },
+    size: { width: item.width ?? 200, height: item.height ?? 40 },
+    content: item.content,
+    flags: {
+      isMoveable: item.flags?.isMoveable ?? true,
+      isEditable: item.flags?.isEditable ?? true,
+      minQuantity: item.flags?.minQuantity ?? 0,
+      maxQuantity: item.flags?.maxQuantity ?? 1,
     },
-    components: canvasItems.map((item) => ({
-      id: item.id,
-      type: item.type,
-      position: { x: item.x, y: item.y },
-      size: { width: item.width ?? 200, height: item.height ?? 40 },
-      content: item.content,
-      flags: {
-        isMoveable: item.flags?.isMoveable ?? true,
-        isEditable: item.flags?.isEditable ?? true,
-        minQuantity: item.flags?.minQuantity ?? 0,
-        maxQuantity: item.flags?.maxQuantity ?? 1,
-      },
-      styles: item.styles ?? {
-        fontFamily: "Inter, ui-sans-serif, system-ui",
-        fontSize: 14,
-        fontWeight: 400,
-        color: "#111827",
-        textAlign: "left",
-      },
-    })),
+    styles: item.styles ?? {
+      fontFamily: "Inter, ui-sans-serif, system-ui",
+      fontSize: 14,
+      fontWeight: 400,
+      color: "#111827",
+      textAlign: "left",
+    },
   };
+}
 
-  const json = JSON.stringify(layout, null, 2);
-  const blob = new Blob([json], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
+function toCanvasItem(component: unknown): CanvasItem {
+  const c = toRecord(component);
+  const position = toRecord(c.position);
+  const size = toRecord(c.size);
+  const flags = toRecord(c.flags);
+  const styles = toRecord(c.styles);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "canvasLayout.json";
-  a.click();
-
-  URL.revokeObjectURL(url);
+  return {
+    id: String(c.id ?? ""),
+    type: toCanvasItemType(c.type),
+    content: String(c.content ?? c.type ?? ""),
+    x: toNumber(position.x, 0),
+    y: toNumber(position.y, 0),
+    width: toNumber(size.width, 200),
+    height: toNumber(size.height, 40),
+    flags: {
+      isMoveable: Boolean(flags.isMoveable ?? true),
+      isEditable: Boolean(flags.isEditable ?? true),
+      minQuantity: toNumber(flags.minQuantity, 0),
+      maxQuantity: toNumber(flags.maxQuantity, 1),
+    },
+    styles: styles as CanvasItem["styles"],
+  };
 }
 
 // -------------------------------
@@ -86,26 +104,7 @@ export function saveDocumentLayout(args: LoadedDocument) {
       return {
         id: pageId,
         name: pageNamesById[pageId] ?? `Page ${idx + 1}`,
-        components: items.map((item) => ({
-          id: item.id,
-          type: item.type,
-          position: { x: item.x, y: item.y },
-          size: { width: item.width ?? 200, height: item.height ?? 40 },
-          content: item.content,
-          flags: {
-            isMoveable: item.flags?.isMoveable ?? true,
-            isEditable: item.flags?.isEditable ?? true,
-            minQuantity: item.flags?.minQuantity ?? 0,
-            maxQuantity: item.flags?.maxQuantity ?? 1,
-          },
-          styles: item.styles ?? {
-            fontFamily: "Inter, ui-sans-serif, system-ui",
-            fontSize: 14,
-            fontWeight: 400,
-            color: "#111827",
-            textAlign: "left",
-          },
-        })),
+        components: items.map(toDocumentComponent),
       };
     }),
   };
@@ -123,111 +122,42 @@ export function saveDocumentLayout(args: LoadedDocument) {
 }
 
 // -------------------------------
-// LOAD LAYOUT (v1 + legacy -> CanvasItem[])
-// -------------------------------
-export async function loadLayout(file: File): Promise<CanvasItem[]> {
-  const text = await file.text();
-  const json = JSON.parse(text);
-
-  // v1 schema
-  if (json?.components && Array.isArray(json.components)) {
-    return json.components.map((c: any) => ({
-      id: String(c.id ?? ""),
-      type: String(c.type ?? "text"),
-      content: String(c.content ?? c.type ?? ""),
-      x: Number(c.position?.x ?? 0),
-      y: Number(c.position?.y ?? 0),
-      width: Number(c.size?.width ?? 200),
-      height: Number(c.size?.height ?? 40),
-      flags: {
-        isMoveable: Boolean(c.flags?.isMoveable ?? true),
-        isEditable: Boolean(c.flags?.isEditable ?? true),
-        minQuantity: Number(c.flags?.minQuantity ?? 0),
-        maxQuantity: Number(c.flags?.maxQuantity ?? 1),
-      },
-      styles: c.styles ?? {},
-    }));
-  }
-
-  // old flat array schema
-  if (Array.isArray(json)) {
-    return json.map((item: any) => ({
-      id: String(item.id ?? ""),
-      type: String(item.type ?? "text"),
-      content: String(item.content ?? ""),
-      x: Number(item.x ?? 0),
-      y: Number(item.y ?? 0),
-      width: Number(item.width ?? 200),
-      height: Number(item.height ?? 40),
-      flags: {
-        isMoveable: true,
-        isEditable: true,
-        minQuantity: 0,
-        maxQuantity: 1,
-      },
-      styles: {},
-    }));
-  }
-
-  throw new Error("Invalid layout format.");
-}
-
-// -------------------------------
 // LOAD MULTI-PAGE DOCUMENT (v2) -> LoadedDocument
-// If file is v1/legacy, it wraps it into a single page.
 // -------------------------------
 export async function loadDocumentLayout(file: File): Promise<LoadedDocument> {
   const text = await file.text();
   const json = JSON.parse(text);
 
-  // v2 schema
-  if (json?.version === "2.0.0" && Array.isArray(json.pages)) {
-    const pageOrder: string[] = [];
-    const pageNamesById: Record<string, string> = {};
-    const pagesById: Record<string, CanvasItem[]> = {};
-
-    for (const p of json.pages) {
-      const pageId = String(p.id ?? "");
-      if (!pageId) continue;
-
-      pageOrder.push(pageId);
-      pageNamesById[pageId] = String(p.name ?? "Page");
-
-      const comps = Array.isArray(p.components) ? p.components : [];
-      pagesById[pageId] = comps.map((c: any) => ({
-        id: String(c.id ?? ""),
-        type: String(c.type ?? "text"),
-        content: String(c.content ?? c.type ?? ""),
-        x: Number(c.position?.x ?? 0),
-        y: Number(c.position?.y ?? 0),
-        width: Number(c.size?.width ?? 200),
-        height: Number(c.size?.height ?? 40),
-        flags: {
-          isMoveable: Boolean(c.flags?.isMoveable ?? true),
-          isEditable: Boolean(c.flags?.isEditable ?? true),
-          minQuantity: Number(c.flags?.minQuantity ?? 0),
-          maxQuantity: Number(c.flags?.maxQuantity ?? 1),
-        },
-        styles: c.styles ?? {},
-      }));
-    }
-
-    // Ensure at least one page
-    if (pageOrder.length === 0) {
-      const fallbackId = "page-1";
-      pageOrder.push(fallbackId);
-      pageNamesById[fallbackId] = "Page 1";
-      pagesById[fallbackId] = [];
-    }
-
-    return { pageOrder, pageNamesById, pagesById };
+  if (json?.version !== "2.0.0" || !Array.isArray(json.pages)) {
+    throw new Error("Invalid layout format. Expected v2 document schema.");
   }
 
-  // v1 / legacy schemas -> wrap into a single page
-  const items = await loadLayout(file);
+  const pageOrder: string[] = [];
+  const pageNamesById: Record<string, string> = {};
+  const pagesById: Record<string, CanvasItem[]> = {};
+
+  for (const page of json.pages as unknown[]) {
+    const p = toRecord(page);
+    const pageId = String(p.id ?? "");
+    if (!pageId) continue;
+
+    pageOrder.push(pageId);
+    pageNamesById[pageId] = String(p.name ?? "Page");
+
+    const components = Array.isArray(p.components) ? p.components : [];
+    pagesById[pageId] = components.map(toCanvasItem);
+  }
+
+  if (pageOrder.length === 0) {
+    const fallbackId = "page-1";
+    pageOrder.push(fallbackId);
+    pageNamesById[fallbackId] = "Page 1";
+    pagesById[fallbackId] = [];
+  }
+
   return {
-    pageOrder: ["page-1"],
-    pageNamesById: { "page-1": "Page 1" },
-    pagesById: { "page-1": items },
+    pageOrder,
+    pageNamesById,
+    pagesById,
   };
 }
