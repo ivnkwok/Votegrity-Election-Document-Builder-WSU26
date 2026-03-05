@@ -7,9 +7,8 @@ interface PropertiesPanelProps {
 }
 
 export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
-  if (!item) return null;
-
   const fileInputRef = useRef<HTMLInputElement>(null);
+  if (!item) return null;
 
   const isMoveable = item.flags?.isMoveable !== false;
   const isText = item.type === "text";

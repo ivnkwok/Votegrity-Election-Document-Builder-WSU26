@@ -2,11 +2,7 @@ import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import {
     Item,
-    ItemActions,
     ItemContent,
-    ItemDescription,
-    ItemMedia,
-    ItemTitle,
   } from "@/components/ui/item"
 
 // Define the shape of our custom data
