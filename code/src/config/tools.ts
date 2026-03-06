@@ -68,4 +68,12 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     defaultHeight: 90,
     flags: { isMoveable: true, isEditable: true, minQuantity: 1, maxQuantity: 1 },
   },
+  {
+    id: "question-answer",
+    label:"Q&A",
+    type: "box",
+    defaultWidth: 200,
+    defaultHeight: 60,
+    flags: { isMoveable: true, isEditable: true, minQuantity: 1, maxQuantity: 1},
+  },
 ];
