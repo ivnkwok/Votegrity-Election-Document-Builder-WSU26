@@ -13,6 +13,7 @@ export function SidebarTools({ tools }: SidebarToolsProps) {
           key={tool.id}
           id={tool.id}
           toolText={tool.label}
+          isMovable={tool.flags.isMovable}
         />
       ))}
     </div>
