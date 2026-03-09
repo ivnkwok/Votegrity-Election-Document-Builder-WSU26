@@ -1,47 +1,43 @@
-export function parseElectionData(rawData: any[]) {
-  if (!Array.isArray(rawData) || rawData.length === 0) {
-    throw new Error("Invalid election data format");
-  }
+// parseElection.ts
 
-  return rawData.map((election) => {
-    const {
-      id,
-      question,
-      short_name,
-      choice_type,
-      result_type,
-      tally_type,
-      min,
-      max,
-      open,
-      answers = [],
-      answer_urls = [],
-      answer_urls_checked = [],
-    } = election;
+// Raw question type (matches the structure of your JSON)
+export interface RawQuestion {
+  id: number;
+  question: string;
+  answers: string[];
+  // You can add extra fields if needed
+}
 
-    // Merge candidate-level attributes
-    const candidates = answers.map((name: string, index: number) => ({
-      index,
-      name,
-      pdfUrl: answer_urls[index] || null,
-      pdfUrlChecked: Boolean(answer_urls_checked[index]),
-      isWriteIn: name === "Write-in",
-    }));
+// Question dictionary type with properties
+export interface QuestionProperties {
+  text: string;
+  max?: number;
+  min?: number;
+  open?: boolean;
+  // Add other properties here if needed
+}
 
-    return {
-      // Election-level attributes
-      id,
-      question,
-      shortName: short_name,
-      choiceType: choice_type,
-      resultType: result_type,
-      tallyType: tally_type,
-      minSelections: min,
-      maxSelections: max,
-      isOpen: open,
+// Function to parse election data
+export function parseElection(data: RawQuestion[]) {
+  // Questions dictionary: key = question id, value = properties object
+  const questions: Record<number, QuestionProperties> = {};
 
-      // Candidate-level array
-      candidates,
+  // Answers dictionary: key = question id, value = array of strings
+  const answers: Record<number, string[]> = {};
+
+  // Parse each raw question
+  data.forEach((q) => {
+    // Store question with properties
+    questions[q.id] = {
+      text: q.question,
+      max: 9,      // example property
+      min: 0,      // example property
+      open: true,  // example property
     };
+
+    // Store answers, replace Write-in with 10 spaces
+    answers[q.id] = q.answers.map((a) => (a === "Write-in" ? "          " : a));
   });
+
+  return { questions, answers };
 }
