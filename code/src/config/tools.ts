@@ -10,7 +10,7 @@ export interface ToolDefinition {
   defaultWidth: number;
   defaultHeight: number;
   flags: {
-    isMoveable: boolean;
+    isMovable: boolean;
     isEditable: boolean;
     minQuantity: number;
     maxQuantity: number;
@@ -27,7 +27,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     defaultContent: "Candidate Name",
     defaultWidth: 250,
     defaultHeight: 40,
-    flags: { isMoveable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 },
+    flags: { isMovable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 },
     styles: { fontSize: 20, fontWeight: 600 },
   },
   {
@@ -37,7 +37,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     defaultContent: "Lorem ipsum candidate bio here...",
     defaultWidth: 350,
     defaultHeight: 120,
-    flags: { isMoveable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 },
+    flags: { isMovable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 },
     styles: { fontSize: 14, lineHeight: "1.4" },
   },
   {
@@ -47,7 +47,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     defaultContent: "1234 Main St\nCity, State ZIP",
     defaultWidth: 200,
     defaultHeight: 60,
-    flags: { isMoveable: true, isEditable: true, minQuantity: 0, maxQuantity: 1 },
+    flags: { isMovable: true, isEditable: true, minQuantity: 0, maxQuantity: 1 },
     styles: { fontSize: 14 },
   },
   {
@@ -57,7 +57,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     imageSrc: "/votegrity-logo.png",
     defaultWidth: 160,
     defaultHeight: 90,
-    flags: { isMoveable: true, isEditable: false, minQuantity: 1, maxQuantity: 1 },
+    flags: { isMovable: true, isEditable: false, minQuantity: 1, maxQuantity: 1 },
   },
   {
     id: "upload-test",
@@ -66,6 +66,14 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     imageSrc: "",
     defaultWidth: 160,
     defaultHeight: 90,
-    flags: { isMoveable: true, isEditable: true, minQuantity: 1, maxQuantity: 1 },
+    flags: { isMovable: true, isEditable: true, minQuantity: 1, maxQuantity: 1 },
+  },
+  {
+    id: "question-answer",
+    label:"Q&A",
+    type: "box",
+    defaultWidth: 200,
+    defaultHeight: 60,
+    flags: { isMovable: true, isEditable: true, minQuantity: 1, maxQuantity: 1},
   },
 ];

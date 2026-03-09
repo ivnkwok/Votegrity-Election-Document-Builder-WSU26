@@ -47,7 +47,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
 
         {/* Content */}
         <div>
-          <strong className="block mb-1">Content:</strong>
+          <strong className="block mb-1 text-wrap">Content:</strong>
           {item.id.includes("upload-test") ? (
             <div className="space-y-2">
               <input
@@ -73,7 +73,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
               )}
             </div>
           ) : (
-            <span className="text-gray-600">{item.content || "No content"}</span>
+            <span className="text-gray-600 break-all">{item.content || "No content"}</span>
           )}
         </div>
         {/* TEXT STYLING */}

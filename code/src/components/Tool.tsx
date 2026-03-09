@@ -15,15 +15,17 @@ export interface ToolData {
 interface DraggableToolProps {
   id: string;
   toolText: string;
+  isMovable: boolean;
 }
 
-export function DraggableTool({ id, toolText }: DraggableToolProps) {
+export function DraggableTool({ id, toolText, isMovable }: DraggableToolProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id,
     data: {
       text: toolText,
       type: 'tool',
     } as ToolData,
+    disabled: isMovable,
   });
 
   // Apply a transform style if the item is being dragged
