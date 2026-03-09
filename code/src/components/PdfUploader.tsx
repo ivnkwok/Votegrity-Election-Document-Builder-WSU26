@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import type * as PdfJsLib from "pdfjs-dist";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import pdfWorker from "../lib/pdf.worker.mjs?url";
+import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
 import { Upload, FileText, Loader2 } from "lucide-react";
 
@@ -25,7 +26,7 @@ export function PdfUploader({ onPdfPagesExtracted }: PdfUploaderProps) {
   const [pageCount, setPageCount] = useState<number>(0);
   const [workerReady, setWorkerReady] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const pdfjsLibRef = useRef<any>(null);
+  const pdfjsLibRef = useRef<typeof PdfJsLib | null>(null);
 
   // Initialize PDF.js worker once on component mount
   useEffect(() => {
@@ -97,6 +98,7 @@ export function PdfUploader({ onPdfPagesExtracted }: PdfUploaderProps) {
 
         // Render page to canvas
         await page.render({
+          canvas,
           canvasContext: context,
           viewport: viewport,
         }).promise;

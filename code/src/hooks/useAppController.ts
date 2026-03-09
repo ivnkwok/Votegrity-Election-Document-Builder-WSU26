@@ -9,6 +9,48 @@ import { captureElementAsPngDataUrl, openPngPagesAsPdf } from "@/lib/utils";
 import { useKeyboardMovement } from "./useKeyboardMovement";
 import { useCanvasDnd } from "./useCanvasDnd";
 
+function getNextPageId(pageIds: string[]): string {
+  let maxIndex = 0;
+
+  for (const id of pageIds) {
+    const match = /^page-(\d+)$/.exec(id);
+    if (!match) continue;
+
+    const value = Number(match[1]);
+    if (!Number.isNaN(value)) {
+      maxIndex = Math.max(maxIndex, value);
+    }
+  }
+
+  let nextIndex = maxIndex + 1;
+  let candidate = `page-${nextIndex}`;
+  while (pageIds.includes(candidate)) {
+    nextIndex += 1;
+    candidate = `page-${nextIndex}`;
+  }
+
+  return candidate;
+}
+
+function createPdfPageItem(dataUrl: string, id: string): CanvasItem {
+  return {
+    id,
+    type: "image",
+    content: dataUrl,
+    x: 0,
+    y: 0,
+    width: 816,
+    height: 1056,
+    flags: {
+      isMoveable: false,
+      isEditable: false,
+      minQuantity: 1,
+      maxQuantity: 1,
+    },
+    styles: {},
+  };
+}
+
 export function useAppController() {
   // ----------------------------
   // State
@@ -49,9 +91,8 @@ export function useAppController() {
 
   /** Add a new blank page and switch to it. */
   const addPage = useCallback(() => {
-    const newIndex = pageOrder.length + 1;
-    const newId = `page-${newIndex}`;
-    const newName = `Page ${newIndex}`;
+    const newId = getNextPageId(pageOrder);
+    const newName = `Page ${newId.replace("page-", "")}`;
 
     // Save current page first
     setPagesById((prev) => ({ ...prev, [activePageId]: canvasItems, [newId]: [] }));
@@ -61,13 +102,12 @@ export function useAppController() {
     setSelectedId(null);
     setCanvasItems([]);
     setActivePageId(newId);
-  }, [activePageId, canvasItems, pageOrder.length]);
+  }, [activePageId, canvasItems, pageOrder]);
 
   /** Duplicate the current page (deep clone items) and switch to the duplicate. */
   const duplicatePage = useCallback(() => {
-    const newIndex = pageOrder.length + 1;
-    const newId = `page-${newIndex}`;
-    const newName = `Page ${newIndex}`;
+    const newId = getNextPageId(pageOrder);
+    const newName = `Page ${newId.replace("page-", "")}`;
 
     const sourceItems = canvasItems;
     const cloned = JSON.parse(JSON.stringify(sourceItems)) as CanvasItem[];
@@ -79,7 +119,7 @@ export function useAppController() {
     setSelectedId(null);
     setCanvasItems(cloned);
     setActivePageId(newId);
-  }, [activePageId, canvasItems, pageOrder.length]);
+  }, [activePageId, canvasItems, pageOrder]);
 
   /** Delete the current page (keeps at least one page). */
   const deletePage = useCallback(() => {
@@ -229,40 +269,27 @@ export function useAppController() {
     (images: { dataUrl: string; pageNumber: number }[]) => {
       if (images.length === 0) return;
 
-      // Save current page state first
-      setPagesById((prev) => ({ ...prev, [activePageId]: canvasItems }));
-
       const timestamp = Date.now();
       const newPageIds: string[] = [];
+      const importedPagesById: Record<string, CanvasItem[]> = {};
+      const importedPageNamesById: Record<string, string> = {};
 
-      // Create a new page for each PDF page
-      images.forEach((img, idx) => {
+      for (const [idx, img] of images.entries()) {
         const newPageId = `pdf-page-${timestamp}-${idx}`;
-        const newPageName = `PDF Page ${img.pageNumber}`;
+        const itemId = `pdf-img-${timestamp}-${idx}`;
 
-        // Create a single item that fills the entire canvas (8.5" x 11" = 816px x 1056px)
-        const item: CanvasItem = {
-          id: `pdf-img-${timestamp}-${idx}`,
-          type: "image",
-          content: img.dataUrl,
-          x: 0,
-          y: 0,
-          width: 816,   // Full canvas width (8.5 inches)
-          height: 1056, // Full canvas height (11 inches)
-          flags: {
-            isMoveable: false,  // Lock to page so it doesn't move
-            isEditable: false,
-            minQuantity: 1,
-            maxQuantity: 1,
-          },
-          styles: {},
-        };
-
-        // Add the new page to our state
-        setPagesById((prev) => ({ ...prev, [newPageId]: [item] }));
-        setPageNamesById((prev) => ({ ...prev, [newPageId]: newPageName }));
         newPageIds.push(newPageId);
-      });
+        importedPagesById[newPageId] = [createPdfPageItem(img.dataUrl, itemId)];
+        importedPageNamesById[newPageId] = `PDF Page ${img.pageNumber}`;
+      }
+
+      // Save current page state and append all imported pages in one update.
+      setPagesById((prev) => ({
+        ...prev,
+        [activePageId]: canvasItems,
+        ...importedPagesById,
+      }));
+      setPageNamesById((prev) => ({ ...prev, ...importedPageNamesById }));
 
       // Add all new pages to the page order
       setPageOrder((prev) => [...prev, ...newPageIds]);
@@ -271,26 +298,11 @@ export function useAppController() {
       if (newPageIds.length > 0) {
         const firstPageId = newPageIds[0];
         setActivePageId(firstPageId);
-        setCanvasItems(pagesById[firstPageId] ?? [{ 
-          id: `pdf-img-${timestamp}-0`,
-          type: "image",
-          content: images[0].dataUrl,
-          x: 0,
-          y: 0,
-          width: 816,
-          height: 1056,
-          flags: {
-            isMoveable: false,
-            isEditable: false,
-            minQuantity: 1,
-            maxQuantity: 1,
-          },
-          styles: {},
-        }]);
+        setCanvasItems(importedPagesById[firstPageId] ?? []);
         setSelectedId(null);
       }
     },
-    [activePageId, canvasItems, pagesById, setActivePageId, setCanvasItems, setPageNamesById, setPagesById, setPageOrder, setSelectedId]
+    [activePageId, canvasItems]
   );
 
   return {

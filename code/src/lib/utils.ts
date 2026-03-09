@@ -3,7 +3,6 @@ import { twMerge } from "tailwind-merge"
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 
-
 export interface CanvasItem {
   id: string;
   type: 'text' | 'box' | 'image';
@@ -21,7 +20,6 @@ export interface CanvasItem {
   styles?: React.CSSProperties;
 }
 
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -30,7 +28,7 @@ export async function previewElementAsPdf(elementId: string) {
   const node = document.getElementById(elementId);
   if (!node) throw new Error(`Could not find element with id="${elementId}"`);
 
-  // Force light scheme so dark-mode UI doesn't affect PDF rendering
+  // Force light scheme so dark-mode UI does not affect PDF rendering
   document.documentElement.style.colorScheme = "light";
 
   // Render DOM -> canvas
@@ -59,30 +57,9 @@ export async function previewElementAsPdf(elementId: string) {
     newTab.location.href = url;
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
   } else {
-    // Popup blocked — fallback to download
+    // Popup blocked; fallback to download
     pdf.save("preview.pdf");
   }
-}
-
-// Reads a JSON layout file and maps it to CanvasItem[]
-export async function loadLayoutFromFile(file: File): Promise<CanvasItem[]> {
-  const text = await file.text();
-  const json = JSON.parse(text);
-
-  if (!json || !Array.isArray(json.components)) {
-    throw new Error("Invalid layout file — missing components array.");
-  }
-
-  return json.components.map((c: any) => ({
-    id: c.id,
-    type: c.type,
-    content: c.content || "",
-    x: c.position?.x ?? 0,
-    y: c.position?.y ?? 0,
-    width: c.size?.width ?? 100,
-    height: c.size?.height ?? 50,
-    styles: c.styles || {},
-  }));
 }
 
 // -------------------------------
@@ -94,7 +71,7 @@ export async function captureElementAsPngDataUrl(elementId: string): Promise<str
   const node = document.getElementById(elementId);
   if (!node) throw new Error(`Could not find element with id="${elementId}"`);
 
-  // Force light scheme so dark-mode UI doesn't affect PDF rendering
+  // Force light scheme so dark-mode UI does not affect PDF rendering
   document.documentElement.style.colorScheme = "light";
 
   const canvas = await html2canvas(node, {

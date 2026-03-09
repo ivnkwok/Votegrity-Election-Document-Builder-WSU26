@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import type { DragEndEvent } from "@dnd-kit/core";
 import type { CanvasItem } from "@/lib/utils";
 import { TOOL_DEFINITIONS } from "@/config/tools";
 
@@ -15,12 +16,14 @@ export function useCanvasDnd({
 }: UseCanvasDndArgs) {
 
   const handleDragEnd = useCallback(
-    (event: any) => {
+    (event: DragEndEvent) => {
       const { active, over } = event;
 
-      const existingItem = canvasItems.find(i => i.id === active.id);
+      const activeId = String(active.id);
+      const existingItem = canvasItems.find(i => i.id === activeId);
       const canvasRect = document.getElementById("page")?.getBoundingClientRect();
       const translated = active.rect.current.translated;
+      if (!translated) return;
 
       // --- MOVE EXISTING ITEM ---
       const { delta } = event;
@@ -37,7 +40,7 @@ export function useCanvasDnd({
 
         setCanvasItems(prev =>
           prev.map(item => {
-            if (item.id !== active.id) return item;
+            if (item.id !== activeId) return item;
 
             const newX = item.x + delta.x;
             const newY = item.y + delta.y;
@@ -74,7 +77,7 @@ export function useCanvasDnd({
 
         // Only handle drops on the canvas area
         if (over && over.id === "canvas") {
-            const toolId = active.id;
+            const toolId = activeId;
             const toolDef = TOOL_DEFINITIONS.find(t => t.id === toolId);
             if (!toolDef) return;
 
