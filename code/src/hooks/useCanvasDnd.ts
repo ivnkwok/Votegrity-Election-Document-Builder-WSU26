@@ -2,17 +2,18 @@ import { useCallback } from "react";
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { CanvasItem } from "@/lib/utils";
 import { TOOL_DEFINITIONS } from "@/config/tools";
-import { parseElection } from "@/utils/parseElectionData";
-import data from "@/data/Election207.json";
+import { parseElection, type RawQuestion } from "@/utils/parseElectionData";
 
 interface UseCanvasDndArgs {
   canvasItems: CanvasItem[];
+  electionData: RawQuestion[];
   setCanvasItems: React.Dispatch<React.SetStateAction<CanvasItem[]>>;
   setSelectedId: (id: string | null) => void;
 }
 
 export function useCanvasDnd({
   canvasItems,
+  electionData,
   setCanvasItems,
   setSelectedId,
 }: UseCanvasDndArgs) {
@@ -84,7 +85,7 @@ export function useCanvasDnd({
             if (!toolDef) return;
 
             if (toolId === "question-answer") {
-              const { questions, answers } = parseElection(data);
+              const { questions, answers } = parseElection(electionData);
               const newItems: CanvasItem[] = [];
               let currentY = translated.top - canvasRect.top;
               const startX = translated.left - canvasRect.left;
@@ -159,7 +160,7 @@ export function useCanvasDnd({
         }
       }
     },
-    [canvasItems, setCanvasItems, setSelectedId]
+    [canvasItems, electionData, setCanvasItems, setSelectedId]
   );
 
   return handleDragEnd;

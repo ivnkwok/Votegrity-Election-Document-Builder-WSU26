@@ -14,7 +14,7 @@ describe("CanvasTextItem", () => {
       width: 200,
       height: 60,
       flags: {
-        isMoveable: true,
+        isMovable: true,
         isEditable: true,
         minQuantity: 0,
         maxQuantity: 1,

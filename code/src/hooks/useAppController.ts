@@ -8,6 +8,7 @@ import {
 import { captureElementAsPngDataUrl, openPngPagesAsPdf } from "@/lib/utils";
 import { useKeyboardMovement } from "./useKeyboardMovement";
 import { useCanvasDnd } from "./useCanvasDnd";
+import type { RawQuestion } from "@/utils/parseElectionData";
 
 function getNextPageId(pageIds: string[]): string {
   let maxIndex = 0;
@@ -51,7 +52,11 @@ function createPdfPageItem(dataUrl: string, id: string): CanvasItem {
   };
 }
 
-export function useAppController() {
+interface UseAppControllerArgs {
+  electionData: RawQuestion[];
+}
+
+export function useAppController({ electionData }: UseAppControllerArgs) {
   // ----------------------------
   // State
   // ----------------------------
@@ -245,6 +250,7 @@ export function useAppController() {
   // Drag and drop handler
   const handleDragEnd = useCanvasDnd({
     canvasItems,
+    electionData,
     setCanvasItems,
     setSelectedId,
   });

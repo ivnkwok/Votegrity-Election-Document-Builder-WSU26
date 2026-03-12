@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TOOL_DEFINITIONS } from './config/tools';
-import { parseElection } from "./utils/parseElectionData";
 import { useState } from "react";
 import election1 from "./data/Election207.json";
 import election2 from "./data/election365.json";
@@ -28,15 +27,16 @@ const electionDataSets = {
   election2,
   election3,
   election4,
-};
+} as const;
 
 export default function App() {
   const tools = TOOL_DEFINITIONS; // Load tool definitions
   type ElectionKey = keyof typeof electionDataSets;
   const [selectedElection, setSelectedElection] = useState<ElectionKey>("election1");
-  const parsedElection = useMemo(() => {
-    return parseElection(electionDataSets[selectedElection]);
-  }, [selectedElection]);
+  const selectedElectionData = useMemo(
+    () => electionDataSets[selectedElection],
+    [selectedElection]
+  );
   // Use the app controller hook to manage state and handlers
   const {
     canvasItems,
@@ -57,7 +57,7 @@ export default function App() {
     deletePage,
     renamePage,
     movePage,
-  } = useAppController();
+  } = useAppController({ electionData: selectedElectionData });
 
   const activePageIndex = useMemo(
     () => pageOrder.indexOf(activePageId),
