@@ -10,7 +10,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   if (!item) return null;
 
-  const isMoveable = item.flags?.isMoveable !== false;
+  const isMoveable = item.flags?.isMovable !== false;
   const isText = item.type === "text";
   const styles = item.styles || {};
 

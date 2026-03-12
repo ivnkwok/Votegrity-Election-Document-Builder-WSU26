@@ -42,7 +42,7 @@ function createPdfPageItem(dataUrl: string, id: string): CanvasItem {
     width: 816,
     height: 1056,
     flags: {
-      isMoveable: false,
+      isMovable: false,
       isEditable: false,
       minQuantity: 1,
       maxQuantity: 1,
