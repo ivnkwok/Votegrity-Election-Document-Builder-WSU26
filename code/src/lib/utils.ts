@@ -12,7 +12,7 @@ export interface CanvasItem {
   width?: number;
   height?: number;
   flags?: {
-    isMoveable: boolean;
+    isMovable: boolean;
     isEditable: boolean;
     minQuantity: number;
     maxQuantity: number;
