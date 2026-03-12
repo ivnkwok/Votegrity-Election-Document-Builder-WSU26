@@ -18,7 +18,7 @@ import {
 import { TOOL_DEFINITIONS } from './config/tools';
 import { parseElection } from "./utils/parseElectionData";
 import { useState } from "react";
-import election1 from "./data/election207.json";
+import election1 from "./data/Election207.json";
 import election2 from "./data/election365.json";
 import election3 from "./data/election458.json";
 import election4 from "./data/election488.json";
