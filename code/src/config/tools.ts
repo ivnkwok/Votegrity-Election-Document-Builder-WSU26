@@ -68,4 +68,12 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     defaultHeight: 90,
     flags: { isMoveable: true, isEditable: true, minQuantity: 1, maxQuantity: 1 },
   },
+  {
+    id: "election-data-importer",
+    label: "Import Election Data",
+    type: "text",
+    defaultWidth: 250,
+    defaultHeight: 40,
+    flags: { isMoveable: true, isEditable: false, minQuantity: 0, maxQuantity: 1 },
+  },
 ];
