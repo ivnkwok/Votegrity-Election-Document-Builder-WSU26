@@ -18,6 +18,8 @@ export interface ToolDefinition {
   styles?: React.CSSProperties;
 }
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 // List of tool definitions (can be expanded as neeeded, read /config/TOOL_DEFINITIONS_README.md for details)
 export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
@@ -54,7 +56,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     id: "votegrity-logo",
     label: "Votegrity Logo",
     type: "image",
-    imageSrc: "/votegrity-logo.png",
+    imageSrc: `${BASE_URL}votegrity-logo.png`,
     defaultWidth: 160,
     defaultHeight: 90,
     flags: { isMovable: true, isEditable: false, minQuantity: 1, maxQuantity: 1 },

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:docscreator": "tsc -b && vite build --base=/docscreator/",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint .",
