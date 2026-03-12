@@ -2,6 +2,8 @@ import { useCallback } from "react";
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { CanvasItem } from "@/lib/utils";
 import { TOOL_DEFINITIONS } from "@/config/tools";
+import { parseElection } from "@/utils/parseElectionData";
+import data from "@/data/Election207.json";
 
 interface UseCanvasDndArgs {
   canvasItems: CanvasItem[];
@@ -80,6 +82,57 @@ export function useCanvasDnd({
             const toolId = activeId;
             const toolDef = TOOL_DEFINITIONS.find(t => t.id === toolId);
             if (!toolDef) return;
+
+            if (toolId === "question-answer") {
+              const { questions, answers } = parseElection(data);
+              const newItems: CanvasItem[] = [];
+              let currentY = translated.top - canvasRect.top;
+              const startX = translated.left - canvasRect.left;
+
+              // Iterate through questions
+              Object.keys(questions).forEach((qId) => {
+                  const idNum = Number(qId);
+                  const questionData = questions[idNum];
+                  
+                  // 1. Create Question Item
+                  const qItem: CanvasItem = {
+                      id: `question-${idNum}-${Date.now()}`,
+                      type: "text",
+                      content: questionData.text,
+                      x: startX,
+                      y: currentY,
+                      width: 400,
+                      height: 30,
+                      styles: { fontWeight: "bold", fontSize: "16px" },
+                      flags: { isMovable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 }
+                  };
+                  newItems.push(qItem);
+                  currentY += 35; // Offset for the next line
+
+                  // 2. Create Answer Items for this question
+                  const questionAnswers = answers[idNum] || [];
+                  questionAnswers.forEach((ansText, index) => {
+                      const aItem: CanvasItem = {
+                          id: `answer-${idNum}-${index}-${Date.now()}`,
+                          type: "text",
+                          content: `[ ] ${ansText}`, // Adding a simple checkbox visual
+                          x: startX + 20, // Indent answers
+                          y: currentY,
+                          width: 300,
+                          height: 25,
+                          styles: { fontSize: "14px" },
+                          flags: { isMovable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 }
+                      };
+                      newItems.push(aItem);
+                      currentY += 28; // Stack answers vertically
+                  });
+                  
+                  currentY += 20; // Extra spacing between different questions
+              });
+
+              setCanvasItems(items => [...items, ...newItems]);
+              return; // Exit early since we handled the burst logic
+            }
 
             const newId = `${toolDef.id}-${Date.now()}`;
 

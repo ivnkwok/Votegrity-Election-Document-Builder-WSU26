@@ -16,10 +16,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TOOL_DEFINITIONS } from './config/tools';
+import { parseElection } from "./utils/parseElectionData";
+import { useState } from "react";
+import election1 from "./data/Election207.json";
+import election2 from "./data/election365.json";
+import election3 from "./data/election458.json";
+import election4 from "./data/election488.json";
+
+const electionDataSets = {
+  election1,
+  election2,
+  election3,
+  election4,
+};
 
 export default function App() {
   const tools = TOOL_DEFINITIONS; // Load tool definitions
-
+  type ElectionKey = keyof typeof electionDataSets;
+  const [selectedElection, setSelectedElection] = useState<ElectionKey>("election1");
+  const parsedElection = useMemo(() => {
+    return parseElection(electionDataSets[selectedElection]);
+  }, [selectedElection]);
   // Use the app controller hook to manage state and handlers
   const {
     canvasItems,
@@ -65,7 +82,24 @@ export default function App() {
         <div className="w-[380px] h-screen bg-white border-r border-gray-300 flex flex-col">
 
           <div className="flex-1 space-y-6 p-4">
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-gray-700">Election Data</div>
+              <Select
+                value={selectedElection}
+                onValueChange={(value) => setSelectedElection(value as ElectionKey)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Election" />
+                </SelectTrigger>
 
+                <SelectContent>
+                  <SelectItem value="election1">Election 1</SelectItem>
+                  <SelectItem value="election2">Election 2</SelectItem>
+                  <SelectItem value="election3">Election 3</SelectItem>
+                  <SelectItem value="election4">Election 4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Select>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Templates" />
