@@ -15,15 +15,15 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
   const styles = item.styles || {};
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        onChange(item.id, {content: reader.result as string})
-      }
-      reader.readAsDataURL(file)
+        onChange(item.id, { content: reader.result as string });
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   return (
     <div className="mt-4 p-4 border rounded-md bg-white shadow">
@@ -37,7 +37,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
           <input
             className="w-full border rounded px-2 py-1 mt-1"
             value={item.id}
-            onChange={e =>
+            onChange={(e) =>
               onChange(item.id, { id: e.target.value })
             }
           />
@@ -45,37 +45,48 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
 
         <div><strong>Type:</strong> {item.type}</div>
 
-        {/* Content */}
-        <div>
-          <strong className="block mb-1 text-wrap">Content:</strong>
-          {item.id.includes("upload-test") ? (
-            <div className="space-y-2">
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
+          {/* Content */}
+          <div>
+            <strong className="block mb-1 text-wrap">Content:</strong>
+
+            {item.type === "image" ? (
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full hover:bg-gray-200 text-black font-medium py-2 px-4 rounded border border-gray-300"
+                >
+                  Upload Image
+                </button>
+
+                {item.content && (
+                  <div className="mt-2">
+                    <p className="text-[10px] text-gray-500 mb-1">Preview:</p>
+                    <img
+                      src={item.content}
+                      alt="Preview"
+                      className="max-h-20 rounded border"
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <textarea
+                className="w-full border rounded px-2 py-1 mt-1"
+                value={item.content || ""}
+                onChange={(e) =>
+                  onChange(item.id, { content: e.target.value })
+                }
               />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full hover:bg-gray-200 text-black font-medium py-2 px-4 rounded border border-gray-300"
-              >Upload Image</button>
-              {item.content && (
-                <div className="mt-2">
-                  <p className="text-[10px] text-gray-500 mb-1">Preview:</p>
-                  <img 
-                    src={item.content} 
-                    alt="Preview" 
-                    className="max-h-20 rounded border" 
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <span className="text-gray-600 break-all">{item.content || "No content"}</span>
-          )}
-        </div>
+            )}
+          </div>
         {/* TEXT STYLING */}
         {isText && (
           <div className="pt-2 border-t space-y-3">
@@ -88,7 +99,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
                 type="number"
                 className="w-full border rounded px-2 py-1 mt-1"
                 value={parseInt(styles.fontSize as string) || 16}
-                onChange={e =>
+                onChange={(e) =>
                   onChange(item.id, {
                     styles: { ...styles, fontSize: `${e.target.value}px` },
                   })
@@ -103,7 +114,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
                 type="color"
                 className="w-full h-8 mt-1"
                 value={(styles.color as string) || "#000000"}
-                onChange={e =>
+                onChange={(e) =>
                   onChange(item.id, {
                     styles: { ...styles, color: e.target.value },
                   })
@@ -117,7 +128,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
               <select
                 className="w-full border rounded px-2 py-1 mt-1"
                 value={(styles.fontFamily as string) || "Arial"}
-                onChange={e =>
+                onChange={(e) =>
                   onChange(item.id, {
                     styles: { ...styles, fontFamily: e.target.value },
                   })
@@ -144,7 +155,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
                 className="w-20 border rounded px-1 py-0.5"
                 value={item.x}
                 disabled={!isMoveable}
-                onChange={e =>
+                onChange={(e) =>
                   onChange(item.id, { x: Number(e.target.value) })
                 }
               />
@@ -157,7 +168,7 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
                 className="w-20 border rounded px-1 py-0.5"
                 value={item.y}
                 disabled={!isMoveable}
-                onChange={e =>
+                onChange={(e) =>
                   onChange(item.id, { y: Number(e.target.value) })
                 }
               />
@@ -166,34 +177,35 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
         </div>
 
         {/* Size */}
-          <div>
-            <strong>Size</strong>
-            <div className="flex gap-2 mt-1">
-              <label className="flex items-center gap-1">
-                W
-                <input
-                  type="number"
-                  className="w-20 border rounded px-1 py-0.5"
-                  value={item.width ?? 200}
-                  onChange={e =>
-                    onChange(item.id, { width: Number(e.target.value) })
-                  }
-                />
-              </label>
+        <div>
+          <strong>Size</strong>
+          <div className="flex gap-2 mt-1">
+            <label className="flex items-center gap-1">
+              W
+              <input
+                type="number"
+                className="w-20 border rounded px-1 py-0.5"
+                value={item.width ?? 200}
+                onChange={(e) =>
+                  onChange(item.id, { width: Number(e.target.value) })
+                }
+              />
+            </label>
 
-              <label className="flex items-center gap-1">
-                H
-                <input
-                  type="number"
-                  className="w-20 border rounded px-1 py-0.5"
-                  value={item.height ?? 40}
-                  onChange={e =>
-                    onChange(item.id, { height: Number(e.target.value) })
-                  }
-                />
-              </label>
-            </div>
+            <label className="flex items-center gap-1">
+              H
+              <input
+                type="number"
+                className="w-20 border rounded px-1 py-0.5"
+                value={item.height ?? 40}
+                onChange={(e) =>
+                  onChange(item.id, { height: Number(e.target.value) })
+                }
+              />
+            </label>
           </div>
+        </div>
+
         {/* Flags */}
         <div><strong>Moveable:</strong> {isMoveable ? "Yes" : "No"}</div>
         <div><strong>Editable:</strong> {item.flags?.isEditable ? "Yes" : "No"}</div>
@@ -202,6 +214,5 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
 
       </div>
     </div>
-    
   );
 }
