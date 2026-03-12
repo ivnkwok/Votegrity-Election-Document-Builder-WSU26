@@ -45,7 +45,7 @@ function toDocumentComponent(item: CanvasItem) {
     size: { width: item.width ?? 200, height: item.height ?? 40 },
     content: item.content,
     flags: {
-      isMoveable: item.flags?.isMoveable ?? true,
+      isMovable: item.flags?.isMovable ?? true,
       isEditable: item.flags?.isEditable ?? true,
       minQuantity: item.flags?.minQuantity ?? 0,
       maxQuantity: item.flags?.maxQuantity ?? 1,
@@ -76,7 +76,8 @@ function toCanvasItem(component: unknown): CanvasItem {
     width: toNumber(size.width, 200),
     height: toNumber(size.height, 40),
     flags: {
-      isMoveable: Boolean(flags.isMoveable ?? true),
+      // Accept legacy `isMoveable` and normalize to canonical `isMovable`.
+      isMovable: Boolean(flags.isMovable ?? flags.isMoveable ?? true),
       isEditable: Boolean(flags.isEditable ?? true),
       minQuantity: toNumber(flags.minQuantity, 0),
       maxQuantity: toNumber(flags.maxQuantity, 1),

@@ -24,7 +24,7 @@ describe("layoutService.loadDocumentLayout", () => {
               position: { x: 10, y: 20 },
               size: { width: 200, height: 40 },
               flags: {
-                isMoveable: false,
+                isMovable: false,
                 isEditable: true,
                 minQuantity: 1,
                 maxQuantity: 3,
@@ -54,7 +54,7 @@ describe("layoutService.loadDocumentLayout", () => {
     expect(item.width).toBe(200);
     expect(item.height).toBe(40);
     expect(item.flags).toMatchObject({
-      isMoveable: false,
+      isMovable: false,
       isEditable: true,
       minQuantity: 1,
       maxQuantity: 3,
