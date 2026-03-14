@@ -1,26 +1,19 @@
 
-Page
-1
-of 2
-# Sprint x Report (Dates from Sprint * to Sprint *)
+# Sprint x Report (2/15/26 - 3/15/26)
 ## YouTube link of Sprint * Video (Make this video unlisted)
 ## What's New (User Facing)
-* Feature 1 or Bug Fix 1
-* Feature 2 or Bug Fix 2
-* Feature n or Bug Fix n
+* Deployment of our application on an online platform
+* Load and produce election question data
+* Fixed some previous bugs during merging of code
 ## Work Summary (Developer Facing)
-Provide a one paragraph synposis of what your team accomplished this sprint. Don't
-repeat the "What's New" list of features. Instead, help the instructor understand
-how you went about the work described there, any barriers you overcame, and any
-significant learnings for your team.
+The main focus of this sprint was proper deployment of our application allowing for anyone with the correct link can access and use our service.
+Another key feature was preparing our documment editor to have the ability to load election data and produce formatted questions and answers
+to easily allow users to drag and drop as a new Q&A componnent. After having our features merged we noticed some issues regarding previous
+code which in turn had us refactor some portions to mantain fuctionality and prevent future issues.
 ## Unfinished Work
-If applicable, explain the work you did not finish in this sprint. For issues/user
-stories in the current sprint that have not been closed, (a) any progress toward
-completion of the issues has been clearly tracked (by checking the checkboxes of
-acceptance criteria), (b) a comment has been added to the issue to explain why the
-issue could not be completed (e.g., "we ran out of time" or "we did not anticipate
-it would be so much work"), and (c) the issue is added to a subsequent sprint, so
-that it can be addressed later.
+We have begun preperation for database implementation as we are attempting to link our application to a database on a seperate server.
+Other features we are currently looking to implement includes other commponents as we learn furher from our client on how our applicaiton
+should function.
 ## Completed Issues/User Stories
 Here are links to the issues that we completed in this sprint:
 * URL of issue 1
