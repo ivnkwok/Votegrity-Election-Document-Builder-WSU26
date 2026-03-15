@@ -7,9 +7,9 @@
 * Fixed some previous bugs during merging of code
 
 ## Work Summary (Developer Facing)
-The main focus of this sprint was proper deployment of our application allowing for anyone with the correct link can access and use our service.
-Another key feature was preparing our documment editor to have the ability to load election data and produce formatted questions and answers to easily allow users to drag and drop as a new Q&A componnent.
-After having our features merged, we noticed some issues regarding previous code which in turn had us refactor some portions to mantain fuctionality and prevent future issues.
+The main focus of this sprint was proper deployment of our application allowing for anyone with the correct link to access and use our service.
+Another key feature was the ability to allow users to drag and drop imported election data as a new Q&A component.
+After having our features merged, we noticed some issues regarding previous code which in turn had us refactor some portions to maintain functionality and prevent future issues.
 
 ## Unfinished Work
 We have begun preperation for database implementation as we are attempting to link our application to a database on a seperate server.
