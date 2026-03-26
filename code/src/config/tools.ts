@@ -20,23 +20,23 @@ export interface ToolDefinition {
 
 const BASE_URL = import.meta.env.BASE_URL;
 
-// List of tool definitions (can be expanded as neeeded, read /config/TOOL_DEFINITIONS_README.md for details)
+// List of tool definitions (can be expanded as needed, read /config/TOOL_DEFINITIONS_README.md for details)
 export const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
-    id: "candidate-name",
-    label: "Candidate Name",
+    id: "text-body",
+    label: "Text Body",
     type: "text",
-    defaultContent: "Candidate Name",
+    defaultContent: "Text Body",
     defaultWidth: 250,
     defaultHeight: 40,
     flags: { isMovable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 },
     styles: { fontSize: 20, fontWeight: 600 },
   },
   {
-    id: "candidate-body",
-    label: "Candidate Body",
+    id: "text-area",
+    label: "Text Area",
     type: "text",
-    defaultContent: "Lorem ipsum candidate bio here...",
+    defaultContent: "Lorem ipsum text here...",
     defaultWidth: 350,
     defaultHeight: 120,
     flags: { isMovable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 },
