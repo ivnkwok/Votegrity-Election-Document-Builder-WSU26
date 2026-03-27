@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { CanvasItem } from "@/lib/utils";
 import {
   saveDocumentLayout,
@@ -37,6 +37,7 @@ function createPdfPageItem(dataUrl: string, id: string): CanvasItem {
   return {
     id,
     type: "image",
+    sourceToolId: "pdf-import",
     content: dataUrl,
     x: 0,
     y: 0,
@@ -62,6 +63,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
   // ----------------------------
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   // --- Multi-page state (simple save/load swap) ---
   const [pageOrder, setPageOrder] = useState<string[]>(["page-1"]);
@@ -73,8 +75,14 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     "page-1": [],
   });
 
+  useEffect(() => {
+    if (!editingItemId) return;
+    if (selectedId === editingItemId) return;
+    setEditingItemId(null);
+  }, [editingItemId, selectedId]);
+
   // Enable keyboard nudging for the selected item
-  useKeyboardMovement(selectedId, setCanvasItems);
+  useKeyboardMovement(selectedId, editingItemId, setCanvasItems);
 
   const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
 
@@ -88,6 +96,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
       // Save current page, then load target
       setPagesById((prev) => ({ ...prev, [activePageId]: canvasItems }));
       setSelectedId(null);
+      setEditingItemId(null);
       setCanvasItems(nextItems);
       setActivePageId(nextPageId);
     },
@@ -105,6 +114,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     setPageOrder((prev) => [...prev, newId]);
 
     setSelectedId(null);
+    setEditingItemId(null);
     setCanvasItems([]);
     setActivePageId(newId);
   }, [activePageId, canvasItems, pageOrder]);
@@ -122,6 +132,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     setPageOrder((prev) => [...prev, newId]);
 
     setSelectedId(null);
+    setEditingItemId(null);
     setCanvasItems(cloned);
     setActivePageId(newId);
   }, [activePageId, canvasItems, pageOrder]);
@@ -152,6 +163,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     setPageOrder((prev) => prev.filter((id) => id !== activePageId));
 
     setSelectedId(null);
+    setEditingItemId(null);
     setCanvasItems(pagesById[nextId] ?? []);
     setActivePageId(nextId);
   }, [activePageId, canvasItems, pageOrder, pagesById]);
@@ -202,10 +214,12 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
       const firstPageId = doc.pageOrder[0] ?? "page-1";
       setActivePageId(firstPageId);
       setSelectedId(null);
+      setEditingItemId(null);
       setCanvasItems(doc.pagesById[firstPageId] ?? []);
     } catch (err) {
       console.error(err);
-      alert("Error loading layout.");
+      const message = err instanceof Error ? err.message : "Error loading layout.";
+      alert(message);
     }
   }, []);
 
@@ -228,6 +242,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
 
       // Load page into the visible canvas
       setSelectedId(null);
+      setEditingItemId(null);
       setActivePageId(pageId);
       setCanvasItems(items);
 
@@ -243,6 +258,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
 
     // Restore original page
     setSelectedId(null);
+    setEditingItemId(null);
     setActivePageId(originalPageId);
     setCanvasItems(originalItems);
   }, [activePageId, canvasItems, pageOrder, pagesById]);
@@ -267,6 +283,9 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     // If the ID changed, update selection too
     if (updates.id) {
       setSelectedId(updates.id);
+      if (editingItemId === id) {
+        setEditingItemId(updates.id);
+      }
     }
   };
 
@@ -306,6 +325,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
         setActivePageId(firstPageId);
         setCanvasItems(importedPagesById[firstPageId] ?? []);
         setSelectedId(null);
+        setEditingItemId(null);
       }
     },
     [activePageId, canvasItems]
@@ -315,6 +335,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     // state
     canvasItems,
     selectedId,
+    editingItemId,
     pageOrder,
     activePageId,
     pageNamesById,
@@ -322,6 +343,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     // setters
     setCanvasItems,
     setSelectedId,
+    setEditingItemId,
 
     // handlers
     handleLoadFile,

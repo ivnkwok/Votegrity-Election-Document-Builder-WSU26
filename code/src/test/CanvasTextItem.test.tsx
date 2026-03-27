@@ -8,6 +8,7 @@ describe("CanvasTextItem", () => {
     const item: CanvasItem = {
       id: "return-address-1",
       type: "text",
+      sourceToolId: "return-address",
       content: "1234 Main St\nCity, State ZIP",
       x: 0,
       y: 0,
@@ -22,7 +23,14 @@ describe("CanvasTextItem", () => {
       styles: { fontSize: 14 },
     };
 
-    render(<CanvasTextItem item={item} />);
+    render(
+      <CanvasTextItem
+        item={item}
+        isEditing={false}
+        onChangeItem={() => undefined}
+        onExitEditMode={() => undefined}
+      />
+    );
 
     const node = screen.getByText(/1234 main st/i);
     expect(node).toBeInTheDocument();

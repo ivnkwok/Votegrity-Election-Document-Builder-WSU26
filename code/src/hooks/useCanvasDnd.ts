@@ -99,6 +99,7 @@ export function useCanvasDnd({
                   const qItem: CanvasItem = {
                       id: `question-${idNum}-${Date.now()}`,
                       type: "text",
+                      sourceToolId: "question-answer",
                       content: questionData.text,
                       x: startX,
                       y: currentY,
@@ -116,6 +117,7 @@ export function useCanvasDnd({
                       const aItem: CanvasItem = {
                           id: `answer-${idNum}-${index}-${Date.now()}`,
                           type: "text",
+                          sourceToolId: "question-answer",
                           content: `[ ] ${ansText}`, // Adding a simple checkbox visual
                           x: startX + 20, // Indent answers
                           y: currentY,
@@ -146,6 +148,7 @@ export function useCanvasDnd({
             const newItem: CanvasItem = {
             id: newId,
             type: toolDef.type,
+            sourceToolId: toolDef.id,
             content: toolDef.type === "text" ? toolDef.defaultContent : toolDef.imageSrc,
             x,
             y,

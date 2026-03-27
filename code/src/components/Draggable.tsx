@@ -6,11 +6,13 @@ interface DraggableProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   style?: React.CSSProperties;
   className?: string;
+  disabled?: boolean;
 }
 
-export function Draggable({ id, children, style, className, ...props }: DraggableProps) {
+export function Draggable({ id, children, style, className, disabled = false, ...props }: DraggableProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: id,
+    disabled,
   });
 
   const combinedStyle: React.CSSProperties = {

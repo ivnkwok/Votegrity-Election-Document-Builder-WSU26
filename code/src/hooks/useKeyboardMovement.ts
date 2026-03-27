@@ -4,10 +4,11 @@ import type { CanvasItem } from "@/lib/utils";
 // Hook to enable keyboard movement of selected canvas items using arrow keys (pixel nudge).
 export function useKeyboardMovement(
   selectedId: string | null,
+  editingItemId: string | null,
   setCanvasItems: React.Dispatch<React.SetStateAction<CanvasItem[]>>
 ) {
   useEffect(() => {
-    if (!selectedId) return;
+    if (!selectedId || editingItemId === selectedId) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const movement = e.shiftKey ? 10 : 1;
@@ -56,5 +57,5 @@ export function useKeyboardMovement(
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedId, setCanvasItems]);
+  }, [editingItemId, selectedId, setCanvasItems]);
 }

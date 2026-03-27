@@ -4,11 +4,21 @@ function toCanvasItemType(value: unknown): CanvasItem["type"] {
   if (value === "image" || value === "box" || value === "text") {
     return value;
   }
-  return "text";
+  throw new Error("Unsupported component type in layout document.");
 }
 
 function toRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
+  if (typeof value === "object" && value !== null) {
+    return value as Record<string, unknown>;
+  }
+  throw new Error("Invalid object shape in layout document.");
+}
+
+function toStringRequired(value: unknown, fieldName: string): string {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new Error(`Layout document is missing required field "${fieldName}".`);
+  }
+  return value;
 }
 
 function toNumber(value: unknown, fallback: number): number {
@@ -17,7 +27,7 @@ function toNumber(value: unknown, fallback: number): number {
 }
 
 export type LayoutDocument = {
-  version: "2.0.0";
+  version: "3.0.0";
   canvas: {
     width: number;
     height: number;
@@ -40,6 +50,7 @@ export type LoadedDocument = {
 function toDocumentComponent(item: CanvasItem) {
   return {
     id: item.id,
+    sourceToolId: item.sourceToolId,
     type: item.type,
     position: { x: item.x, y: item.y },
     size: { width: item.width ?? 200, height: item.height ?? 40 },
@@ -67,17 +78,19 @@ function toCanvasItem(component: unknown): CanvasItem {
   const flags = toRecord(c.flags);
   const styles = toRecord(c.styles);
 
+  const sourceToolId = toStringRequired(c.sourceToolId, "sourceToolId");
+
   return {
-    id: String(c.id ?? ""),
+    id: toStringRequired(c.id, "id"),
+    sourceToolId,
     type: toCanvasItemType(c.type),
-    content: String(c.content ?? c.type ?? ""),
+    content: typeof c.content === "string" ? c.content : "",
     x: toNumber(position.x, 0),
     y: toNumber(position.y, 0),
     width: toNumber(size.width, 200),
     height: toNumber(size.height, 40),
     flags: {
-      // Accept legacy `isMoveable` and normalize to canonical `isMovable`.
-      isMovable: Boolean(flags.isMovable ?? flags.isMoveable ?? true),
+      isMovable: Boolean(flags.isMovable ?? true),
       isEditable: Boolean(flags.isEditable ?? true),
       minQuantity: toNumber(flags.minQuantity, 0),
       maxQuantity: toNumber(flags.maxQuantity, 1),
@@ -87,13 +100,13 @@ function toCanvasItem(component: unknown): CanvasItem {
 }
 
 // -------------------------------
-// SAVE MULTI-PAGE DOCUMENT (v2)
+// SAVE MULTI-PAGE DOCUMENT (v3)
 // -------------------------------
 export function saveDocumentLayout(args: LoadedDocument) {
   const { pageOrder, pageNamesById, pagesById } = args;
 
   const doc: LayoutDocument = {
-    version: "2.0.0",
+    version: "3.0.0",
     canvas: {
       width: 816,
       height: 1056,
@@ -123,14 +136,14 @@ export function saveDocumentLayout(args: LoadedDocument) {
 }
 
 // -------------------------------
-// LOAD MULTI-PAGE DOCUMENT (v2) -> LoadedDocument
+// LOAD MULTI-PAGE DOCUMENT (v3) -> LoadedDocument
 // -------------------------------
 export async function loadDocumentLayout(file: File): Promise<LoadedDocument> {
   const text = await file.text();
   const json = JSON.parse(text);
 
-  if (json?.version !== "2.0.0" || !Array.isArray(json.pages)) {
-    throw new Error("Invalid layout format. Expected v2 document schema.");
+  if (json?.version !== "3.0.0" || !Array.isArray(json.pages)) {
+    throw new Error("Unsupported layout version; regenerate with current app.");
   }
 
   const pageOrder: string[] = [];
@@ -139,11 +152,10 @@ export async function loadDocumentLayout(file: File): Promise<LoadedDocument> {
 
   for (const page of json.pages as unknown[]) {
     const p = toRecord(page);
-    const pageId = String(p.id ?? "");
-    if (!pageId) continue;
+    const pageId = toStringRequired(p.id, "pages[].id");
 
     pageOrder.push(pageId);
-    pageNamesById[pageId] = String(p.name ?? "Page");
+    pageNamesById[pageId] = toStringRequired(p.name, "pages[].name");
 
     const components = Array.isArray(p.components) ? p.components : [];
     pagesById[pageId] = components.map(toCanvasItem);

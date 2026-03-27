@@ -6,6 +6,7 @@ import jsPDF from "jspdf";
 export interface CanvasItem {
   id: string;
   type: 'text' | 'box' | 'image';
+  sourceToolId: string;
   content?: string;
   x: number;
   y: number;

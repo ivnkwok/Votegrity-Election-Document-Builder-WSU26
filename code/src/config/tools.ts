@@ -36,11 +36,11 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     id: "text-area",
     label: "Text Area",
     type: "text",
-    defaultContent: "Lorem ipsum text here...",
+    defaultContent: "<p>Lorem ipsum text here...</p>",
     defaultWidth: 350,
     defaultHeight: 120,
     flags: { isMovable: true, isEditable: true, minQuantity: 0, maxQuantity: 999 },
-    styles: { fontSize: 14, lineHeight: "1.4" },
+    styles: { fontFamily: "Arial", fontSize: "14px", color: "#000000", lineHeight: "1.4" },
   },
   {
     id: "return-address",

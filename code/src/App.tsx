@@ -7,7 +7,7 @@ import { Canvas } from './components/Canvas/Canvas';
 import { PdfUploader } from './components/PdfUploader';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TOOL_DEFINITIONS } from './config/tools';
-import { useState } from "react";
 import election1 from "./data/Election207.json";
 import election2 from "./data/election365.json";
 import election3 from "./data/election458.json";
@@ -41,7 +40,9 @@ export default function App() {
   const {
     canvasItems,
     selectedId,
+    editingItemId,
     setSelectedId,
+    setEditingItemId,
     handleLoadFile,
     handlePreviewPDF,
     handleDragEnd,
@@ -66,6 +67,23 @@ export default function App() {
 
   const canMoveUp = activePageIndex > 0;
   const canMoveDown = activePageIndex >= 0 && activePageIndex < pageOrder.length - 1;
+  const currentPageName = pageNamesById[activePageId] ?? "";
+  const [pageNameDraft, setPageNameDraft] = useState(currentPageName);
+
+  useEffect(() => {
+    setPageNameDraft(currentPageName);
+  }, [currentPageName]);
+
+  const commitPageName = () => {
+    const clean = pageNameDraft.trim();
+    if (!clean) {
+      setPageNameDraft(currentPageName);
+      return;
+    }
+
+    renamePage(pageNameDraft, activePageId);
+    setPageNameDraft(clean);
+  };
 
   // --- RENDER ---
   return (
@@ -117,9 +135,21 @@ export default function App() {
 
               <Select value={activePageId} onValueChange={switchPage}>
                 <Input
-                  value={pageNamesById[activePageId] ?? ""}
+                  value={pageNameDraft}
                   placeholder="Rename page"
-                  onChange={(e) => renamePage(e.target.value, activePageId)}
+                  onChange={(e) => setPageNameDraft(e.target.value)}
+                  onBlur={commitPageName}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitPageName();
+                      e.currentTarget.blur();
+                    }
+                    if (e.key === "Escape") {
+                      setPageNameDraft(currentPageName);
+                      e.currentTarget.blur();
+                    }
+                  }}
                 />
 
                 <div className="flex gap-2">
@@ -182,6 +212,7 @@ export default function App() {
               onLoad={handleLoadFile}
               onPreview={() => {
                 setSelectedId(null);
+                setEditingItemId(null);
                 requestAnimationFrame(() => {
                   void handlePreviewPDF();
                 });
@@ -196,7 +227,14 @@ export default function App() {
 
         {/* Canvas Area */}
         <div className="flex-1 p-6 bg-gray-100 overflow-auto">
-          <Canvas canvasItems={canvasItems} selectedId={selectedId} setSelectedId={setSelectedId}/>
+          <Canvas
+            canvasItems={canvasItems}
+            selectedId={selectedId}
+            editingItemId={editingItemId}
+            setSelectedId={setSelectedId}
+            setEditingItemId={setEditingItemId}
+            onChangeItem={updateItem}
+          />
         </div>
       </div>
 

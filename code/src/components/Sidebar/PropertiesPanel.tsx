@@ -1,9 +1,68 @@
 import type { CanvasItem } from "@/lib/utils";
-import { useRef, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
 interface PropertiesPanelProps {
   item: CanvasItem | undefined;
   onChange: (id: string, updates: Partial<CanvasItem>) => void;
+}
+
+interface CommitNumberInputProps {
+  value: number;
+  disabled?: boolean;
+  className: string;
+  onCommit: (value: number) => void;
+}
+
+function CommitNumberInput({ value, disabled, className, onCommit }: CommitNumberInputProps) {
+  const [draft, setDraft] = useState(String(value));
+
+  useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
+  const commit = () => {
+    const normalized = draft.trim();
+    if (
+      normalized === "" ||
+      normalized === "-" ||
+      normalized === "." ||
+      normalized === "-."
+    ) {
+      setDraft(String(value));
+      return;
+    }
+
+    const parsed = Number(normalized);
+    if (!Number.isFinite(parsed)) {
+      setDraft(String(value));
+      return;
+    }
+
+    onCommit(parsed);
+    setDraft(String(parsed));
+  };
+
+  return (
+    <input
+      type="number"
+      className={className}
+      disabled={disabled}
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          commit();
+          e.currentTarget.blur();
+        }
+        if (e.key === "Escape") {
+          setDraft(String(value));
+          e.currentTarget.blur();
+        }
+      }}
+    />
+  );
 }
 
 export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
@@ -12,7 +71,10 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
 
   const isMoveable = item.flags?.isMovable !== false;
   const isText = item.type === "text";
+  const isRichTextArea = isText && item.sourceToolId === "text-area";
   const styles = item.styles || {};
+  const parsedFontSize = Number.parseInt(String(styles.fontSize ?? "16"), 10);
+  const fontSize = Number.isFinite(parsedFontSize) ? parsedFontSize : 16;
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,6 +139,10 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
                   </div>
                 )}
               </div>
+            ) : isRichTextArea ? (
+              <div className="rounded border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                Double-click this text area on the canvas to edit rich text.
+              </div>
             ) : (
               <textarea
                 className="w-full border rounded px-2 py-1 mt-1"
@@ -91,17 +157,21 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
         {isText && (
           <div className="pt-2 border-t space-y-3">
             <strong>Text Style</strong>
+            {isRichTextArea && (
+              <div className="rounded border border-gray-200 bg-gray-50 px-2 py-1 text-[11px] text-gray-600">
+                These style controls apply to the entire text area.
+              </div>
+            )}
 
             {/* Font Size */}
             <div>
               <label className="font-medium">Font Size</label>
-              <input
-                type="number"
+              <CommitNumberInput
                 className="w-full border rounded px-2 py-1 mt-1"
-                value={parseInt(styles.fontSize as string) || 16}
-                onChange={(e) =>
+                value={fontSize}
+                onCommit={(value) =>
                   onChange(item.id, {
-                    styles: { ...styles, fontSize: `${e.target.value}px` },
+                    styles: { ...styles, fontSize: `${value}px` },
                   })
                 }
               />
@@ -150,27 +220,21 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
           <div className="flex gap-2 mt-1">
             <label className="flex items-center gap-1">
               X
-              <input
-                type="number"
+              <CommitNumberInput
                 className="w-20 border rounded px-1 py-0.5"
                 value={item.x}
                 disabled={!isMoveable}
-                onChange={(e) =>
-                  onChange(item.id, { x: Number(e.target.value) })
-                }
+                onCommit={(value) => onChange(item.id, { x: value })}
               />
             </label>
 
             <label className="flex items-center gap-1">
               Y
-              <input
-                type="number"
+              <CommitNumberInput
                 className="w-20 border rounded px-1 py-0.5"
                 value={item.y}
                 disabled={!isMoveable}
-                onChange={(e) =>
-                  onChange(item.id, { y: Number(e.target.value) })
-                }
+                onCommit={(value) => onChange(item.id, { y: value })}
               />
             </label>
           </div>
@@ -182,25 +246,19 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
           <div className="flex gap-2 mt-1">
             <label className="flex items-center gap-1">
               W
-              <input
-                type="number"
+              <CommitNumberInput
                 className="w-20 border rounded px-1 py-0.5"
                 value={item.width ?? 200}
-                onChange={(e) =>
-                  onChange(item.id, { width: Number(e.target.value) })
-                }
+                onCommit={(value) => onChange(item.id, { width: value })}
               />
             </label>
 
             <label className="flex items-center gap-1">
               H
-              <input
-                type="number"
+              <CommitNumberInput
                 className="w-20 border rounded px-1 py-0.5"
                 value={item.height ?? 40}
-                onChange={(e) =>
-                  onChange(item.id, { height: Number(e.target.value) })
-                }
+                onCommit={(value) => onChange(item.id, { height: value })}
               />
             </label>
           </div>
