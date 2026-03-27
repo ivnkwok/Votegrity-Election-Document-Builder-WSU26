@@ -13,16 +13,18 @@ import { PropertiesPanel } from "@/components/Sidebar/PropertiesPanel";
 import { PageControls } from "@/components/Sidebar/PageControls";
 import { PdfUploader } from "@/components/PdfUploader";
 
-interface ElectionOption {
+interface SidebarSelectOption {
   value: string;
   label: string;
 }
 
 interface AppSidebarProps {
   tools: ToolDefinition[];
-  electionOptions: ElectionOption[];
+  electionOptions: SidebarSelectOption[];
+  templateOptions: SidebarSelectOption[];
   selectedElection: string;
   onSelectedElectionChange: (value: string) => void;
+  onTemplateChange: (value: string) => void;
   pageOrder: string[];
   activePageId: string;
   pageNamesById: Record<string, string>;
@@ -43,8 +45,10 @@ interface AppSidebarProps {
 export function AppSidebar({
   tools,
   electionOptions,
+  templateOptions,
   selectedElection,
   onSelectedElectionChange,
+  onTemplateChange,
   pageOrder,
   activePageId,
   pageNamesById,
@@ -80,17 +84,21 @@ export function AppSidebar({
             </SelectContent>
           </Select>
         </div>
-
-        <Select>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Templates" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Ballot Template">Ballot Template</SelectItem>
-            <SelectItem value="Notice Template">Notice Template</SelectItem>
-            <SelectItem value="Candidate Statement Template">Candidate Statement Template</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-gray-700">Starting Template</div>
+          <Select onValueChange={onTemplateChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Templates" />
+            </SelectTrigger>
+            <SelectContent>
+              {templateOptions.map((template) => (
+                <SelectItem key={template.value} value={template.value}>
+                  {template.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <PageControls
           pageOrder={pageOrder}
@@ -103,8 +111,11 @@ export function AppSidebar({
           renamePage={renamePage}
           movePage={movePage}
         />
-
-        <SidebarTools tools={tools} />
+        <div className="space-y-2">
+          <div className="text-sm font-medium text-gray-700">Drag-and-Droppable Components</div><hr></hr>
+          <SidebarTools tools={tools} />
+          <hr></hr>
+        </div>
         <PdfUploader onPdfPagesExtracted={onPdfPagesExtracted} />
 
         <SidebarActions onSave={onSave} onLoad={onLoad} onPreview={onPreview} />
