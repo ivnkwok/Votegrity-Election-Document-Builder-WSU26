@@ -1,0 +1,209 @@
+{
+  "version": "3.0.0",
+  "canvas": {
+    "width": 816,
+    "height": 1056,
+    "background": "#ffffff",
+    "unit": "px"
+  },
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Cover",
+      "components": [
+        {
+          "id": "ballot-cover-logo",
+          "sourceToolId": "votegrity-logo",
+          "type": "image",
+          "position": { "x": 40, "y": 24 },
+          "size": { "width": 180, "height": 72 },
+          "content": "/votegrity-logo.png",
+          "flags": { "isMovable": true, "isEditable": false, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": {}
+        },
+        {
+          "id": "ballot-cover-title",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 40, "y": 120 },
+          "size": { "width": 736, "height": 46 },
+          "content": "Official General Election Ballot",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 34, "fontWeight": 700, "textAlign": "center" }
+        },
+        {
+          "id": "ballot-cover-subtitle",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 40, "y": 170 },
+          "size": { "width": 736, "height": 30 },
+          "content": "County of Evergreen - November 3, 2026",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 20, "fontWeight": 500, "textAlign": "center" }
+        },
+        {
+          "id": "ballot-cover-instructions",
+          "sourceToolId": "text-area",
+          "type": "text",
+          "position": { "x": 72, "y": 250 },
+          "size": { "width": 670, "height": 260 },
+          "content": "<p><strong>Read before voting:</strong></p><ul><li>Use blue or black ink only.</li><li>Fill in one choice per contest unless otherwise noted.</li><li>If you make a mistake, request a replacement ballot.</li></ul><p>This template is a starter layout and can be customized per jurisdiction.</p>",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 18, "lineHeight": 1.45 }
+        },
+        {
+          "id": "ballot-cover-signature-line",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 72, "y": 620 },
+          "size": { "width": 670, "height": 26 },
+          "content": "Voter Signature: ______________________________________",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 18 }
+        }
+      ]
+    },
+    {
+      "id": "page-2",
+      "name": "Contests",
+      "components": [
+        {
+          "id": "ballot-contest-title",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 40, "y": 30 },
+          "size": { "width": 736, "height": 36 },
+          "content": "Sample Contest Page",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 28, "fontWeight": 700 }
+        },
+        {
+          "id": "ballot-contest-prompt",
+          "sourceToolId": "text-area",
+          "type": "text",
+          "position": { "x": 40, "y": 86 },
+          "size": { "width": 736, "height": 84 },
+          "content": "<p><strong>Mayor - Vote for one</strong></p><p>Mark one choice. Candidate names below are placeholders for proof of concept.</p>",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 18, "lineHeight": 1.4 }
+        },
+        {
+          "id": "ballot-candidate-a",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 64, "y": 198 },
+          "size": { "width": 680, "height": 44 },
+          "content": "[ ] Jordan Avery",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 20, "border": "1px solid #111827", "padding": "8px 12px" }
+        },
+        {
+          "id": "ballot-candidate-b",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 64, "y": 252 },
+          "size": { "width": 680, "height": 44 },
+          "content": "[ ] Riley Chen",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 20, "border": "1px solid #111827", "padding": "8px 12px" }
+        },
+        {
+          "id": "ballot-candidate-c",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 64, "y": 306 },
+          "size": { "width": 680, "height": 44 },
+          "content": "[ ] Casey Morales",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 20, "border": "1px solid #111827", "padding": "8px 12px" }
+        },
+        {
+          "id": "ballot-candidate-d",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 64, "y": 360 },
+          "size": { "width": 680, "height": 44 },
+          "content": "[ ] Write-in: _______________________",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 20, "border": "1px solid #111827", "padding": "8px 12px" }
+        },
+        {
+          "id": "ballot-prop-title",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 40, "y": 458 },
+          "size": { "width": 736, "height": 32 },
+          "content": "Proposition 1 - Community Safety Levy",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 24, "fontWeight": 700 }
+        },
+        {
+          "id": "ballot-prop-yes",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 64, "y": 514 },
+          "size": { "width": 330, "height": 44 },
+          "content": "[ ] YES",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 22, "fontWeight": 600, "border": "1px solid #111827", "padding": "8px 12px", "textAlign": "center" }
+        },
+        {
+          "id": "ballot-prop-no",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 414, "y": 514 },
+          "size": { "width": 330, "height": 44 },
+          "content": "[ ] NO",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 22, "fontWeight": 600, "border": "1px solid #111827", "padding": "8px 12px", "textAlign": "center" }
+        }
+      ]
+    },
+    {
+      "id": "page-3",
+      "name": "Return Instructions",
+      "components": [
+        {
+          "id": "ballot-return-title",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 40, "y": 40 },
+          "size": { "width": 736, "height": 36 },
+          "content": "How to Return Your Ballot",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 30, "fontWeight": 700, "textAlign": "center" }
+        },
+        {
+          "id": "ballot-return-body",
+          "sourceToolId": "text-area",
+          "type": "text",
+          "position": { "x": 70, "y": 120 },
+          "size": { "width": 676, "height": 420 },
+          "content": "<p>Seal your completed ballot in the secrecy envelope, then place it in the return envelope.</p><ol><li>Sign and date the declaration.</li><li>Mail by Election Day or use an official drop box by 8:00 PM.</li><li>Track ballot status online with your voter ID.</li></ol><p><em>Local election office phone:</em> (555) 010-2300</p>",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 19, "lineHeight": 1.5 }
+        },
+        {
+          "id": "ballot-return-oath",
+          "sourceToolId": "text-area",
+          "type": "text",
+          "position": { "x": 70, "y": 580 },
+          "size": { "width": 676, "height": 180 },
+          "content": "<p><strong>Voter Oath</strong></p><p>I declare under penalty of perjury that I am a qualified voter and that I completed this ballot personally.</p>",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 18, "border": "1px solid #111827", "padding": "12px" }
+        },
+        {
+          "id": "ballot-return-signature",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 70, "y": 794 },
+          "size": { "width": 676, "height": 32 },
+          "content": "Signature: ________________________    Date: __________",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 20 }
+        }
+      ]
+    }
+  ]
+}

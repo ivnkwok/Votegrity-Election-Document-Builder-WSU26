@@ -135,14 +135,10 @@ export function saveDocumentLayout(args: LoadedDocument) {
   URL.revokeObjectURL(url);
 }
 
-// -------------------------------
-// LOAD MULTI-PAGE DOCUMENT (v3) -> LoadedDocument
-// -------------------------------
-export async function loadDocumentLayout(file: File): Promise<LoadedDocument> {
-  const text = await file.text();
-  const json = JSON.parse(text);
+function parseLoadedDocument(json: unknown): LoadedDocument {
+  const doc = toRecord(json);
 
-  if (json?.version !== "3.0.0" || !Array.isArray(json.pages)) {
+  if (doc.version !== "3.0.0" || !Array.isArray(doc.pages)) {
     throw new Error("Unsupported layout version; regenerate with current app.");
   }
 
@@ -150,7 +146,7 @@ export async function loadDocumentLayout(file: File): Promise<LoadedDocument> {
   const pageNamesById: Record<string, string> = {};
   const pagesById: Record<string, CanvasItem[]> = {};
 
-  for (const page of json.pages as unknown[]) {
+  for (const page of doc.pages as unknown[]) {
     const p = toRecord(page);
     const pageId = toStringRequired(p.id, "pages[].id");
 
@@ -173,4 +169,20 @@ export async function loadDocumentLayout(file: File): Promise<LoadedDocument> {
     pageNamesById,
     pagesById,
   };
+}
+
+// -------------------------------
+// LOAD MULTI-PAGE DOCUMENT (v3) from object -> LoadedDocument
+// -------------------------------
+export function loadDocumentLayoutFromJson(json: unknown): LoadedDocument {
+  return parseLoadedDocument(json);
+}
+
+// -------------------------------
+// LOAD MULTI-PAGE DOCUMENT (v3) from file -> LoadedDocument
+// -------------------------------
+export async function loadDocumentLayout(file: File): Promise<LoadedDocument> {
+  const text = await file.text();
+  const json = JSON.parse(text);
+  return parseLoadedDocument(json);
 }

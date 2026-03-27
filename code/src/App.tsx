@@ -4,6 +4,7 @@ import { useAppController } from "./hooks/useAppController";
 import { Canvas } from "./components/Canvas/Canvas";
 import { AppSidebar } from "./components/Sidebar/AppSidebar";
 import { TOOL_DEFINITIONS } from "./config/tools";
+import { TEMPLATE_OPTIONS, loadTemplateLayout, type TemplateId } from "./services/templateService";
 import election1 from "./data/Election207.json";
 import election2 from "./data/Election365.json";
 import election3 from "./data/Election458.json";
@@ -54,6 +55,7 @@ export default function App() {
     deletePage,
     renamePage,
     movePage,
+    loadDocument,
   } = useAppController({ electionData: selectedElectionData });
 
   const selectedItem = useMemo(
@@ -71,8 +73,19 @@ export default function App() {
         <AppSidebar
           tools={TOOL_DEFINITIONS}
           electionOptions={ELECTION_OPTIONS}
+          templateOptions={TEMPLATE_OPTIONS}
           selectedElection={selectedElection}
           onSelectedElectionChange={(value) => setSelectedElection(value as ElectionKey)}
+          onTemplateChange={(value) => {
+            try {
+              const doc = loadTemplateLayout(value as TemplateId);
+              loadDocument(doc);
+            } catch (err) {
+              console.error(err);
+              const message = err instanceof Error ? err.message : "Error loading template.";
+              alert(message);
+            }
+          }}
           pageOrder={pageOrder}
           activePageId={activePageId}
           pageNamesById={pageNamesById}

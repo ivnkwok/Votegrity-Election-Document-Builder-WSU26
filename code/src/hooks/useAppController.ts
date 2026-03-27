@@ -50,28 +50,31 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
 
   const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
+  const loadDocument = useCallback((doc: LoadedDocument) => {
+    setPageOrder(doc.pageOrder);
+    setPageNamesById(doc.pageNamesById);
+    setPagesById(doc.pagesById);
+
+    const firstPageId = doc.pageOrder[0] ?? "page-1";
+    setActivePageId(firstPageId);
+    setSelectedId(null);
+    setEditingItemId(null);
+    setCanvasItems(doc.pagesById[firstPageId] ?? []);
+  }, [setActivePageId, setCanvasItems, setEditingItemId, setPageNamesById, setPageOrder, setPagesById, setSelectedId]);
+
   const handleLoadFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
       const doc = await loadDocumentLayout(file);
-
-      setPageOrder(doc.pageOrder);
-      setPageNamesById(doc.pageNamesById);
-      setPagesById(doc.pagesById);
-
-      const firstPageId = doc.pageOrder[0] ?? "page-1";
-      setActivePageId(firstPageId);
-      setSelectedId(null);
-      setEditingItemId(null);
-      setCanvasItems(doc.pagesById[firstPageId] ?? []);
+      loadDocument(doc);
     } catch (err) {
       console.error(err);
       const message = err instanceof Error ? err.message : "Error loading layout.";
       alert(message);
     }
-  }, [setActivePageId, setCanvasItems, setEditingItemId, setPageNamesById, setPageOrder, setPagesById, setSelectedId]);
+  }, [loadDocument]);
 
   const handlePreviewPDF = useCallback(async () => {
     const originalPageId = activePageId;
@@ -175,6 +178,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     renamePage,
     movePage,
     updateItem,
+    loadDocument,
 
     save: () => {
       const doc: LoadedDocument = {
