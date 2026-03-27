@@ -37,8 +37,11 @@ export default function App() {
   const {
     canvasItems,
     selectedId,
+    selectedIds,
     editingItemId,
-    setSelectedId,
+    selectOne,
+    toggleSelect,
+    clearSelection,
     setEditingItemId,
     handleLoadFile,
     handlePreviewPDF,
@@ -99,7 +102,7 @@ export default function App() {
           onSave={save}
           onLoad={handleLoadFile}
           onPreview={() => {
-            setSelectedId(null);
+            clearSelection();
             setEditingItemId(null);
             requestAnimationFrame(() => {
               void handlePreviewPDF();
@@ -113,9 +116,28 @@ export default function App() {
           <Canvas
             canvasItems={canvasItems}
             selectedId={selectedId}
+            selectedIds={selectedIds}
             editingItemId={editingItemId}
-            setSelectedId={setSelectedId}
-            setEditingItemId={setEditingItemId}
+            onSelect={(id, e) => {
+              if (e.shiftKey || e.metaKey || e.ctrlKey) {
+                toggleSelect(id);
+              } else {
+                selectOne(id);
+              }
+
+              if (editingItemId && editingItemId !== id) {
+                setEditingItemId(null);
+              }
+            }}
+            onClearSelection={() => {
+              clearSelection();
+              setEditingItemId(null);
+            }}
+            onBeginEdit={(id) => {
+              selectOne(id);
+              setEditingItemId(id);
+            }}
+            onExitEdit={() => setEditingItemId(null)}
             onChangeItem={updateItem}
           />
         </div>

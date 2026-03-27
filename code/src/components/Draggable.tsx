@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 
 interface DraggableProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -9,11 +9,27 @@ interface DraggableProps extends React.HTMLAttributes<HTMLDivElement> {
   disabled?: boolean;
 }
 
-export function Draggable({ id, children, style, className, disabled = false, ...props }: DraggableProps) {
+export function Draggable({
+  id,
+  children,
+  style,
+  className,
+  disabled = false,
+  onPointerDown,
+  ...props
+}: DraggableProps) {
+  const modifiersRef = useRef({ shift: false, meta: false });
+
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: id,
+    id,
     disabled,
+    data: { getModifiers: () => modifiersRef.current },
   });
+
+  const dragPointerDown = listeners?.onPointerDown;
+  const otherListeners = listeners
+    ? Object.fromEntries(Object.entries(listeners).filter(([name]) => name !== "onPointerDown"))
+    : {};
 
   const combinedStyle: React.CSSProperties = {
     ...style,
@@ -24,7 +40,19 @@ export function Draggable({ id, children, style, className, disabled = false, ..
   };
 
   return (
-    <div ref={setNodeRef} style={combinedStyle} {...listeners} {...attributes} className={className} {...props}>
+    <div
+      ref={setNodeRef}
+      style={combinedStyle}
+      {...otherListeners}
+      onPointerDown={(e) => {
+        modifiersRef.current = { shift: e.shiftKey, meta: e.metaKey || e.ctrlKey };
+        dragPointerDown?.(e);
+        onPointerDown?.(e);
+      }}
+      {...attributes}
+      className={className}
+      {...props}
+    >
       {children}
     </div>
   );

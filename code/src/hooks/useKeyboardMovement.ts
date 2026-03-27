@@ -3,51 +3,45 @@ import type { CanvasItem } from "@/lib/utils";
 
 // Hook to enable keyboard movement of selected canvas items using arrow keys (pixel nudge).
 export function useKeyboardMovement(
-  selectedId: string | null,
+  selectedIds: Set<string>,
   editingItemId: string | null,
   setCanvasItems: React.Dispatch<React.SetStateAction<CanvasItem[]>>
 ) {
   useEffect(() => {
-    if (!selectedId || editingItemId === selectedId) return;
+    if (selectedIds.size === 0) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (editingItemId && selectedIds.has(editingItemId)) return;
+
       const movement = e.shiftKey ? 10 : 1;
 
-      let handled = false;
-
-      if (e.key === "ArrowUp") handled = true;
-      if (e.key === "ArrowDown") handled = true;
-      if (e.key === "ArrowLeft") handled = true;
-      if (e.key === "ArrowRight") handled = true;
-
-      if (!handled) return;
+      let dx = 0;
+      let dy = 0;
+      switch (e.key) {
+        case "ArrowUp":
+          dy = -movement;
+          break;
+        case "ArrowDown":
+          dy = movement;
+          break;
+        case "ArrowLeft":
+          dx = -movement;
+          break;
+        case "ArrowRight":
+          dx = movement;
+          break;
+        default:
+          return;
+      }
 
       setCanvasItems((prev) =>
         prev.map((item) => {
-          if (item.id !== selectedId) return item;
-
-          let x = item.x;
-          let y = item.y;
-
-          switch (e.key) {
-            case "ArrowUp":
-              y -= movement;
-              break;
-            case "ArrowDown":
-              y += movement;
-              break;
-            case "ArrowLeft":
-              x -= movement;
-              break;
-            case "ArrowRight":
-              x += movement;
-              break;
-          }
+          if (!selectedIds.has(item.id)) return item;
 
           return {
             ...item,
-            x: Math.max(0, x),
-            y: Math.max(0, y),
+            x: Math.max(0, item.x + dx),
+            y: Math.max(0, item.y + dy),
           };
         })
       );
@@ -57,5 +51,5 @@ export function useKeyboardMovement(
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [editingItemId, selectedId, setCanvasItems]);
+  }, [editingItemId, selectedIds, setCanvasItems]);
 }

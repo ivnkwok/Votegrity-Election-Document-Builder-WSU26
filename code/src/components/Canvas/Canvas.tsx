@@ -6,9 +6,12 @@ import { CanvasItemRenderer } from "./CanvasItemRenderer";
 interface CanvasProps {
   canvasItems: CanvasItem[];
   selectedId: string | null;
+  selectedIds: Set<string>;
   editingItemId: string | null;
-  setSelectedId: (id: string | null) => void;
-  setEditingItemId: (id: string | null) => void;
+  onSelect: (id: string, e: React.MouseEvent) => void;
+  onClearSelection: () => void;
+  onBeginEdit: (id: string) => void;
+  onExitEdit: () => void;
   onChangeItem: (id: string, updates: Partial<CanvasItem>) => void;
 }
 
@@ -20,9 +23,12 @@ function isRichTextArea(item: CanvasItem): boolean {
 export function Canvas({
   canvasItems,
   selectedId,
+  selectedIds,
   editingItemId,
-  setSelectedId,
-  setEditingItemId,
+  onSelect,
+  onClearSelection,
+  onBeginEdit,
+  onExitEdit,
   onChangeItem,
 }: CanvasProps) {
   return (
@@ -35,14 +41,12 @@ export function Canvas({
           height: "11in",
           position: "relative",
         }}
-        onClick={() => {
-          setSelectedId(null);
-          setEditingItemId(null);
-        }}
+        onClick={onClearSelection}
       >
         {canvasItems.map((item) => {
           const richTextArea = isRichTextArea(item);
           const isEditing = editingItemId === item.id;
+          const isSelected = selectedIds.has(item.id) || item.id === selectedId;
 
           return (
             <Draggable
@@ -51,16 +55,12 @@ export function Canvas({
               disabled={isEditing}
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedId(item.id);
-                if (editingItemId && editingItemId !== item.id) {
-                  setEditingItemId(null);
-                }
+                onSelect(item.id, e);
               }}
               onDoubleClick={(e) => {
                 if (!richTextArea) return;
                 e.stopPropagation();
-                setSelectedId(item.id);
-                setEditingItemId(item.id);
+                onBeginEdit(item.id);
               }}
               style={{
                 boxSizing: "border-box",
@@ -69,18 +69,18 @@ export function Canvas({
                 top: `${item.y}px`,
                 width: item.width,
                 height: item.height,
-                outline: item.id === selectedId ? "2px dashed #ccc" : "2px solid transparent",
+                outline: isSelected ? "2px dashed #ccc" : "2px solid transparent",
                 padding: "4px",
                 cursor: isEditing ? "text" : "grab",
                 backgroundColor: "white",
-                zIndex: item.id === selectedId ? 50 : 1,
+                zIndex: isSelected ? 50 : 1,
               }}
             >
               <CanvasItemRenderer
                 item={item}
                 isEditing={isEditing}
                 onChangeItem={onChangeItem}
-                onExitEditMode={() => setEditingItemId(null)}
+                onExitEditMode={onExitEdit}
               />
             </Draggable>
           );
