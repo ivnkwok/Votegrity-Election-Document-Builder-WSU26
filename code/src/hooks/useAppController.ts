@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { CanvasItem } from "@/lib/utils";
 import {
   saveDocumentLayout,
@@ -21,7 +21,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     canvasItems,
     setCanvasItems,
     selectedId,
-    setSelectedId,
+    setSelectedId: setPrimarySelectedId,
     editingItemId,
     setEditingItemId,
     pageOrder,
@@ -32,13 +32,75 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     setPageNamesById,
     pagesById,
     setPagesById,
-    switchPage,
-    addPage,
-    duplicatePage,
-    deletePage,
+    switchPage: switchPageBase,
+    addPage: addPageBase,
+    duplicatePage: duplicatePageBase,
+    deletePage: deletePageBase,
     renamePage,
     movePage,
   } = usePageState();
+
+  const [selectedIdsState, setSelectedIdsState] = useState<Set<string>>(new Set());
+
+  const setSelectedIds = useCallback((value: React.SetStateAction<Set<string>>) => {
+    setSelectedIdsState((prev) => {
+      const next = typeof value === "function"
+        ? (value as (prevState: Set<string>) => Set<string>)(prev)
+        : value;
+
+      const normalized = new Set(next);
+      const nextSelectedId = normalized.size === 1
+        ? normalized.values().next().value ?? null
+        : null;
+      setPrimarySelectedId(nextSelectedId);
+      return normalized;
+    });
+  }, [setPrimarySelectedId]);
+
+  const setSelectedId = useCallback((id: string | null) => {
+    setPrimarySelectedId(id);
+    setSelectedIdsState(id ? new Set([id]) : new Set());
+  }, [setPrimarySelectedId]);
+
+  const selectOne = useCallback((id: string | null) => {
+    setSelectedId(id);
+  }, [setSelectedId]);
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, [setSelectedIds]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedId(null);
+  }, [setSelectedId]);
+
+  const switchPage = useCallback((nextPageId: string) => {
+    switchPageBase(nextPageId);
+    setSelectedIdsState(new Set());
+  }, [switchPageBase]);
+
+  const addPage = useCallback(() => {
+    addPageBase();
+    setSelectedIdsState(new Set());
+  }, [addPageBase]);
+
+  const duplicatePage = useCallback(() => {
+    duplicatePageBase();
+    setSelectedIdsState(new Set());
+  }, [duplicatePageBase]);
+
+  const deletePage = useCallback(() => {
+    deletePageBase();
+    setSelectedIdsState(new Set());
+  }, [deletePageBase]);
 
   useEffect(() => {
     if (!editingItemId) return;
@@ -46,7 +108,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     setEditingItemId(null);
   }, [editingItemId, selectedId, setEditingItemId]);
 
-  useKeyboardMovement(selectedId, editingItemId, setCanvasItems);
+  useKeyboardMovement(selectedIdsState, editingItemId, setCanvasItems);
 
   const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
@@ -113,8 +175,11 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
   const handleDragEnd = useCanvasDnd({
     canvasItems,
     electionData,
+    selectedIds: selectedIdsState,
     setCanvasItems,
-    setSelectedId,
+    setSelectedIds,
+    selectOne,
+    toggleSelect,
   });
 
   const updateItem = (id: string, updates: Partial<CanvasItem>) => {
@@ -123,7 +188,14 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     );
 
     if (updates.id) {
-      setSelectedId(updates.id);
+      setSelectedIds((prev) => {
+        if (!prev.has(id)) return prev;
+        const next = new Set(prev);
+        next.delete(id);
+        next.add(updates.id!);
+        return next;
+      });
+
       if (editingItemId === id) {
         setEditingItemId(updates.id);
       }
@@ -158,6 +230,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
   return {
     canvasItems,
     selectedId,
+    selectedIds: selectedIdsState,
     editingItemId,
     pageOrder,
     activePageId,
@@ -165,7 +238,12 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
 
     setCanvasItems,
     setSelectedId,
+    setSelectedIds,
     setEditingItemId,
+
+    selectOne,
+    toggleSelect,
+    clearSelection,
 
     handleLoadFile,
     handlePreviewPDF,

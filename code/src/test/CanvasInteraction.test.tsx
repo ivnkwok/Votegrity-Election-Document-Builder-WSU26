@@ -5,8 +5,10 @@ import { Canvas } from "@/components/Canvas/Canvas";
 import type { CanvasItem } from "@/lib/utils";
 
 function renderCanvas(items: CanvasItem[], editingItemId: string | null = null) {
-  const setSelectedId = vi.fn();
-  const setEditingItemId = vi.fn();
+  const onSelect = vi.fn();
+  const onClearSelection = vi.fn();
+  const onBeginEdit = vi.fn();
+  const onExitEdit = vi.fn();
   const onChangeItem = vi.fn();
 
   render(
@@ -14,15 +16,18 @@ function renderCanvas(items: CanvasItem[], editingItemId: string | null = null) 
       <Canvas
         canvasItems={items}
         selectedId={null}
+        selectedIds={new Set<string>()}
         editingItemId={editingItemId}
-        setSelectedId={setSelectedId}
-        setEditingItemId={setEditingItemId}
+        onSelect={onSelect}
+        onClearSelection={onClearSelection}
+        onBeginEdit={onBeginEdit}
+        onExitEdit={onExitEdit}
         onChangeItem={onChangeItem}
       />
     </DndContext>
   );
 
-  return { setSelectedId, setEditingItemId };
+  return { onSelect, onBeginEdit };
 }
 
 describe("Canvas editing interactions", () => {
@@ -42,11 +47,12 @@ describe("Canvas editing interactions", () => {
       },
     ];
 
-    const { setSelectedId, setEditingItemId } = renderCanvas(items);
+    const { onSelect, onBeginEdit } = renderCanvas(items);
     fireEvent.click(screen.getByText("Hello"));
 
-    expect(setSelectedId).toHaveBeenCalledWith("text-area-1");
-    expect(setEditingItemId).not.toHaveBeenCalledWith("text-area-1");
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onSelect.mock.calls[0][0]).toBe("text-area-1");
+    expect(onBeginEdit).not.toHaveBeenCalledWith("text-area-1");
   });
 
   it("double click enters edit mode for text-area", () => {
@@ -65,10 +71,10 @@ describe("Canvas editing interactions", () => {
       },
     ];
 
-    const { setEditingItemId } = renderCanvas(items);
+    const { onBeginEdit } = renderCanvas(items);
     fireEvent.doubleClick(screen.getByText("Edit me"));
 
-    expect(setEditingItemId).toHaveBeenCalledWith("text-area-2");
+    expect(onBeginEdit).toHaveBeenCalledWith("text-area-2");
   });
 
   it("double click does not enter edit mode for non-text-area text item", () => {
@@ -87,9 +93,9 @@ describe("Canvas editing interactions", () => {
       },
     ];
 
-    const { setEditingItemId } = renderCanvas(items);
+    const { onBeginEdit } = renderCanvas(items);
     fireEvent.doubleClick(screen.getByText("Address line"));
 
-    expect(setEditingItemId).not.toHaveBeenCalledWith("return-address-1");
+    expect(onBeginEdit).not.toHaveBeenCalledWith("return-address-1");
   });
 });
