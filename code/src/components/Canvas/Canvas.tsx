@@ -2,35 +2,45 @@ import { Droppable } from "@/components/Droppable";
 import { Draggable } from "@/components/Draggable";
 import type { CanvasItem } from "@/lib/utils";
 import { CanvasItemRenderer } from "./CanvasItemRenderer";
+import { useDndMonitor, type Translate } from "@dnd-kit/core";
+import { useState } from "react";
 
 interface CanvasProps {
   canvasItems: CanvasItem[];
   selectedId: string | null;
   selectedIds: Set<string>;
-  editingItemId: string | null;
   onSelect: (id: string, e: React.MouseEvent) => void;
   onClearSelection: () => void;
-  onBeginEdit: (id: string) => void;
-  onExitEdit: () => void;
   onChangeItem: (id: string, updates: Partial<CanvasItem>) => void;
 }
 
-function isRichTextArea(item: CanvasItem): boolean {
-  return item.type === "text" && item.sourceToolId === "text-area";
-}
+export function Canvas({ canvasItems, selectedId, selectedIds, onSelect, onClearSelection, onChangeItem }: CanvasProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-// Renders the main canvas area where items are displayed and can be selected.
-export function Canvas({
-  canvasItems,
-  selectedId,
-  selectedIds,
-  editingItemId,
-  onSelect,
-  onClearSelection,
-  onBeginEdit,
-  onExitEdit,
-  onChangeItem,
-}: CanvasProps) {
+  const [dragActiveId, setDragActiveId] = useState<string | null>(null);
+  const [dragTranslate, setDragTranslate] = useState<Translate | null>(null);
+
+  useDndMonitor({
+    onDragStart({ active }) {
+      setDragActiveId(String(active.id));
+      setDragTranslate(null);
+    },
+    onDragMove({ delta }) {
+      setDragTranslate(delta);
+    },
+    onDragEnd() {
+      setDragActiveId(null);
+      setDragTranslate(null);
+    },
+    onDragCancel() {
+      setDragActiveId(null);
+      setDragTranslate(null);
+    },
+  });
+
+  const isDraggingSelection =
+    dragActiveId !== null && selectedIds.has(dragActiveId) && dragTranslate !== null;
+
   return (
     <Droppable id="canvas">
       <div
@@ -41,26 +51,31 @@ export function Canvas({
           height: "11in",
           position: "relative",
         }}
-        onClick={onClearSelection}
+        onClick={() => {
+          onClearSelection();
+          setEditingId(null);
+        }}
       >
         {canvasItems.map((item) => {
-          const richTextArea = isRichTextArea(item);
-          const isEditing = editingItemId === item.id;
-          const isSelected = selectedIds.has(item.id) || item.id === selectedId;
+          const isSelected = selectedIds.has(item.id);
+          const isEditing = editingId === item.id;
+
+          const isGhost = isDraggingSelection && isSelected && item.id !== dragActiveId;
+          const ghostStyle: React.CSSProperties = isGhost
+            ? { transform: `translate3d(${dragTranslate!.x}px, ${dragTranslate!.y}px, 0)`, zIndex: 100 }
+            : {};
 
           return (
             <Draggable
               key={item.id}
               id={item.id}
-              disabled={isEditing}
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect(item.id, e);
               }}
               onDoubleClick={(e) => {
-                if (!richTextArea) return;
                 e.stopPropagation();
-                onBeginEdit(item.id);
+                setEditingId(item.id);
               }}
               style={{
                 boxSizing: "border-box",
@@ -74,13 +89,14 @@ export function Canvas({
                 cursor: isEditing ? "text" : "grab",
                 backgroundColor: "white",
                 zIndex: isSelected ? 50 : 1,
+                ...ghostStyle,
               }}
             >
               <CanvasItemRenderer
                 item={item}
                 isEditing={isEditing}
                 onChangeItem={onChangeItem}
-                onExitEditMode={onExitEdit}
+                onExitEditMode={() => setEditingId(null)}
               />
             </Draggable>
           );
