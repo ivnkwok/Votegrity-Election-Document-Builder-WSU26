@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { DndContext } from "@dnd-kit/core";
 import { Canvas } from "@/components/Canvas/Canvas";
+import { createEmptyDragSession } from "@/hooks/canvasDnd/dragGroup";
 import type { CanvasItem } from "@/lib/utils";
 
 function renderCanvas(items: CanvasItem[], editingItemId: string | null = null) {
@@ -17,6 +18,7 @@ function renderCanvas(items: CanvasItem[], editingItemId: string | null = null) 
         canvasItems={items}
         selectedId={null}
         selectedIds={new Set<string>()}
+        dragSession={createEmptyDragSession()}
         editingItemId={editingItemId}
         onSelect={onSelect}
         onClearSelection={onClearSelection}
