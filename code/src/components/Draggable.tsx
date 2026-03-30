@@ -34,7 +34,10 @@ export function Draggable({
   const combinedStyle: React.CSSProperties = {
     ...style,
     ...(transform ? {
-      transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      transform:
+        typeof style?.transform === "string"
+          ? style.transform
+          : `translate3d(${transform.x}px, ${transform.y}px, 0)`,
       zIndex: 100,
     } : undefined),
   };

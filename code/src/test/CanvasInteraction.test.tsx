@@ -2,10 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, createEvent } from "@testing-library/react";
 import { DndContext } from "@dnd-kit/core";
 import { Canvas } from "@/components/Canvas/Canvas";
-import { createEmptyDragSession } from "@/hooks/canvasDnd/dragGroup";
+import { createEmptyDragSession, type DragSession } from "@/hooks/canvasDnd/dragGroup";
 import type { CanvasItem } from "@/lib/utils";
 
-function renderCanvas(items: CanvasItem[], editingItemId: string | null = null) {
+function renderCanvas(
+  items: CanvasItem[],
+  editingItemId: string | null = null,
+  dragSession: DragSession = createEmptyDragSession()
+) {
   const onSelect = vi.fn();
   const onClearSelection = vi.fn();
   const onBeginEdit = vi.fn();
@@ -18,7 +22,7 @@ function renderCanvas(items: CanvasItem[], editingItemId: string | null = null) 
         canvasItems={items}
         selectedId={null}
         selectedIds={new Set<string>()}
-        dragSession={createEmptyDragSession()}
+        dragSession={dragSession}
         editingItemId={editingItemId}
         onSelect={onSelect}
         onClearSelection={onClearSelection}
@@ -86,6 +90,36 @@ describe("Canvas editing interactions", () => {
     fireEvent(target, pointerDown);
 
     expect(pointerDown.defaultPrevented).toBe(true);
+  });
+
+  it("applies clamped dragSession transform to active drag item", () => {
+    const items: CanvasItem[] = [
+      {
+        id: "active-drag-1",
+        type: "text",
+        sourceToolId: "text-body",
+        content: "Drag me",
+        x: 10,
+        y: 10,
+        width: 200,
+        height: 60,
+        flags: { isMovable: true, isEditable: true, minQuantity: 0, maxQuantity: 99 },
+        styles: {},
+      },
+    ];
+
+    const dragSession: DragSession = {
+      activeId: "active-drag-1",
+      rawDelta: { x: 900, y: 600 },
+      appliedDelta: { x: 24, y: 18 },
+      moveIds: new Set(["active-drag-1"]),
+    };
+
+    renderCanvas(items, null, dragSession);
+
+    const draggableNode = screen.getByText("Drag me").parentElement;
+    expect(draggableNode).not.toBeNull();
+    expect(draggableNode).toHaveStyle({ transform: "translate3d(24px, 18px, 0)" });
   });
 
   it("double click enters edit mode for text-area", () => {

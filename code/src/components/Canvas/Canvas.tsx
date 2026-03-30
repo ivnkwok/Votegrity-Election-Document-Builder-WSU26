@@ -55,6 +55,9 @@ export function Canvas({
           const isSelected = selectedIds.has(item.id) || item.id === selectedId;
           const isInDragGroup = isDragging && dragSession.moveIds.has(item.id);
           const isActiveDragItem = dragSession.activeId === item.id;
+          const activeTransform = isActiveDragItem
+            ? `translate3d(${dragSession.appliedDelta.x}px, ${dragSession.appliedDelta.y}px, 0)`
+            : undefined;
           const showPreviewTransform =
             isInDragGroup &&
             !isActiveDragItem &&
@@ -95,7 +98,7 @@ export function Canvas({
                 padding: "4px",
                 cursor: isEditing ? "text" : isInDragGroup ? "grabbing" : isMovable ? "grab" : "default",
                 backgroundColor: "white",
-                transform: previewTransform,
+                transform: activeTransform ?? previewTransform,
                 zIndex: isInDragGroup ? 80 : isSelected ? 50 : 1,
               }}
             >
