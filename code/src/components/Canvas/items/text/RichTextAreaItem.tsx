@@ -263,8 +263,16 @@ export function RichTextAreaItem({
         </div>
       ) : (
         <div
+          data-testid="rich-text-preview"
           dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-          style={{ width: "100%", height: "100%" }}
+          style={{
+            width: "100%",
+            height: "100%",
+            userSelect: "none",
+            WebkitUserSelect: "none",
+            MozUserSelect: "none",
+            pointerEvents: "none",
+          }}
         />
       )}
     </div>

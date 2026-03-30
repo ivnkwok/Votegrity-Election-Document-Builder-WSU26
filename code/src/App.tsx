@@ -1,4 +1,4 @@
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useMemo, useState } from "react";
 import { useAppController } from "./hooks/useAppController";
 import { Canvas } from "./components/Canvas/Canvas";
@@ -38,6 +38,7 @@ export default function App() {
     canvasItems,
     selectedId,
     selectedIds,
+    dragSession,
     editingItemId,
     selectOne,
     toggleSelect,
@@ -45,6 +46,9 @@ export default function App() {
     setEditingItemId,
     handleLoadFile,
     handlePreviewPDF,
+    handleDragStart,
+    handleDragMove,
+    handleDragCancel,
     handleDragEnd,
     handlePdfImport,
     save,
@@ -66,8 +70,23 @@ export default function App() {
     [canvasItems, selectedId]
   );
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
+
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragMove={handleDragMove}
+      onDragCancel={handleDragCancel}
+      onDragEnd={handleDragEnd}
+    >
       <header className="flex h-14 w-full items-center border-b border-gray-300 bg-slate-200 px-6 shadow-sm">
         <h1 className="text-xl font-semibold">Votegrity Election Document Builder</h1>
       </header>
@@ -117,6 +136,7 @@ export default function App() {
             canvasItems={canvasItems}
             selectedId={selectedId}
             selectedIds={selectedIds}
+            dragSession={dragSession}
             editingItemId={editingItemId}
             onSelect={(id, e) => {
               if (e.shiftKey || e.metaKey || e.ctrlKey) {

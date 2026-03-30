@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { DragEndEvent, DragMoveEvent, DragStartEvent } from "@dnd-kit/core";
 import type { CanvasItem } from "@/lib/utils";
 import {
   saveDocumentLayout,
@@ -11,6 +12,13 @@ import { useCanvasDnd } from "./useCanvasDnd";
 import type { RawQuestion } from "@/utils/parseElectionData";
 import { buildImportedPdfPages } from "./appController/pageUtils";
 import { usePageState } from "./appController/usePageState";
+import {
+  computeRigidClampedDelta,
+  createEmptyDragSession,
+  getMoveItems,
+  resolveDragMoveIds,
+  type DragSession,
+} from "./canvasDnd/dragGroup";
 
 interface UseAppControllerArgs {
   electionData: RawQuestion[];
@@ -41,6 +49,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
   } = usePageState();
 
   const [selectedIdsState, setSelectedIdsState] = useState<Set<string>>(new Set());
+  const [dragSession, setDragSession] = useState<DragSession>(createEmptyDragSession);
 
   const setSelectedIds = useCallback((value: React.SetStateAction<Set<string>>) => {
     setSelectedIdsState((prev) => {
@@ -110,6 +119,56 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
 
   useKeyboardMovement(selectedIdsState, editingItemId, setCanvasItems);
 
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const activeId = String(event.active.id);
+    const moveIds = resolveDragMoveIds({
+      activeId,
+      selectedIds: selectedIdsState,
+      canvasItems,
+    });
+
+    setDragSession({
+      activeId,
+      rawDelta: { x: 0, y: 0 },
+      appliedDelta: { x: 0, y: 0 },
+      moveIds,
+    });
+  }, [canvasItems, selectedIdsState]);
+
+  const handleDragMove = useCallback((event: DragMoveEvent) => {
+    const activeId = String(event.active.id);
+    const rawDelta = event.delta ?? { x: 0, y: 0 };
+    const canvasRect = document.getElementById("page")?.getBoundingClientRect();
+
+    setDragSession((prev) => {
+      const moveIds =
+        prev.activeId === activeId && prev.moveIds.size > 0
+          ? prev.moveIds
+          : resolveDragMoveIds({
+            activeId,
+            selectedIds: selectedIdsState,
+            canvasItems,
+          });
+
+      const moveItems = getMoveItems(canvasItems, moveIds);
+      const appliedDelta =
+        canvasRect && moveItems.length > 0
+          ? computeRigidClampedDelta(rawDelta, moveItems, canvasRect)
+          : { x: 0, y: 0 };
+
+      return {
+        activeId,
+        rawDelta,
+        appliedDelta,
+        moveIds,
+      };
+    });
+  }, [canvasItems, selectedIdsState]);
+
+  const handleDragCancel = useCallback(() => {
+    setDragSession(createEmptyDragSession());
+  }, []);
+
   const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
   const loadDocument = useCallback((doc: LoadedDocument) => {
@@ -172,15 +231,21 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     setCanvasItems(originalItems);
   }, [activePageId, canvasItems, pageOrder, pagesById, setActivePageId, setCanvasItems, setEditingItemId, setSelectedId]);
 
-  const handleDragEnd = useCanvasDnd({
+  const commitDragEnd = useCanvasDnd({
     canvasItems,
     electionData,
     selectedIds: selectedIdsState,
+    dragSession,
     setCanvasItems,
     setSelectedIds,
     selectOne,
     toggleSelect,
   });
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    commitDragEnd(event);
+    setDragSession(createEmptyDragSession());
+  }, [commitDragEnd]);
 
   const updateItem = (id: string, updates: Partial<CanvasItem>) => {
     setCanvasItems((items) =>
@@ -231,6 +296,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     canvasItems,
     selectedId,
     selectedIds: selectedIdsState,
+    dragSession,
     editingItemId,
     pageOrder,
     activePageId,
@@ -247,6 +313,9 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
 
     handleLoadFile,
     handlePreviewPDF,
+    handleDragStart,
+    handleDragMove,
+    handleDragCancel,
     handleDragEnd,
     handlePdfImport,
     switchPage,

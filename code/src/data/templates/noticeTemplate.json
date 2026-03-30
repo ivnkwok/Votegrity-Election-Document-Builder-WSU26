@@ -17,7 +17,7 @@
           "type": "image",
           "position": { "x": 44, "y": 32 },
           "size": { "width": 160, "height": 70 },
-          "content": "/votegrity-logo.png",
+          "content": "votegrity-logo.png",
           "flags": { "isMovable": true, "isEditable": false, "minQuantity": 1, "maxQuantity": 1 },
           "styles": {}
         },

@@ -4,12 +4,19 @@ import type { CanvasItem } from "@/lib/utils";
 import { TOOL_DEFINITIONS } from "@/config/tools";
 import { parseElection, type RawQuestion } from "@/utils/parseElectionData";
 import { createQuestionAnswerItems, createToolDropItem } from "./canvasDnd/itemFactories";
-import { clampToRange, isPointInsideRect } from "./canvasDnd/positionUtils";
+import { isPointInsideRect } from "./canvasDnd/positionUtils";
+import {
+  computeRigidClampedDelta,
+  getMoveItems,
+  resolveDragMoveIds,
+  type DragSession,
+} from "./canvasDnd/dragGroup";
 
 interface UseCanvasDndArgs {
   canvasItems: CanvasItem[];
   electionData: RawQuestion[];
   selectedIds: Set<string>;
+  dragSession: DragSession;
   setCanvasItems: React.Dispatch<React.SetStateAction<CanvasItem[]>>;
   setSelectedIds: React.Dispatch<React.SetStateAction<Set<string>>>;
   selectOne: (id: string | null) => void;
@@ -20,6 +27,7 @@ export function useCanvasDnd({
   canvasItems,
   electionData,
   selectedIds,
+  dragSession,
   setCanvasItems,
   setSelectedIds,
   selectOne,
@@ -38,7 +46,8 @@ export function useCanvasDnd({
       if (!canvasRect) return;
 
       if (existingItem) {
-        if (!delta || (delta.x === 0 && delta.y === 0)) {
+        const rawDelta = delta ?? { x: 0, y: 0 };
+        if (rawDelta.x === 0 && rawDelta.y === 0) {
           const { shift, meta } = active.data.current?.getModifiers?.() ?? {};
           if (shift || meta) {
             toggleSelect(existingItem.id);
@@ -48,21 +57,27 @@ export function useCanvasDnd({
           return;
         }
 
-        const idsToMove: Set<string> = selectedIds.has(activeId)
-          ? selectedIds
-          : new Set([activeId]);
+        const fallbackMoveIds = resolveDragMoveIds({
+          activeId,
+          selectedIds,
+          canvasItems,
+        });
+
+        const idsToMove =
+          dragSession.activeId === activeId && dragSession.moveIds.size > 0
+            ? dragSession.moveIds
+            : fallbackMoveIds;
+        const moveItems = getMoveItems(canvasItems, idsToMove);
+        const appliedDelta = computeRigidClampedDelta(rawDelta, moveItems, canvasRect);
 
         setCanvasItems((prev) =>
           prev.map((item) => {
             if (!idsToMove.has(item.id)) return item;
 
-            const newX = item.x + delta.x;
-            const newY = item.y + delta.y;
-
             return {
               ...item,
-              x: clampToRange(newX, 0, canvasRect.width - (item.width ?? 0)),
-              y: clampToRange(newY, 0, canvasRect.height - (item.height ?? 0)),
+              x: item.x + appliedDelta.x,
+              y: item.y + appliedDelta.y,
             };
           })
         );
@@ -112,7 +127,16 @@ export function useCanvasDnd({
       setCanvasItems((items) => [...items, newItem]);
       selectOne(newItem.id);
     },
-    [canvasItems, electionData, selectOne, selectedIds, setCanvasItems, setSelectedIds, toggleSelect]
+    [
+      canvasItems,
+      dragSession,
+      electionData,
+      selectOne,
+      selectedIds,
+      setCanvasItems,
+      setSelectedIds,
+      toggleSelect,
+    ]
   );
 
   return handleDragEnd;

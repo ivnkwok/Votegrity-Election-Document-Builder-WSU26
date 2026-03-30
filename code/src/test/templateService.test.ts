@@ -29,4 +29,21 @@ describe("templateService.loadTemplateLayout", () => {
     expect(doc.pageNamesById["page-2"]).toBe("Contests");
     expect(doc.pageNamesById["page-3"]).toBe("Return Instructions");
   });
+
+  it("uses base-relative Votegrity logo paths in templates", () => {
+    for (const templateId of [
+      "ballot-template",
+      "notice-template",
+      "candidate-statement-template",
+    ] as const) {
+      const doc = loadTemplateLayout(templateId);
+      const items = doc.pageOrder.flatMap((pageId) => doc.pagesById[pageId] ?? []);
+      const logos = items.filter((item) => item.type === "image" && item.sourceToolId === "votegrity-logo");
+
+      expect(logos.length).toBeGreaterThan(0);
+      logos.forEach((logo) => {
+        expect(logo.content).toBe("votegrity-logo.png");
+      });
+    }
+  });
 });
