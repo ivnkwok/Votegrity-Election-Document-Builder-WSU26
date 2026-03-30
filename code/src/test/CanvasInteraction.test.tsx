@@ -63,7 +63,7 @@ describe("Canvas editing interactions", () => {
         id: "text-area-2",
         type: "text",
         sourceToolId: "text-area",
-        content: "<p>Edit me</p>",
+        content: "<p><strong>Edit</strong> me</p>",
         x: 10,
         y: 10,
         width: 200,
@@ -74,7 +74,7 @@ describe("Canvas editing interactions", () => {
     ];
 
     const { onBeginEdit } = renderCanvas(items);
-    fireEvent.doubleClick(screen.getByText("Edit me"));
+    fireEvent.doubleClick(screen.getByText("Edit"));
 
     expect(onBeginEdit).toHaveBeenCalledWith("text-area-2");
   });
