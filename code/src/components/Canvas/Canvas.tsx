@@ -72,6 +72,13 @@ export function Canvas({
                 e.stopPropagation();
                 onSelect(item.id, e);
               }}
+              onPointerDown={(e) => {
+                if (isEditing) return;
+                if (e.shiftKey || e.metaKey || e.ctrlKey) {
+                  // Prevent browser range-selection behavior during multi-select modifier clicks.
+                  e.preventDefault();
+                }
+              }}
               onDoubleClick={(e) => {
                 if (!richTextArea) return;
                 e.stopPropagation();
