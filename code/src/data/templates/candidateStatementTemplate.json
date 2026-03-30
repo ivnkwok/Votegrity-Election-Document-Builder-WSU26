@@ -1,0 +1,169 @@
+{
+  "version": "3.0.0",
+  "canvas": {
+    "width": 816,
+    "height": 1056,
+    "background": "#ffffff",
+    "unit": "px"
+  },
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Candidate Profile",
+      "components": [
+        {
+          "id": "candidate-logo",
+          "sourceToolId": "votegrity-logo",
+          "type": "image",
+          "position": { "x": 42, "y": 26 },
+          "size": { "width": 154, "height": 66 },
+          "content": "/votegrity-logo.png",
+          "flags": { "isMovable": true, "isEditable": false, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": {}
+        },
+        {
+          "id": "candidate-title",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 40, "y": 112 },
+          "size": { "width": 736, "height": 42 },
+          "content": "Candidate Statement Packet",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 32, "fontWeight": 700, "textAlign": "center" }
+        },
+        {
+          "id": "candidate-office",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 64, "y": 196 },
+          "size": { "width": 688, "height": 54 },
+          "content": "Office Sought: ____________________________",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 21, "border": "1px solid #1f2937", "padding": "12px" }
+        },
+        {
+          "id": "candidate-name",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 64, "y": 264 },
+          "size": { "width": 688, "height": 54 },
+          "content": "Candidate Name: ____________________________",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 21, "border": "1px solid #1f2937", "padding": "12px" }
+        },
+        {
+          "id": "candidate-contact",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 64, "y": 332 },
+          "size": { "width": 688, "height": 92 },
+          "content": "Contact Email: ____________________________\nCampaign Website: _________________________",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 20, "lineHeight": 1.35, "border": "1px solid #1f2937", "padding": "12px" }
+        },
+        {
+          "id": "candidate-summary",
+          "sourceToolId": "text-area",
+          "type": "text",
+          "position": { "x": 64, "y": 462 },
+          "size": { "width": 688, "height": 270 },
+          "content": "<p><strong>Short Biography (100-150 words)</strong></p><p>Provide a brief biography focused on public service, local experience, and relevant background.</p><p>Keep language factual and non-defamatory. This section is intended as a strong starting block for edits.</p>",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 18, "lineHeight": 1.45 }
+        }
+      ]
+    },
+    {
+      "id": "page-2",
+      "name": "Full Statement",
+      "components": [
+        {
+          "id": "candidate-statement-title",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 40, "y": 36 },
+          "size": { "width": 736, "height": 36 },
+          "content": "Candidate Statement",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 29, "fontWeight": 700 }
+        },
+        {
+          "id": "candidate-statement-body",
+          "sourceToolId": "text-area",
+          "type": "text",
+          "position": { "x": 54, "y": 96 },
+          "size": { "width": 706, "height": 760 },
+          "content": "<p><strong>Statement Draft:</strong></p><p>I am running for office to improve transparency, affordability, and trust in local government. My priorities include safer neighborhoods, sustainable infrastructure, and responsive constituent services.</p><p>Replace this draft text with candidate-specific positions, measurable policy goals, and plain-language commitments.</p><p>Recommended structure:</p><ol><li>Opening and values</li><li>Top 3 policy priorities</li><li>Community impact and accountability plan</li><li>Closing</li></ol>",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 18, "lineHeight": 1.5 }
+        }
+      ]
+    },
+    {
+      "id": "page-3",
+      "name": "Compliance Checklist",
+      "components": [
+        {
+          "id": "candidate-checklist-title",
+          "sourceToolId": "text-body",
+          "type": "text",
+          "position": { "x": 40, "y": 40 },
+          "size": { "width": 736, "height": 38 },
+          "content": "Submission Checklist",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 1, "maxQuantity": 1 },
+          "styles": { "fontSize": 31, "fontWeight": 700, "textAlign": "center" }
+        },
+        {
+          "id": "candidate-checklist-1",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 68, "y": 120 },
+          "size": { "width": 680, "height": 50 },
+          "content": "[ ] Statement word count verified",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 21, "border": "1px solid #111827", "padding": "10px 12px" }
+        },
+        {
+          "id": "candidate-checklist-2",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 68, "y": 182 },
+          "size": { "width": 680, "height": 50 },
+          "content": "[ ] Contact details confirmed",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 21, "border": "1px solid #111827", "padding": "10px 12px" }
+        },
+        {
+          "id": "candidate-checklist-3",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 68, "y": 244 },
+          "size": { "width": 680, "height": 50 },
+          "content": "[ ] Filing fee and forms submitted",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 21, "border": "1px solid #111827", "padding": "10px 12px" }
+        },
+        {
+          "id": "candidate-checklist-4",
+          "sourceToolId": "question-answer",
+          "type": "box",
+          "position": { "x": 68, "y": 306 },
+          "size": { "width": 680, "height": 50 },
+          "content": "[ ] Candidate signature completed",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 21, "border": "1px solid #111827", "padding": "10px 12px" }
+        },
+        {
+          "id": "candidate-checklist-notes",
+          "sourceToolId": "text-area",
+          "type": "text",
+          "position": { "x": 68, "y": 398 },
+          "size": { "width": 680, "height": 260 },
+          "content": "<p><strong>Notes for Elections Staff</strong></p><p>Use this area for review comments, missing-field notes, or follow-up actions before final acceptance.</p>",
+          "flags": { "isMovable": true, "isEditable": true, "minQuantity": 0, "maxQuantity": 1 },
+          "styles": { "fontSize": 18, "lineHeight": 1.45, "border": "1px solid #111827", "padding": "12px" }
+        }
+      ]
+    }
+  ]
+}

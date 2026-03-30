@@ -13,6 +13,7 @@ dist-ssr
 *.local
 .venv/
 server/__pycache__/
+docscreator*.tgz
 
 # Editor directories and files
 .vscode/*

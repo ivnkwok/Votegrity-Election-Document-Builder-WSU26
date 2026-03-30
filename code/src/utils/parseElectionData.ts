@@ -33,12 +33,5 @@ export function parseElection(data: RawQuestion[]) {
     );
   });
 
-  // --- Print outputs ---
-  console.log("Parsed Questions:");
-  console.log(questions);
-
-  console.log("Parsed Answers:");
-  console.log(answers);
-
   return { questions, answers };
 }

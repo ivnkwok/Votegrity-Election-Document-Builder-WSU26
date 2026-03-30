@@ -1,0 +1,16 @@
+{
+  "version": "3.0.0",
+  "canvas": {
+    "width": 816,
+    "height": 1056,
+    "background": "#ffffff",
+    "unit": "px"
+  },
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Page 1",
+      "components": []
+    }
+  ]
+}

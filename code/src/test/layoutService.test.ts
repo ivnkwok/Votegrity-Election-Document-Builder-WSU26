@@ -10,7 +10,7 @@ function mockFileFromJson(obj: unknown): File {
 describe("layoutService.loadDocumentLayout", () => {
   it("loads canonical v2 schema correctly", async () => {
     const docJson = {
-      version: "2.0.0",
+      version: "3.0.0",
       canvas: { width: 816, height: 1056, background: "#ffffff", unit: "px" },
       pages: [
         {
@@ -19,6 +19,7 @@ describe("layoutService.loadDocumentLayout", () => {
           components: [
             {
               id: "item-1",
+              sourceToolId: "text-area",
               type: "text",
               content: "Hello",
               position: { x: 10, y: 20 },
@@ -47,6 +48,7 @@ describe("layoutService.loadDocumentLayout", () => {
 
     const item = pageItems[0];
     expect(item.id).toBe("item-1");
+    expect(item.sourceToolId).toBe("text-area");
     expect(item.type).toBe("text");
     expect(item.content).toBe("Hello");
     expect(item.x).toBe(10);
@@ -62,15 +64,13 @@ describe("layoutService.loadDocumentLayout", () => {
     expect(item.styles).toMatchObject({ fontSize: 16 });
   });
 
-  it("throws on non-v2 schema format", async () => {
+  it("throws on non-v3 schema format", async () => {
     const oldSchema = {
-      version: "1.0.0",
+      version: "2.0.0",
       components: [],
     };
     const file = mockFileFromJson(oldSchema);
 
-    await expect(loadDocumentLayout(file)).rejects.toThrow(
-      "Invalid layout format. Expected v2 document schema.",
-    );
+    await expect(loadDocumentLayout(file)).rejects.toThrow("Unsupported layout version; regenerate with current app.");
   });
 });

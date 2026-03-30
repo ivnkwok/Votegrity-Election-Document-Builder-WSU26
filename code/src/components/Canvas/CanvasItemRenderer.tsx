@@ -1,7 +1,14 @@
 import type { CanvasItem } from "@/lib/utils";
 
-import { CanvasTextItem } from "./items/CanvasTextItem";
 import { CanvasImageItem } from "./items/CanvasImageItem";
+import { CanvasTextItem } from "./items/CanvasTextItem";
+
+interface CanvasItemRendererProps {
+  item: CanvasItem;
+  isEditing: boolean;
+  onChangeItem: (id: string, updates: Partial<CanvasItem>) => void;
+  onExitEditMode: () => void;
+}
 
 /*
 Renders the appropriate CanvasItem based on its type.
@@ -10,13 +17,25 @@ Can be expanded in the future to support additional item types.
 
 Just a simple switch statement with specific renderers for each type.
 */
-export function CanvasItemRenderer({ item }: { item: CanvasItem }) {
+export function CanvasItemRenderer({
+  item,
+  isEditing,
+  onChangeItem,
+  onExitEditMode,
+}: CanvasItemRendererProps) {
   switch (item.type) {
     case "image":
       return <CanvasImageItem item={item} />;
 
     case "text":
     default:
-      return <CanvasTextItem item={item} />;
+      return (
+        <CanvasTextItem
+          item={item}
+          isEditing={isEditing}
+          onChangeItem={onChangeItem}
+          onExitEditMode={onExitEditMode}
+        />
+      );
   }
 }
