@@ -23,6 +23,7 @@ export interface UsePageStateResult {
   deletePage: () => void;
   renamePage: (newName: string, pageId?: string) => void;
   movePage: (pageId: string, delta: -1 | 1) => void;
+  deleteSelectedItems: (selectedIds: Set<string>) => void;
 }
 
 export function usePageState(): UsePageStateResult {
@@ -140,6 +141,12 @@ export function usePageState(): UsePageStateResult {
     });
   }, []);
 
+  const deleteSelectedItems = useCallback((selectedIds: Set<string>) => {
+    if (selectedIds.size === 0) return;
+
+    setCanvasItems((prev) => prev.filter((item) => !selectedIds.has(item.id)));
+  }, []);
+
   return {
     canvasItems,
     setCanvasItems,
@@ -161,5 +168,6 @@ export function usePageState(): UsePageStateResult {
     deletePage,
     renamePage,
     movePage,
+    deleteSelectedItems,
   };
 }

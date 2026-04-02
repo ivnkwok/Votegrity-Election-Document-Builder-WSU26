@@ -46,6 +46,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     deletePage: deletePageBase,
     renamePage,
     movePage,
+    deleteSelectedItems: deleteSelectedItemsBase,
   } = usePageState();
 
   const [selectedIdsState, setSelectedIdsState] = useState<Set<string>>(new Set());
@@ -90,6 +91,8 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
   const clearSelection = useCallback(() => {
     setSelectedId(null);
   }, [setSelectedId]);
+
+  
 
   const switchPage = useCallback((nextPageId: string) => {
     switchPageBase(nextPageId);
@@ -292,6 +295,11 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     [activePageId, canvasItems, setActivePageId, setCanvasItems, setEditingItemId, setPageNamesById, setPageOrder, setPagesById, setSelectedId]
   );
 
+  const deleteSelectedItems = useCallback(() => {
+    deleteSelectedItemsBase(selectedIdsState);
+    setSelectedId(null); // Clear selection after deletion
+  }, [deleteSelectedItemsBase, selectedIdsState, setSelectedId]);
+
   return {
     canvasItems,
     selectedId,
@@ -326,6 +334,8 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     movePage,
     updateItem,
     loadDocument,
+
+    deleteSelectedItems,
 
     save: () => {
       const doc: LoadedDocument = {
