@@ -24,7 +24,7 @@ export function PropertiesPanel({ item, onChange, onDelete }: PropertiesPanelPro
       <h3 className="mb-2 font-semibold">Selected Component</h3>
         <Button 
           variant="destructive" 
-          size="icon-xs" 
+          size="sm" 
           onClick={onDelete}
           title="Delete selected"
         >
