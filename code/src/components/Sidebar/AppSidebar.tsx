@@ -1,5 +1,7 @@
+import { Suspense, lazy } from "react";
 import type { CanvasItem } from "@/lib/utils";
 import type { ToolDefinition } from "@/config/tools";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,7 +13,11 @@ import { SidebarActions } from "@/components/Sidebar/SidebarActions";
 import { SidebarTools } from "@/components/Sidebar/SidebarTools";
 import { PropertiesPanel } from "@/components/Sidebar/PropertiesPanel";
 import { PageControls } from "@/components/Sidebar/PageControls";
-import { PdfUploader } from "@/components/PdfUploader";
+
+const PdfUploader = lazy(async () => {
+  const module = await import("@/components/PdfUploader");
+  return { default: module.PdfUploader };
+});
 
 interface SidebarSelectOption {
   value: string;
@@ -38,6 +44,15 @@ interface AppSidebarProps {
   onSave: () => void;
   onLoad: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onPreview: () => void;
+  voterListOptions: SidebarSelectOption[];
+  selectedVoterList: string;
+  uploadedVoterListName: string | null;
+  canRunMailMerge: boolean;
+  isMailMerging: boolean;
+  toolStatusMessage: string | null;
+  onSelectedVoterListChange: (value: string) => void;
+  onUploadVoterList: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRunMailMerge: () => void;
   selectedItem: CanvasItem | undefined;
   onChangeItem: (id: string, updates: Partial<CanvasItem>) => void;
 }
@@ -62,12 +77,21 @@ export function AppSidebar({
   onSave,
   onLoad,
   onPreview,
+  voterListOptions,
+  selectedVoterList,
+  uploadedVoterListName,
+  canRunMailMerge,
+  isMailMerging,
+  toolStatusMessage,
+  onSelectedVoterListChange,
+  onUploadVoterList,
+  onRunMailMerge,
   selectedItem,
   onChangeItem,
 }: AppSidebarProps) {
   return (
-    <div className="flex h-screen w-[380px] flex-col border-r border-gray-300 bg-white">
-      <div className="flex-1 space-y-6 p-4">
+    <aside className="flex h-full w-[380px] shrink-0 overflow-hidden border-r border-gray-300 bg-white">
+      <div className="flex h-full flex-1 flex-col gap-6 overflow-x-hidden overflow-y-auto p-4">
         <div className="space-y-2">
           <div className="text-sm font-medium text-gray-700">Election Data</div>
           <Select value={selectedElection} onValueChange={onSelectedElectionChange}>
@@ -112,16 +136,46 @@ export function AppSidebar({
           movePage={movePage}
         />
         <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-700">Drag-and-Droppable Components</div><hr></hr>
+          <div className="text-sm font-medium text-gray-700">Drag-and-Drop Components</div>
+          <hr />
           <SidebarTools tools={tools} />
-          <hr></hr>
+          <hr />
+          {toolStatusMessage && (
+            <div
+              className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"
+              role="status"
+              aria-live="polite"
+            >
+              {toolStatusMessage}
+            </div>
+          )}
         </div>
-        <PdfUploader onPdfPagesExtracted={onPdfPagesExtracted} />
+        <Suspense
+          fallback={
+            <Button variant="outline" className="w-full" disabled>
+              Loading PDF Importer...
+            </Button>
+          }
+        >
+          <PdfUploader onPdfPagesExtracted={onPdfPagesExtracted} />
+        </Suspense>
 
-        <SidebarActions onSave={onSave} onLoad={onLoad} onPreview={onPreview} />
+        <SidebarActions
+          onSave={onSave}
+          onLoad={onLoad}
+          onPreview={onPreview}
+          voterListOptions={voterListOptions}
+          selectedVoterList={selectedVoterList}
+          uploadedVoterListName={uploadedVoterListName}
+          canRunMailMerge={canRunMailMerge}
+          isMailMerging={isMailMerging}
+          onSelectedVoterListChange={onSelectedVoterListChange}
+          onUploadVoterList={onUploadVoterList}
+          onRunMailMerge={onRunMailMerge}
+        />
 
         <PropertiesPanel item={selectedItem} onChange={onChangeItem} />
       </div>
-    </div>
+    </aside>
   );
 }

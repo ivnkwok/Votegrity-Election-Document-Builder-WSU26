@@ -6,7 +6,8 @@ export function Droppable(props: { id: string; children: React.ReactNode }) {
     id: props.id, // Use the id from props
   });
   const style = {
-    height: '100%', // Ensure it fills the container
+    minHeight: '100%',
+    width: '100%',
   };
   
   

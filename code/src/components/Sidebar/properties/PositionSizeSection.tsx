@@ -2,10 +2,10 @@ import { CommitNumberInput } from "./CommitNumberInput";
 import type { PropertiesSectionProps } from "./types";
 
 interface PositionSizeSectionProps extends PropertiesSectionProps {
-  isMoveable: boolean;
+  isMovable: boolean;
 }
 
-export function PositionSizeSection({ item, onChange, isMoveable }: PositionSizeSectionProps) {
+export function PositionSizeSection({ item, onChange, isMovable }: PositionSizeSectionProps) {
   return (
     <>
       <div>
@@ -16,7 +16,7 @@ export function PositionSizeSection({ item, onChange, isMoveable }: PositionSize
             <CommitNumberInput
               className="h-7 w-20 px-1 py-0.5 text-sm"
               value={item.x}
-              disabled={!isMoveable}
+              disabled={!isMovable}
               onCommit={(value) => onChange(item.id, { x: value })}
             />
           </label>
@@ -26,7 +26,7 @@ export function PositionSizeSection({ item, onChange, isMoveable }: PositionSize
             <CommitNumberInput
               className="h-7 w-20 px-1 py-0.5 text-sm"
               value={item.y}
-              disabled={!isMoveable}
+              disabled={!isMovable}
               onCommit={(value) => onChange(item.id, { y: value })}
             />
           </label>

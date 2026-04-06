@@ -27,6 +27,7 @@ export function PdfUploader({ onPdfPagesExtracted }: PdfUploaderProps) {
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || file.type !== "application/pdf") {
+      e.target.value = "";
       alert("Please select a valid PDF file");
       return;
     }
@@ -34,6 +35,7 @@ export function PdfUploader({ onPdfPagesExtracted }: PdfUploaderProps) {
     setSelectedFile(file);
 
     if (!pdfjsLibRef.current) {
+      e.target.value = "";
       alert("PDF library not loaded yet. Please try again.");
       return;
     }
@@ -46,6 +48,8 @@ export function PdfUploader({ onPdfPagesExtracted }: PdfUploaderProps) {
       alert("Error loading PDF file. The file may be corrupted or password-protected.");
       setSelectedFile(null);
       setPageCount(0);
+    } finally {
+      e.target.value = "";
     }
   };
 

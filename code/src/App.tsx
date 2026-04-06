@@ -1,4 +1,4 @@
-import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useMemo, useState } from "react";
 import { useAppController } from "./hooks/useAppController";
 import { Canvas } from "./components/Canvas/Canvas";
@@ -9,6 +9,8 @@ import election1 from "./data/Election207.json";
 import election2 from "./data/Election365.json";
 import election3 from "./data/Election458.json";
 import election4 from "./data/Election488.json";
+import voterSampleCanonical from "./data/voterMailMergeSampleCanonical.json";
+import voterSampleColumnsRows from "./data/voterMailMergeSampleColumnsRows.json";
 
 const electionDataSets = {
   election1,
@@ -26,8 +28,28 @@ const ELECTION_OPTIONS: Array<{ value: ElectionKey; label: string }> = [
   { value: "election4", label: "Election 4" },
 ];
 
+const voterDataSets = {
+  "sample-canonical": voterSampleCanonical,
+  "sample-columns": voterSampleColumnsRows,
+} as const;
+
+type VoterListKey = keyof typeof voterDataSets | "upload";
+
+const VOTER_LIST_OPTIONS: Array<{ value: VoterListKey; label: string }> = [
+  { value: "sample-canonical", label: "Sample Voters (Canonical)" },
+  { value: "sample-columns", label: "Sample Voters (Columns/Rows)" },
+  { value: "upload", label: "Upload JSON File" },
+];
+
+function getVoterListLabel(value: VoterListKey): string {
+  return VOTER_LIST_OPTIONS.find((option) => option.value === value)?.label ?? value;
+}
+
 export default function App() {
   const [selectedElection, setSelectedElection] = useState<ElectionKey>("election1");
+  const [selectedVoterList, setSelectedVoterList] = useState<VoterListKey>("sample-canonical");
+  const [uploadedVoterData, setUploadedVoterData] = useState<unknown | null>(null);
+  const [uploadedVoterFileName, setUploadedVoterFileName] = useState<string | null>(null);
 
   const selectedElectionData = useMemo(
     () => electionDataSets[selectedElection],
@@ -46,6 +68,7 @@ export default function App() {
     setEditingItemId,
     handleLoadFile,
     handlePreviewPDF,
+    handleMailMergePDF,
     handleDragStart,
     handleDragMove,
     handleDragCancel,
@@ -63,11 +86,17 @@ export default function App() {
     renamePage,
     movePage,
     loadDocument,
+    isMailMerging,
+    toolStatusMessage,
   } = useAppController({ electionData: selectedElectionData });
 
   const selectedItem = useMemo(
     () => canvasItems.find((item) => item.id === selectedId),
     [canvasItems, selectedId]
+  );
+  const activeTool = useMemo(
+    () => TOOL_DEFINITIONS.find((tool) => tool.id === dragSession.activeId) ?? null,
+    [dragSession.activeId]
   );
 
   const sensors = useSensors(
@@ -79,6 +108,38 @@ export default function App() {
     useSensor(KeyboardSensor)
   );
 
+  const selectedVoterData = useMemo(() => {
+    if (selectedVoterList === "upload") {
+      return uploadedVoterData;
+    }
+
+    return voterDataSets[selectedVoterList];
+  }, [selectedVoterList, uploadedVoterData]);
+
+  const canRunMailMerge = selectedVoterList !== "upload" || uploadedVoterData !== null;
+
+  const handleVoterListUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text) as unknown;
+      setUploadedVoterData(parsed);
+      setUploadedVoterFileName(file.name);
+      setSelectedVoterList("upload");
+    } catch (err) {
+      if (!(err instanceof SyntaxError)) {
+        console.error(err);
+      }
+      setUploadedVoterData(null);
+      setUploadedVoterFileName(null);
+      alert("Could not parse voter list JSON file.");
+    } finally {
+      e.target.value = "";
+    }
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -87,79 +148,111 @@ export default function App() {
       onDragCancel={handleDragCancel}
       onDragEnd={handleDragEnd}
     >
-      <header className="flex h-14 w-full items-center border-b border-gray-300 bg-slate-200 px-6 shadow-sm">
-        <h1 className="text-xl font-semibold">Votegrity Election Document Builder</h1>
-      </header>
+      <DragOverlay dropAnimation={null}>
+        {activeTool ? (
+          <div className="pointer-events-none min-w-40 rounded-md border border-gray-300 bg-white px-4 py-3 text-center text-sm font-medium text-gray-900 shadow-2xl">
+            {activeTool.label}
+          </div>
+        ) : null}
+      </DragOverlay>
 
-      <div className="flex">
-        <AppSidebar
-          tools={TOOL_DEFINITIONS}
-          electionOptions={ELECTION_OPTIONS}
-          templateOptions={TEMPLATE_OPTIONS}
-          selectedElection={selectedElection}
-          onSelectedElectionChange={(value) => setSelectedElection(value as ElectionKey)}
-          onTemplateChange={(value) => {
-            try {
-              const doc = loadTemplateLayout(value as TemplateId);
-              loadDocument(doc);
-            } catch (err) {
-              console.error(err);
-              const message = err instanceof Error ? err.message : "Error loading template.";
-              alert(message);
-            }
-          }}
-          pageOrder={pageOrder}
-          activePageId={activePageId}
-          pageNamesById={pageNamesById}
-          switchPage={switchPage}
-          addPage={addPage}
-          duplicatePage={duplicatePage}
-          deletePage={deletePage}
-          renamePage={renamePage}
-          movePage={movePage}
-          onPdfPagesExtracted={handlePdfImport}
-          onSave={save}
-          onLoad={handleLoadFile}
-          onPreview={() => {
-            clearSelection();
-            setEditingItemId(null);
-            requestAnimationFrame(() => {
-              void handlePreviewPDF();
-            });
-          }}
-          selectedItem={selectedItem}
-          onChangeItem={updateItem}
-        />
+      <div className="flex h-screen flex-col overflow-hidden bg-gray-100">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center border-b border-gray-300 bg-slate-200 px-6 shadow-sm">
+          <h1 className="text-xl font-semibold">Votegrity Election Document Builder</h1>
+        </header>
 
-        <div className="flex-1 overflow-auto bg-gray-100 p-6">
-          <Canvas
-            canvasItems={canvasItems}
-            selectedId={selectedId}
-            selectedIds={selectedIds}
-            dragSession={dragSession}
-            editingItemId={editingItemId}
-            onSelect={(id, e) => {
-              if (e.shiftKey || e.metaKey || e.ctrlKey) {
-                toggleSelect(id);
-              } else {
-                selectOne(id);
-              }
-
-              if (editingItemId && editingItemId !== id) {
-                setEditingItemId(null);
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <AppSidebar
+            tools={TOOL_DEFINITIONS}
+            electionOptions={ELECTION_OPTIONS}
+            templateOptions={TEMPLATE_OPTIONS}
+            selectedElection={selectedElection}
+            onSelectedElectionChange={(value) => setSelectedElection(value as ElectionKey)}
+            onTemplateChange={(value) => {
+              try {
+                const doc = loadTemplateLayout(value as TemplateId);
+                loadDocument(doc);
+              } catch (err) {
+                console.error(err);
+                const message = err instanceof Error ? err.message : "Error loading template.";
+                alert(message);
               }
             }}
-            onClearSelection={() => {
+            pageOrder={pageOrder}
+            activePageId={activePageId}
+            pageNamesById={pageNamesById}
+            switchPage={switchPage}
+            addPage={addPage}
+            duplicatePage={duplicatePage}
+            deletePage={deletePage}
+            renamePage={renamePage}
+            movePage={movePage}
+            onPdfPagesExtracted={handlePdfImport}
+            onSave={save}
+            onLoad={handleLoadFile}
+            onPreview={() => {
               clearSelection();
               setEditingItemId(null);
+              requestAnimationFrame(() => {
+                void handlePreviewPDF();
+              });
             }}
-            onBeginEdit={(id) => {
-              selectOne(id);
-              setEditingItemId(id);
+            voterListOptions={VOTER_LIST_OPTIONS}
+            selectedVoterList={selectedVoterList}
+            uploadedVoterListName={selectedVoterList === "upload" ? uploadedVoterFileName : null}
+            canRunMailMerge={canRunMailMerge}
+            isMailMerging={isMailMerging}
+            toolStatusMessage={toolStatusMessage}
+            onSelectedVoterListChange={(value) => setSelectedVoterList(value as VoterListKey)}
+            onUploadVoterList={handleVoterListUpload}
+            onRunMailMerge={() => {
+              if (!selectedVoterData) {
+                alert("Please upload a voter list JSON file before running mail merge.");
+                return;
+              }
+
+              clearSelection();
+              setEditingItemId(null);
+              requestAnimationFrame(() => {
+                void handleMailMergePDF(selectedVoterData, {
+                  sourceLabel: getVoterListLabel(selectedVoterList),
+                });
+              });
             }}
-            onExitEdit={() => setEditingItemId(null)}
+            selectedItem={selectedItem}
             onChangeItem={updateItem}
           />
+
+          <div className="min-w-0 flex-1 overflow-x-auto overflow-y-auto overscroll-contain bg-gray-100 px-6 pt-10 pb-10">
+            <Canvas
+              canvasItems={canvasItems}
+              selectedId={selectedId}
+              selectedIds={selectedIds}
+              dragSession={dragSession}
+              editingItemId={editingItemId}
+              onSelect={(id, e) => {
+                if (e.shiftKey || e.metaKey || e.ctrlKey) {
+                  toggleSelect(id);
+                } else {
+                  selectOne(id);
+                }
+
+                if (editingItemId && editingItemId !== id) {
+                  setEditingItemId(null);
+                }
+              }}
+              onClearSelection={() => {
+                clearSelection();
+                setEditingItemId(null);
+              }}
+              onBeginEdit={(id) => {
+                selectOne(id);
+                setEditingItemId(id);
+              }}
+              onExitEdit={() => setEditingItemId(null)}
+              onChangeItem={updateItem}
+            />
+          </div>
         </div>
       </div>
     </DndContext>

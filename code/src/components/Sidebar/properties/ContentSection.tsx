@@ -1,6 +1,7 @@
 import { useRef, type ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import type { PropertiesSectionProps } from "./types";
+import { MAIL_MERGE_TOOL_SOURCE_IDS } from "@/services/mailMergeService";
 
 interface ContentSectionProps extends PropertiesSectionProps {
   isRichTextArea: boolean;
@@ -8,6 +9,9 @@ interface ContentSectionProps extends PropertiesSectionProps {
 
 export function ContentSection({ item, onChange, isRichTextArea }: ContentSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMailMergePlaceholder =
+    item.sourceToolId === MAIL_MERGE_TOOL_SOURCE_IDS.voterAddress
+    || item.sourceToolId === MAIL_MERGE_TOOL_SOURCE_IDS.voterPin;
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,6 +57,10 @@ export function ContentSection({ item, onChange, isRichTextArea }: ContentSectio
       ) : isRichTextArea ? (
         <div className="rounded border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-800">
           Double-click this text area on the canvas to edit rich text.
+        </div>
+      ) : isMailMergePlaceholder ? (
+        <div className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          This placeholder is filled automatically during mail merge.
         </div>
       ) : (
         <textarea
