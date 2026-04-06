@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { CanvasTextItem } from "@/components/Canvas/items/CanvasTextItem";
 import type { CanvasItem } from "@/lib/utils";
 
@@ -71,7 +71,7 @@ describe("CanvasTextItem", () => {
     expect(screen.getByText("Edit me")).toBeInTheDocument();
   });
 
-  it("exits edit mode on Escape for rich text areas", () => {
+  it("exits edit mode on Escape for rich text areas", async () => {
     const onExitEditMode = vi.fn();
     const item: CanvasItem = {
       id: "text-area-1",
@@ -99,6 +99,10 @@ describe("CanvasTextItem", () => {
         onExitEditMode={onExitEditMode}
       />
     );
+
+    await waitFor(() => {
+      expect(document.querySelector("[contenteditable='true']")).not.toBeNull();
+    });
 
     fireEvent.keyDown(window, { key: "Escape" });
     expect(onExitEditMode).toHaveBeenCalledTimes(1);
