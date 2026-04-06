@@ -161,19 +161,6 @@ export function RichTextAreaItem({
   useEffect(() => {
     if (!isEditing) return;
 
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      onExitEditMode();
-    };
-
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [isEditing, onExitEditMode]);
-
-  useEffect(() => {
-    if (!isEditing) return;
-
     const timeout = window.setTimeout(() => {
       if (draftHtml === item.content) return;
       onChangeItem(item.id, { content: draftHtml });
