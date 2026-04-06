@@ -6,12 +6,18 @@ import {
   loadDocumentLayout,
   type LoadedDocument,
 } from "@/services/layoutService";
-import { captureElementAsPngDataUrl, openPngPagesAsPdf } from "@/lib/utils";
+import { mergeCanvasItemUpdates } from "@/lib/canvasBounds";
 import { useKeyboardMovement } from "./useKeyboardMovement";
 import { useCanvasDnd } from "./useCanvasDnd";
 import type { RawQuestion } from "@/utils/parseElectionData";
 import { buildImportedPdfPages } from "./appController/pageUtils";
 import { usePageState } from "./appController/usePageState";
+import {
+  applyVoterMergeToItems,
+  documentContainsMailMergeTools,
+  parseVoterData,
+  type VoterValidationIssue,
+} from "@/services/mailMergeService";
 import {
   computeRigidClampedDelta,
   createEmptyDragSession,
@@ -19,9 +25,39 @@ import {
   resolveDragMoveIds,
   type DragSession,
 } from "./canvasDnd/dragGroup";
+import { exportCanvasPagesToPdf } from "@/services/documentPdfService";
 
 interface UseAppControllerArgs {
   electionData: RawQuestion[];
+}
+
+const MAX_ISSUE_LINES = 10;
+
+function sanitizeFilenameSegment(value: string): string {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return normalized || "voters";
+}
+
+function summarizeIssues(issues: VoterValidationIssue[]): string {
+  if (issues.length === 0) return "";
+
+  const lines = issues.slice(0, MAX_ISSUE_LINES).map((issue) => {
+    if (issue.rowIndex <= 0) {
+      return `- ${issue.message}`;
+    }
+    return `- Row ${issue.rowIndex}: ${issue.message}`;
+  });
+
+  const overflow = issues.length - lines.length;
+  if (overflow > 0) {
+    lines.push(`- ...and ${overflow} more issue(s).`);
+  }
+
+  return lines.join("\n");
 }
 
 export function useAppController({ electionData }: UseAppControllerArgs) {
@@ -50,6 +86,8 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
 
   const [selectedIdsState, setSelectedIdsState] = useState<Set<string>>(new Set());
   const [dragSession, setDragSession] = useState<DragSession>(createEmptyDragSession);
+  const [isMailMerging, setIsMailMerging] = useState(false);
+  const [toolStatusMessage, setToolStatusMessage] = useState<string | null>(null);
 
   const setSelectedIds = useCallback((value: React.SetStateAction<Set<string>>) => {
     setSelectedIdsState((prev) => {
@@ -94,21 +132,25 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
   const switchPage = useCallback((nextPageId: string) => {
     switchPageBase(nextPageId);
     setSelectedIdsState(new Set());
+    setToolStatusMessage(null);
   }, [switchPageBase]);
 
   const addPage = useCallback(() => {
     addPageBase();
     setSelectedIdsState(new Set());
+    setToolStatusMessage(null);
   }, [addPageBase]);
 
   const duplicatePage = useCallback(() => {
     duplicatePageBase();
     setSelectedIdsState(new Set());
+    setToolStatusMessage(null);
   }, [duplicatePageBase]);
 
   const deletePage = useCallback(() => {
     deletePageBase();
     setSelectedIdsState(new Set());
+    setToolStatusMessage(null);
   }, [deletePageBase]);
 
   useEffect(() => {
@@ -169,12 +211,11 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     setDragSession(createEmptyDragSession());
   }, []);
 
-  const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-
   const loadDocument = useCallback((doc: LoadedDocument) => {
     setPageOrder(doc.pageOrder);
     setPageNamesById(doc.pageNamesById);
     setPagesById(doc.pagesById);
+    setToolStatusMessage(null);
 
     const firstPageId = doc.pageOrder[0] ?? "page-1";
     setActivePageId(firstPageId);
@@ -194,42 +235,107 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
       console.error(err);
       const message = err instanceof Error ? err.message : "Error loading layout.";
       alert(message);
+    } finally {
+      e.target.value = "";
     }
   }, [loadDocument]);
 
   const handlePreviewPDF = useCallback(async () => {
-    const originalPageId = activePageId;
-    const originalItems = canvasItems;
+    const docPagesById: Record<string, CanvasItem[]> = {
+      ...pagesById,
+      [activePageId]: canvasItems,
+    };
+
+    try {
+      await exportCanvasPagesToPdf({
+        pages: pageOrder.map((pageId) => docPagesById[pageId] ?? []),
+      });
+    } catch (err) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : "Error generating preview PDF.";
+      alert(message);
+    }
+  }, [activePageId, canvasItems, pageOrder, pagesById]);
+
+  const handleMailMergePDF = useCallback(async (
+    rawVoterData: unknown,
+    options?: { sourceLabel?: string }
+  ) => {
+    if (isMailMerging) return;
+    if (rawVoterData === null || rawVoterData === undefined) {
+      alert("No voter data is loaded for mail merge.");
+      return;
+    }
 
     const docPagesById: Record<string, CanvasItem[]> = {
       ...pagesById,
       [activePageId]: canvasItems,
     };
 
-    const images: string[] = [];
-
-    for (const pageId of pageOrder) {
-      const items = docPagesById[pageId] ?? [];
-
-      setSelectedId(null);
-      setEditingItemId(null);
-      setActivePageId(pageId);
-      setCanvasItems(items);
-
-      await nextFrame();
-      await nextFrame();
-
-      const png = await captureElementAsPngDataUrl("page");
-      images.push(png);
+    if (!documentContainsMailMergeTools(pageOrder, docPagesById)) {
+      alert("Mail merge requires at least one Voter Address or Voter PIN component on the template.");
+      return;
     }
 
-    openPngPagesAsPdf(images);
+    const parsed = parseVoterData(rawVoterData);
+    if (parsed.totalRows === 0) {
+      const issueSummary = summarizeIssues(parsed.issues);
+      const message = issueSummary
+        ? `No voter rows were found.\n${issueSummary}`
+        : "No voter rows were found in the selected data.";
+      alert(message);
+      return;
+    }
 
-    setSelectedId(null);
-    setEditingItemId(null);
-    setActivePageId(originalPageId);
-    setCanvasItems(originalItems);
-  }, [activePageId, canvasItems, pageOrder, pagesById, setActivePageId, setCanvasItems, setEditingItemId, setSelectedId]);
+    if (parsed.validRecords.length === 0) {
+      const issueSummary = summarizeIssues(parsed.issues);
+      const message = issueSummary
+        ? `Mail merge could not start because no valid voter rows were found.\n${issueSummary}`
+        : "Mail merge could not start because no valid voter rows were found.";
+      alert(message);
+      return;
+    }
+
+    setIsMailMerging(true);
+
+    try {
+      const mergedPages: CanvasItem[][] = [];
+
+      for (const voter of parsed.validRecords) {
+        for (const pageId of pageOrder) {
+          const templateItems = docPagesById[pageId] ?? [];
+          mergedPages.push(applyVoterMergeToItems(templateItems, voter));
+        }
+      }
+
+      const timestamp = new Date().toISOString().slice(0, 10).replaceAll("-", "");
+      const sourceSegment = sanitizeFilenameSegment(options?.sourceLabel ?? "voters");
+      const filename = `mail-merge-${sourceSegment}-${parsed.validRecords.length}-voters-${timestamp}.pdf`;
+      await exportCanvasPagesToPdf({
+        pages: mergedPages,
+        filename,
+      });
+
+      if (parsed.issues.length > 0) {
+        alert(
+          `Mail merge completed for ${parsed.validRecords.length} voter(s). `
+          + `${parsed.issues.length} row(s) were skipped.\n${summarizeIssues(parsed.issues)}`
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : "Error generating mail merge PDF.";
+      alert(message);
+    } finally {
+      setIsMailMerging(false);
+    }
+  }, [
+    activePageId,
+    canvasItems,
+    isMailMerging,
+    pageOrder,
+    pagesById,
+  ]);
 
   const commitDragEnd = useCanvasDnd({
     canvasItems,
@@ -238,6 +344,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     dragSession,
     setCanvasItems,
     setSelectedIds,
+    setToolStatusMessage,
     selectOne,
     toggleSelect,
   });
@@ -247,9 +354,9 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     setDragSession(createEmptyDragSession());
   }, [commitDragEnd]);
 
-  const updateItem = (id: string, updates: Partial<CanvasItem>) => {
+  const updateItem = useCallback((id: string, updates: Partial<CanvasItem>) => {
     setCanvasItems((items) =>
-      items.map((item) => (item.id === id ? { ...item, ...updates } : item))
+      items.map((item) => (item.id === id ? mergeCanvasItemUpdates(item, updates) : item))
     );
 
     if (updates.id) {
@@ -265,7 +372,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
         setEditingItemId(updates.id);
       }
     }
-  };
+  }, [editingItemId, setCanvasItems, setEditingItemId, setSelectedIds]);
 
   const handlePdfImport = useCallback(
     (images: { dataUrl: string; pageNumber: number }[]) => {
@@ -278,6 +385,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
         [activePageId]: canvasItems,
         ...importedPagesById,
       }));
+      setToolStatusMessage(null);
       setPageNamesById((prev) => ({ ...prev, ...importedPageNamesById }));
       setPageOrder((prev) => [...prev, ...newPageIds]);
 
@@ -313,6 +421,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
 
     handleLoadFile,
     handlePreviewPDF,
+    handleMailMergePDF,
     handleDragStart,
     handleDragMove,
     handleDragCancel,
@@ -326,6 +435,8 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     movePage,
     updateItem,
     loadDocument,
+    isMailMerging,
+    toolStatusMessage,
 
     save: () => {
       const doc: LoadedDocument = {

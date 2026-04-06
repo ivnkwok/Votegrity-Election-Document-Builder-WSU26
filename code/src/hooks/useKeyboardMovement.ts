@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { CanvasItem } from "@/lib/utils";
+import { mergeCanvasItemUpdates } from "@/lib/canvasBounds";
 
 // Hook to enable keyboard movement of selected canvas items using arrow keys (pixel nudge).
 export function useKeyboardMovement(
@@ -38,11 +39,10 @@ export function useKeyboardMovement(
         prev.map((item) => {
           if (!selectedIds.has(item.id)) return item;
 
-          return {
-            ...item,
+          return mergeCanvasItemUpdates(item, {
             x: Math.max(0, item.x + dx),
             y: Math.max(0, item.y + dy),
-          };
+          });
         })
       );
 
