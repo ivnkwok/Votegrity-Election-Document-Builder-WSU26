@@ -63,6 +63,7 @@ export default function App() {
     renamePage,
     movePage,
     loadDocument,
+    deleteSelectedItems,
   } = useAppController({ electionData: selectedElectionData });
 
   const selectedItem = useMemo(
@@ -129,6 +130,7 @@ export default function App() {
           }}
           selectedItem={selectedItem}
           onChangeItem={updateItem}
+          onDeleteItem={deleteSelectedItems}
         />
 
         <div className="flex-1 overflow-auto bg-gray-100 p-6">

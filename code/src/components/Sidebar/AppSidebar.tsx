@@ -40,6 +40,7 @@ interface AppSidebarProps {
   onPreview: () => void;
   selectedItem: CanvasItem | undefined;
   onChangeItem: (id: string, updates: Partial<CanvasItem>) => void;
+  onDeleteItem: () => void;
 }
 
 export function AppSidebar({
@@ -64,6 +65,7 @@ export function AppSidebar({
   onPreview,
   selectedItem,
   onChangeItem,
+  onDeleteItem,
 }: AppSidebarProps) {
   return (
     <div className="flex h-screen w-[380px] flex-col border-r border-gray-300 bg-white">
@@ -120,7 +122,7 @@ export function AppSidebar({
 
         <SidebarActions onSave={onSave} onLoad={onLoad} onPreview={onPreview} />
 
-        <PropertiesPanel item={selectedItem} onChange={onChangeItem} />
+        <PropertiesPanel item={selectedItem} onChange={onChangeItem} onDelete={onDeleteItem}/>
       </div>
     </div>
   );
