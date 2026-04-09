@@ -55,6 +55,7 @@ interface AppSidebarProps {
   onRunMailMerge: () => void;
   selectedItem: CanvasItem | undefined;
   onChangeItem: (id: string, updates: Partial<CanvasItem>) => void;
+  onDeleteItem: () => void;
 }
 
 export function AppSidebar({
@@ -88,6 +89,7 @@ export function AppSidebar({
   onRunMailMerge,
   selectedItem,
   onChangeItem,
+  onDeleteItem,
 }: AppSidebarProps) {
   return (
     <aside className="flex h-full w-[380px] shrink-0 overflow-hidden border-r border-gray-300 bg-white">
@@ -174,7 +176,7 @@ export function AppSidebar({
           onRunMailMerge={onRunMailMerge}
         />
 
-        <PropertiesPanel item={selectedItem} onChange={onChangeItem} />
+        <PropertiesPanel item={selectedItem} onChange={onChangeItem} onDelete={onDeleteItem}/>
       </div>
     </aside>
   );

@@ -86,6 +86,7 @@ export default function App() {
     renamePage,
     movePage,
     loadDocument,
+    deleteSelectedItems,
     isMailMerging,
     toolStatusMessage,
   } = useAppController({ electionData: selectedElectionData });
@@ -221,6 +222,7 @@ export default function App() {
             }}
             selectedItem={selectedItem}
             onChangeItem={updateItem}
+            onDeleteItem={deleteSelectedItems}
           />
 
           <div className="min-w-0 flex-1 overflow-x-auto overflow-y-auto overscroll-contain bg-gray-100 px-6 pt-10 pb-10">

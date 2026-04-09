@@ -4,13 +4,15 @@ import { ContentSection } from "./properties/ContentSection";
 import { FlagsSummarySection } from "./properties/FlagsSummarySection";
 import { PositionSizeSection } from "./properties/PositionSizeSection";
 import { TextStyleSection } from "./properties/TextStyleSection";
+import { Button } from "@/components/ui/button";
 
 interface PropertiesPanelProps {
   item: CanvasItem | undefined;
   onChange: (id: string, updates: Partial<CanvasItem>) => void;
+  onDelete: () => void;
 }
 
-export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
+export function PropertiesPanel({ item, onChange, onDelete }: PropertiesPanelProps) {
   if (!item) return null;
 
   const isMovable = item.flags?.isMovable !== false;
@@ -20,7 +22,14 @@ export function PropertiesPanel({ item, onChange }: PropertiesPanelProps) {
   return (
     <div className="mt-4 rounded-md border bg-white p-4 shadow">
       <h3 className="mb-2 font-semibold">Selected Component</h3>
-
+        <Button 
+          variant="destructive" 
+          size="sm" 
+          onClick={onDelete}
+          title="Delete selected"
+        >
+          Delete Selected
+        </Button>
       <div className="space-y-3 text-sm">
         <div>
           <label className="font-medium">ID</label>
