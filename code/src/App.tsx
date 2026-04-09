@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useAppController } from "./hooks/useAppController";
 import { Canvas } from "./components/Canvas/Canvas";
 import { AppSidebar } from "./components/Sidebar/AppSidebar";
+import { HelpDialog } from "./components/HelpDialog";
 import { TOOL_DEFINITIONS } from "./config/tools";
 import { TEMPLATE_OPTIONS, loadTemplateLayout, type TemplateId } from "./services/templateService";
 import election1 from "./data/Election207.json";
@@ -158,8 +159,9 @@ export default function App() {
       </DragOverlay>
 
       <div className="flex h-screen flex-col overflow-hidden bg-gray-100">
-        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center border-b border-gray-300 bg-slate-200 px-6 shadow-sm">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-gray-300 bg-slate-200 px-6 shadow-sm">
           <h1 className="text-xl font-semibold">Votegrity Election Document Builder</h1>
+          <HelpDialog />
         </header>
 
         <div className="flex min-h-0 flex-1 overflow-hidden">
