@@ -5,6 +5,17 @@ import { FlagsSummarySection } from "./properties/FlagsSummarySection";
 import { PositionSizeSection } from "./properties/PositionSizeSection";
 import { TextStyleSection } from "./properties/TextStyleSection";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface PropertiesPanelProps {
   item: CanvasItem | undefined;
@@ -22,14 +33,6 @@ export function PropertiesPanel({ item, onChange, onDelete }: PropertiesPanelPro
   return (
     <div className="mt-4 rounded-md border bg-white p-4 shadow">
       <h3 className="mb-2 font-semibold">Selected Component</h3>
-        <Button 
-          variant="destructive" 
-          size="sm" 
-          onClick={onDelete}
-          title="Delete selected"
-        >
-          Delete Selected
-        </Button>
       <div className="space-y-3 text-sm">
         <div>
           <label className="font-medium">ID</label>
@@ -47,6 +50,28 @@ export function PropertiesPanel({ item, onChange, onDelete }: PropertiesPanelPro
         <PositionSizeSection item={item} onChange={onChange} isMovable={isMovable} />
 
         <FlagsSummarySection item={item} />
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm" title="Delete selected">
+              Delete Selected
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent size="sm">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete selected component?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction variant="destructive" onClick={onDelete}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
