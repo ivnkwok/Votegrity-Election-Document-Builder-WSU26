@@ -1,141 +1,50 @@
-# Tool Definitions Guide  
-This document explains how the tool-definition system works inside the `config/` directory, and how to create new tools for the canvas-based document builder.
+# Tool Definitions Guide
 
-The file `tools.ts` contains a declarative list of **ToolDefinitions**, which describe all draggable components shown in the left-hand palette of the application.
+`src/config/tools.ts` is the source of truth for draggable sidebar tools.
 
-The canvas uses these definitions to automatically generate items when the user drags a tool onto the page.
-
----
-
-## What Is a ToolDefinition?
-
-A tool is a JSON-like configuration object describing:
-
-- what type of item it is (`text`, `image`, or `box`)
-- what default content it has
-- how large it should be
-- whether it can be moved or edited
-- optional styling applied when rendered
-
-Every tool must match this interface:
+## ToolDefinition Shape
 
 ```ts
 export interface ToolDefinition {
-  id: string;                     // Unique internal ID
-  label: string;                  // Name shown in the palette
-  type: "text" | "image" | "box"; // Determines how the tool is rendered on the canvas
-
-  defaultContent?: string;        // Only for text items
-  imageSrc?: string;              // Only for image items
-
-  defaultWidth: number;           // Initial width on canvas
-  defaultHeight: number;          // Initial height on canvas
-
+  id: string;
+  label: string;
+  toolKind?: "canvas-item" | "generator";
+  type: "text" | "image" | "box";
+  defaultContent?: string;
+  imageSrc?: string;
+  defaultWidth: number;
+  defaultHeight: number;
   flags: {
-    isMoveable: boolean;          // Can the user drag it?
-    isEditable: boolean;          // Can the content be edited?
-    minQuantity: number;          // Minimum allowed on the canvas
-    maxQuantity: number;          // Maximum allowed on the canvas
+    isMovable: boolean;
+    isEditable: boolean;
+    minQuantity: number;
+    maxQuantity: number;
   };
-
-  styles?: React.CSSProperties;   // Optional styles (font size, alignment, etc.)
+  styles?: React.CSSProperties;
 }
 ```
 
----
+## How It Works
 
-## Where Tools Are Defined
+1. Sidebar tools are rendered directly from `TOOL_DEFINITIONS`.
+2. `toolKind: "canvas-item"` creates a single canvas item when dropped.
+3. `toolKind: "generator"` runs custom drop logic instead of creating a direct item.
+4. `flags.maxQuantity` is enforced per page during drop.
 
-All available tools are listed in:
+## Current Rendering Rules
 
-```
-config/tools.ts
-```
+- `text` uses `CanvasTextItem`
+- `image` uses `CanvasImageItem`
+- `box` uses `CanvasBoxItem`
 
-They are stored as an array:
+## Adding A New Tool
 
-```ts
-export const TOOL_DEFINITIONS: ToolDefinition[] = [
-  { ... },
-  { ... },
-  ...
-];
-```
+- Add an entry to `TOOL_DEFINITIONS`.
+- Use `toolKind: "generator"` only if the tool creates multiple items or runs custom logic.
+- Keep `sourceToolId` stable so saved layouts, quantity checks, and tests stay consistent.
+- If a tool needs custom generation behavior, update `useCanvasDnd.ts`.
 
-Each entry corresponds to one draggable tool in the left palette.
-
----
-
-## How Tools Are Used in the Application
-
-When a user drags a tool from the palette onto the canvas:
-
-1. The tool definition is looked up using its `id`.
-2. A new `CanvasItem` is created using:
-   - `defaultContent` or `imageSrc`
-   - default width/height
-   - styling from the `styles` field
-   - behavior from the `flags` field  
-3. The renderer automatically chooses the correct component:
-   - `"text"` → `CanvasTextItem`
-   - `"image"` → `CanvasImageItem`
-   - `"box"` → (reserved for layout items or backgrounds)
-
-This setup keeps the canvas generic while allowing tools to be fully customizable.
-
----
-
-## Adding a New Tool
-
-To define a new tool, simply append a new object to the `TOOL_DEFINITIONS` array.
-
-### Example: A Section Header Text Block
-
-```ts
-{
-  id: "section-header",
-  label: "Section Header",
-  type: "text",
-  defaultContent: "Section Title",
-  defaultWidth: 300,
-  defaultHeight: 50,
-  flags: {
-    isMoveable: true,
-    isEditable: true,
-    minQuantity: 0,
-    maxQuantity: 99
-  },
-  styles: {
-    fontSize: 22,
-    fontWeight: 700
-  }
-}
-```
-
----
-
-### Example: A Decorative Divider Image
-
-```ts
-{
-  id: "divider-line",
-  label: "Divider Line",
-  type: "image",
-  imageSrc: "/assets/divider.png",
-  defaultWidth: 400,
-  defaultHeight: 20,
-  flags: {
-    isMoveable: true,
-    isEditable: false,
-    minQuantity: 0,
-    maxQuantity: 99
-  }
-}
-```
-
----
-
-### Example: A Simple Colored Box
+## Example
 
 ```ts
 {
@@ -145,38 +54,14 @@ To define a new tool, simply append a new object to the `TOOL_DEFINITIONS` array
   defaultWidth: 200,
   defaultHeight: 120,
   flags: {
-    isMoveable: true,
+    isMovable: true,
     isEditable: false,
     minQuantity: 0,
-    maxQuantity: 99
+    maxQuantity: 99,
   },
   styles: {
     backgroundColor: "#e5e7eb",
-    border: "1px solid #ccc"
-  }
+    border: "1px solid #ccc",
+  },
 }
 ```
-
----
-
-## Design Principles
-
-- **Declarative by design** — tools require no React code changes.
-- **Automatic rendering** — the renderer chooses components based on `type`.
-- **Consistent behavior** — movement, resizing, and editing are unified.
-- **Easily extendable** — new tools require only a new entry in `TOOL_DEFINITIONS`.
-
----
-
-## Summary
-
-The tool-definition system allows the application to scale quickly and stay maintainable.  
-Every draggable tool is defined entirely within `config/tools.ts`, making it easy to:
-
-- add new component types  
-- modify styling or defaults  
-- enforce quantity limits  
-- reuse tools across templates  
-
-No canvas rendering logic needs to be modified when adding a tool.
-

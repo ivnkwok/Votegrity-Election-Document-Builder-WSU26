@@ -15,7 +15,7 @@ interface PropertiesPanelProps {
 export function PropertiesPanel({ item, onChange, onDelete }: PropertiesPanelProps) {
   if (!item) return null;
 
-  const isMoveable = item.flags?.isMovable !== false;
+  const isMovable = item.flags?.isMovable !== false;
   const isText = item.type === "text";
   const isRichTextArea = isText && item.sourceToolId === "text-area";
 
@@ -44,7 +44,7 @@ export function PropertiesPanel({ item, onChange, onDelete }: PropertiesPanelPro
 
         <TextStyleSection item={item} onChange={onChange} isRichTextArea={isRichTextArea} />
 
-        <PositionSizeSection item={item} onChange={onChange} isMoveable={isMoveable} />
+        <PositionSizeSection item={item} onChange={onChange} isMovable={isMovable} />
 
         <FlagsSummarySection item={item} />
       </div>

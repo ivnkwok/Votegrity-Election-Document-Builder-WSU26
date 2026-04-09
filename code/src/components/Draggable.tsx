@@ -7,6 +7,7 @@ interface DraggableProps extends React.HTMLAttributes<HTMLDivElement> {
   style?: React.CSSProperties;
   className?: string;
   disabled?: boolean;
+  useDragTransform?: boolean;
 }
 
 export function Draggable({
@@ -15,6 +16,7 @@ export function Draggable({
   style,
   className,
   disabled = false,
+  useDragTransform = true,
   onPointerDown,
   ...props
 }: DraggableProps) {
@@ -33,7 +35,7 @@ export function Draggable({
 
   const combinedStyle: React.CSSProperties = {
     ...style,
-    ...(transform ? {
+    ...(useDragTransform && transform ? {
       transform:
         typeof style?.transform === "string"
           ? style.transform

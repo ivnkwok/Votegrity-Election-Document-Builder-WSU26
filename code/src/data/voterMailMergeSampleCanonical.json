@@ -1,0 +1,84 @@
+{
+  "voters": [
+    {
+      "name": "Avery Johnson",
+      "addressLine1": "1221 W Riverside Ave",
+      "addressLine2": "Unit 4B",
+      "cityStateZip": "Spokane, WA 99201",
+      "country": "USA",
+      "pin": "001245"
+    },
+    {
+      "name": "Morgan Lee",
+      "addressLine1": "874 N Maple St",
+      "addressLine2": "",
+      "cityStateZip": "Spokane, WA 99205",
+      "country": "USA",
+      "pin": "774301"
+    },
+    {
+      "name": "Jordan Kim",
+      "addressLine1": "4412 S Perry St",
+      "addressLine2": "Apt 11",
+      "cityStateZip": "Spokane, WA 99223",
+      "country": "USA",
+      "pin": "502918"
+    },
+    {
+      "name": "Riley Carter",
+      "addressLine1": "317 W Mission Ave",
+      "addressLine2": "Floor 2",
+      "cityStateZip": "Spokane, WA 99201",
+      "country": "USA",
+      "pin": "660045"
+    },
+    {
+      "name": "Casey Martinez",
+      "addressLine1": "909 E Sprague Ave",
+      "addressLine2": "",
+      "cityStateZip": "Spokane, WA 99202",
+      "country": "USA",
+      "pin": "931227"
+    },
+    {
+      "name": "Taylor Nguyen",
+      "addressLine1": "201 N Wall St",
+      "addressLine2": "Suite 300",
+      "cityStateZip": "Spokane, WA 99201",
+      "country": "USA",
+      "pin": "185904"
+    },
+    {
+      "name": "Quinn Parker",
+      "addressLine1": "728 S Ray St",
+      "addressLine2": "",
+      "cityStateZip": "Spokane, WA 99202",
+      "country": "USA",
+      "pin": "430112"
+    },
+    {
+      "name": "Drew Patel",
+      "addressLine1": "6507 N Nevada St",
+      "addressLine2": "Lot 17",
+      "cityStateZip": "Spokane, WA 99208",
+      "country": "USA",
+      "pin": "712809"
+    },
+    {
+      "name": "Emerson Wright",
+      "addressLine1": "1450 E 37th Ave",
+      "addressLine2": "",
+      "cityStateZip": "Spokane, WA 99203",
+      "country": "USA",
+      "pin": "529776"
+    },
+    {
+      "name": "Peyton Ramirez",
+      "addressLine1": "9815 N Division St",
+      "addressLine2": "Box 204",
+      "cityStateZip": "Spokane, WA 99218",
+      "country": "USA",
+      "pin": "348990"
+    }
+  ]
+}

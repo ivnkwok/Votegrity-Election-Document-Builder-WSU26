@@ -19,6 +19,7 @@ interface UseCanvasDndArgs {
   dragSession: DragSession;
   setCanvasItems: React.Dispatch<React.SetStateAction<CanvasItem[]>>;
   setSelectedIds: React.Dispatch<React.SetStateAction<Set<string>>>;
+  setToolStatusMessage: React.Dispatch<React.SetStateAction<string | null>>;
   selectOne: (id: string | null) => void;
   toggleSelect: (id: string) => void;
 }
@@ -30,6 +31,7 @@ export function useCanvasDnd({
   dragSession,
   setCanvasItems,
   setSelectedIds,
+  setToolStatusMessage,
   selectOne,
   toggleSelect,
 }: UseCanvasDndArgs) {
@@ -47,7 +49,11 @@ export function useCanvasDnd({
 
       if (existingItem) {
         const rawDelta = delta ?? { x: 0, y: 0 };
-        if (rawDelta.x === 0 && rawDelta.y === 0) {
+        const hasLiveSession =
+          dragSession.activeId === activeId && dragSession.moveIds.size > 0;
+        const sessionRawDelta = hasLiveSession ? dragSession.rawDelta : rawDelta;
+
+        if (sessionRawDelta.x === 0 && sessionRawDelta.y === 0) {
           const { shift, meta } = active.data.current?.getModifiers?.() ?? {};
           if (shift || meta) {
             toggleSelect(existingItem.id);
@@ -64,11 +70,13 @@ export function useCanvasDnd({
         });
 
         const idsToMove =
-          dragSession.activeId === activeId && dragSession.moveIds.size > 0
+          hasLiveSession
             ? dragSession.moveIds
             : fallbackMoveIds;
         const moveItems = getMoveItems(canvasItems, idsToMove);
-        const appliedDelta = computeRigidClampedDelta(rawDelta, moveItems, canvasRect);
+        const appliedDelta = hasLiveSession
+          ? dragSession.appliedDelta
+          : computeRigidClampedDelta(rawDelta, moveItems, canvasRect);
 
         setCanvasItems((prev) =>
           prev.map((item) => {
@@ -103,7 +111,16 @@ export function useCanvasDnd({
       const toolDef = TOOL_DEFINITIONS.find((tool) => tool.id === toolId);
       if (!toolDef) return;
 
-      if (toolId === "question-answer") {
+      const existingCount = canvasItems.filter((item) => item.sourceToolId === toolDef.id).length;
+      if (existingCount >= toolDef.flags.maxQuantity) {
+        const limitMessage = toolDef.flags.maxQuantity === 1
+          ? `"${toolDef.label}" can only be added once on this page.`
+          : `"${toolDef.label}" can only be added ${toolDef.flags.maxQuantity} times on this page.`;
+        setToolStatusMessage(limitMessage);
+        return;
+      }
+
+      if ((toolDef.toolKind ?? "canvas-item") === "generator" && toolId === "question-answer") {
         const { questions, answers } = parseElection(electionData);
         const newItems = createQuestionAnswerItems({
           questions,
@@ -112,6 +129,7 @@ export function useCanvasDnd({
           startY: translated.top - canvasRect.top,
         });
 
+        setToolStatusMessage(null);
         setCanvasItems((items) => [...items, ...newItems]);
         setSelectedIds(new Set(newItems.map((item) => item.id)));
         return;
@@ -124,6 +142,7 @@ export function useCanvasDnd({
         canvasRect,
       });
 
+      setToolStatusMessage(null);
       setCanvasItems((items) => [...items, newItem]);
       selectOne(newItem.id);
     },
@@ -135,6 +154,7 @@ export function useCanvasDnd({
       selectedIds,
       setCanvasItems,
       setSelectedIds,
+      setToolStatusMessage,
       toggleSelect,
     ]
   );

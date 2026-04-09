@@ -18,7 +18,7 @@ interface DraggableToolProps {
 }
 
 export function DraggableTool({ id, toolText }: DraggableToolProps) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: id,
     data: {
       text: toolText,
@@ -26,11 +26,9 @@ export function DraggableTool({ id, toolText }: DraggableToolProps) {
     } as ToolData,
   });
 
-  // Apply a transform style if the item is being dragged
-  const style: React.CSSProperties = transform
+  const style: React.CSSProperties = isDragging
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        zIndex: 999, // Ensure it's on top while dragging
+        opacity: 0.35,
       }
     : {};
 

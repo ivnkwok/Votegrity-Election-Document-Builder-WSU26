@@ -4,6 +4,7 @@
 export interface ToolDefinition {
   id: string;
   label: string;
+  toolKind?: "canvas-item" | "generator";
   type: "text" | "image" | "box";
   defaultContent?: string;       // for text items
   imageSrc?: string;             // for image items
@@ -72,10 +73,31 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     id: "question-answer",
-    label:"Q&A",
+    label: "Q&A",
+    toolKind: "generator",
     type: "box",
     defaultWidth: 200,
     defaultHeight: 60,
-    flags: { isMovable: true, isEditable: true, minQuantity: 1, maxQuantity: 1},
+    flags: { isMovable: true, isEditable: true, minQuantity: 1, maxQuantity: 1 },
+  },
+  {
+    id: "voter-address",
+    label: "Voter Address",
+    type: "text",
+    defaultContent: "{{VOTER_ADDRESS}}",
+    defaultWidth: 240,
+    defaultHeight: 110,
+    flags: { isMovable: true, isEditable: false, minQuantity: 0, maxQuantity: 999 },
+    styles: { fontSize: 14, whiteSpace: "pre-wrap" },
+  },
+  {
+    id: "voter-pin",
+    label: "Voter PIN",
+    type: "text",
+    defaultContent: "{{VOTER_PIN}}",
+    defaultWidth: 180,
+    defaultHeight: 40,
+    flags: { isMovable: true, isEditable: false, minQuantity: 0, maxQuantity: 999 },
+    styles: { fontSize: 14, fontWeight: 600 },
   },
 ];

@@ -1,12 +1,12 @@
 import type { CanvasItem } from "@/lib/utils";
 
 export function FlagsSummarySection({ item }: { item: CanvasItem }) {
-  const isMoveable = item.flags?.isMovable !== false;
+  const isMovable = item.flags?.isMovable !== false;
 
   return (
     <>
       <div>
-        <strong>Moveable:</strong> {isMoveable ? "Yes" : "No"}
+        <strong>Movable:</strong> {isMovable ? "Yes" : "No"}
       </div>
       <div>
         <strong>Editable:</strong> {item.flags?.isEditable ? "Yes" : "No"}

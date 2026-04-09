@@ -95,6 +95,33 @@ function createDragEndEvent(activeId: string, x: number, y: number): DragEndEven
   } as unknown as DragEndEvent;
 }
 
+function createToolDropEvent(toolId: string, left: number, top: number): DragEndEvent {
+  return {
+    active: {
+      id: toolId,
+      rect: {
+        current: {
+          translated: {
+            left,
+            top,
+            right: left,
+            bottom: top,
+            width: 0,
+            height: 0,
+          },
+        },
+      },
+      data: {
+        current: {},
+      },
+    },
+    over: {
+      id: "canvas",
+    },
+    delta: { x: 0, y: 0 },
+  } as unknown as DragEndEvent;
+}
+
 describe("useAppController drag session behavior", () => {
   it("clears drag preview state on cancel without mutating positions", () => {
     mockPageRect(500, 700);
@@ -131,7 +158,7 @@ describe("useAppController drag session behavior", () => {
     ]);
   });
 
-  it("commits the same clamped delta shown during preview", () => {
+  it("commits the same clamped delta shown during preview even if drag end reports a larger delta", () => {
     mockPageRect(400, 500);
 
     const { result } = renderHook(() => useAppController({ electionData: [] }));
@@ -152,7 +179,7 @@ describe("useAppController drag session behavior", () => {
     expect(result.current.dragSession.appliedDelta).toEqual({ x: 20, y: 0 });
 
     act(() => {
-      result.current.handleDragEnd(createDragEndEvent("a", 60, 0));
+      result.current.handleDragEnd(createDragEndEvent("a", 600, 0));
     });
 
     expect(result.current.canvasItems.map((item) => ({ id: item.id, x: item.x, y: item.y }))).toEqual([
@@ -186,5 +213,28 @@ describe("useAppController drag session behavior", () => {
       { id: "a", x: 30, y: 10 },
       { id: "b", x: 80, y: 10 },
     ]);
+  });
+
+  it("blocks tool drops that exceed the configured page quantity limit", () => {
+    mockPageRect(500, 700);
+
+    const { result } = renderHook(() => useAppController({ electionData: [] }));
+
+    act(() => {
+      result.current.setCanvasItems([
+        {
+          ...makeItem("return-address-1", 10, 10, 200, 60, true),
+          sourceToolId: "return-address",
+          content: "1234 Main St",
+        },
+      ]);
+    });
+
+    act(() => {
+      result.current.handleDragEnd(createToolDropEvent("return-address", 100, 120));
+    });
+
+    expect(result.current.canvasItems).toHaveLength(1);
+    expect(result.current.toolStatusMessage).toContain("can only be added once on this page");
   });
 });

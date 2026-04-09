@@ -1,11 +1,11 @@
 {
-  "name": "temp",
+  "name": "votegrity-election-document-builder",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/checkBundleSize.mjs",
     "build:docscreator": "tsc -b && vite build --base=/docscreator/",
     "test": "vitest",
     "test:ui": "vitest --ui",

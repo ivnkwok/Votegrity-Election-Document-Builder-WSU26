@@ -71,6 +71,7 @@ export function Canvas({
               key={item.id}
               id={item.id}
               disabled={isEditing || !isMovable}
+              useDragTransform={false}
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect(item.id, e);

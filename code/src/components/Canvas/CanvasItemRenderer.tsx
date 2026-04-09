@@ -1,5 +1,6 @@
 import type { CanvasItem } from "@/lib/utils";
 
+import { CanvasBoxItem } from "./items/CanvasBoxItem";
 import { CanvasImageItem } from "./items/CanvasImageItem";
 import { CanvasTextItem } from "./items/CanvasTextItem";
 
@@ -24,11 +25,13 @@ export function CanvasItemRenderer({
   onExitEditMode,
 }: CanvasItemRendererProps) {
   switch (item.type) {
+    case "box":
+      return <CanvasBoxItem item={item} />;
+
     case "image":
       return <CanvasImageItem item={item} />;
 
     case "text":
-    default:
       return (
         <CanvasTextItem
           item={item}
@@ -37,5 +40,8 @@ export function CanvasItemRenderer({
           onExitEditMode={onExitEditMode}
         />
       );
+
+    default:
+      return null;
   }
 }
