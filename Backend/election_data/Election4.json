@@ -1,0 +1,8 @@
+ [{"answer_urls": ["https://akka.votegrity.net/booth/media/uploads/2026/02/JimCampbell.pdf", "https://akka.votegrity.net/booth/media/uploads/2026/02/LendellFoan.pdf", 
+  "https://akka.votegrity.net/booth/media/uploads/2026/02/RebeccaMann.pdf", "https://akka.votegrity.net/booth/media/uploads/2026/02/CRyanPatterson.pdf",
+  "https://akka.votegrity.net/booth/media/uploads/2026/02/KarlPfrommer.pdf", "https://akka.votegrity.net/booth/media/uploads/2026/02/MaryAnneSmith.pdf",
+  "https://akka.votegrity.net/booth/media/uploads/2026/02/CarlaSproge.pdf", "https://akka.votegrity.net/booth/media/uploads/2026/02/NateWestheimer.pdf",
+  "https://akka.votegrity.net/booth/media/uploads/2026/02/ArielleWright.pdf", "", "", "", "", "", "", "", "", ""],
+  "answer_urls_checked": [true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false],
+  "answers": ["Jim Campbell", "Lendell Foan", "Rebecca Mann", "C. Ryan Patterson", "Karl Pfrommer", "Mary Anne Smith", "Carla Sproge", "Nate Westheimer", "Arielle Wright", "Write-in", "Write-in", "Write-in", "Write-in", "Write-in", "Write-in", "Write-in", "Write-in", "Write-in"],
+  "choice_type": "approval", "id": 1, "max": 9, "min": 0, "open": true, "question": "Board of Directors", "result_type": "absolute", "short_name": "", "tally_type": "homomorphic"}]

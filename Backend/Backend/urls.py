@@ -16,8 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from posts.API.views import get_election_data
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('Backend.API.urls'))
+
+    path('api/backend/', include('Backend.API.urls')),
+    path('api/posts/', include('posts.API.urls')),
+    path('posts/', include('posts.API.urls')),
+    path("elections/<str:election_id>/", get_election_data, name="get-election-data"),
 ]
