@@ -1,6 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 from ..models import Post
 from .serializers import postSerializer
+from Backend.ServerAccess import fetch_remote_elections
 
 class PostViewSet(ModelViewSet):
     queryset = Post.objects.all()
@@ -34,3 +35,14 @@ def get_election_data(request, election_id):
         return JsonResponse(data, safe=False)
     except FileNotFoundError:
         return JsonResponse({"error": "File not found"}, status=404)
+
+
+@api_view(["GET"])
+def get_remote_elections(request):
+    limit = request.GET.get("limit", 10)
+
+    try:
+        data = fetch_remote_elections(limit=limit)
+        return JsonResponse(data, safe=False)
+    except Exception as err:
+        return JsonResponse({"error": str(err)}, status=500)

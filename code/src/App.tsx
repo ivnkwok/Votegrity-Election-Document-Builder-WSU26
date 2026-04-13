@@ -1,23 +1,13 @@
 import { DndContext } from "@dnd-kit/core";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppController } from "./hooks/useAppController";
 import { Canvas } from "./components/Canvas/Canvas";
 import { AppSidebar } from "./components/Sidebar/AppSidebar";
 import { TOOL_DEFINITIONS } from "./config/tools";
 import { TEMPLATE_OPTIONS, loadTemplateLayout, type TemplateId } from "./services/templateService";
-import election1 from "./data/Election207.json";
-import election2 from "./data/Election365.json";
-import election3 from "./data/Election458.json";
-import election4 from "./data/Election488.json";
+import { fetchElectionData, type RawQuestion } from "./utils/parseElectionData";
 
-const electionDataSets = {
-  election1,
-  election2,
-  election3,
-  election4,
-} as const;
-
-type ElectionKey = keyof typeof electionDataSets;
+type ElectionKey = "election1" | "election2" | "election3" | "election4";
 
 const ELECTION_OPTIONS: Array<{ value: ElectionKey; label: string }> = [
   { value: "election1", label: "Election 1" },
@@ -28,11 +18,31 @@ const ELECTION_OPTIONS: Array<{ value: ElectionKey; label: string }> = [
 
 export default function App() {
   const [selectedElection, setSelectedElection] = useState<ElectionKey>("election1");
+  const [selectedElectionData, setSelectedElectionData] = useState<RawQuestion[]>([]);
 
-  const selectedElectionData = useMemo(
-    () => electionDataSets[selectedElection],
-    [selectedElection]
-  );
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadElection = async () => {
+      try {
+        const data = await fetchElectionData(selectedElection);
+        if (!cancelled) {
+          setSelectedElectionData(data);
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setSelectedElectionData([]);
+        }
+      }
+    };
+
+    void loadElection();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedElection]);
 
   const {
     canvasItems,

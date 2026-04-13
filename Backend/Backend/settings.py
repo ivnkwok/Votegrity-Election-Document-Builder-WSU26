@@ -85,6 +85,17 @@ DATABASES = {
     }
 }
 
+#import os
+##DATABASES = {
+##   'default': {
+##       'ENGINE': 'django.db.backends.postgresql',
+##       'NAME': 'helios',
+#       'USER': 'adminuser',
+##        'PASSWORD': 'new_password',
+##        'HOST': '127.0.0.1',
+#        'PORT': int(os.environ.get("DB_PORT", 5432)),
+#    }
+##}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators

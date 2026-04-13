@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import type { DragEndEvent } from "@dnd-kit/core";
 import type { CanvasItem } from "@/lib/utils";
 import { TOOL_DEFINITIONS } from "@/config/tools";
-import { parseElection, type RawQuestion } from "@/utils/parseElectionData";
+import { parseElectionData, type RawQuestion } from "@/utils/parseElectionData";
 import { createQuestionAnswerItems, createToolDropItem } from "./canvasDnd/itemFactories";
 import { clampToRange, isPointInsideRect } from "./canvasDnd/positionUtils";
 
@@ -89,7 +89,7 @@ export function useCanvasDnd({
       if (!toolDef) return;
 
       if (toolId === "question-answer") {
-        const { questions, answers } = parseElection(electionData);
+        const { questions, answers } = parseElectionData(electionData);
         const newItems = createQuestionAnswerItems({
           questions,
           answers,
