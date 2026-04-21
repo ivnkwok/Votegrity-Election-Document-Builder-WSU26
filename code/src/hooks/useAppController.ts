@@ -414,6 +414,7 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
         const url = 'https://docscreator.votegrity.net/helios/elections/administered/raw'
         const rawData = await fetchElectionData(url)
         //TODO: ADD PARSING HERE @TiengLance
+        console.log(`Data fetched:`, rawData)
       }
       catch (error) {
         console.error(`Failed to load election data:`, error)
