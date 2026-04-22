@@ -43,3 +43,4 @@ def fetch_remote_elections(limit=10):
         return json.loads(data) if data else []
     finally:
         client.close()
+v
