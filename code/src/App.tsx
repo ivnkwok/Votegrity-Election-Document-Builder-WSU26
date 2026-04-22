@@ -6,28 +6,26 @@ import { AppSidebar } from "./components/Sidebar/AppSidebar";
 import { HelpDialog } from "./components/HelpDialog";
 import { TOOL_DEFINITIONS } from "./config/tools";
 import { TEMPLATE_OPTIONS, loadTemplateLayout, type TemplateId } from "./services/templateService";
-import election1 from "./data/Election207.json";
-import election2 from "./data/Election365.json";
-import election3 from "./data/Election458.json";
-import election4 from "./data/Election488.json";
+import allElections from "./data/AllElection.json";
 import voterSampleCanonical from "./data/voterMailMergeSampleCanonical.json";
 import voterSampleColumnsRows from "./data/voterMailMergeSampleColumnsRows.json";
+import type { ElectionRecord } from "./utils/parseElectionData";
 
-const electionDataSets = {
-  election1,
-  election2,
-  election3,
-  election4,
-} as const;
+const electionRecords = allElections as ElectionRecord[];
 
-type ElectionKey = keyof typeof electionDataSets;
+const availableElectionRecords = electionRecords.filter(
+  (record) => Array.isArray(record.questions) && record.questions.length > 0
+);
 
-const ELECTION_OPTIONS: Array<{ value: ElectionKey; label: string }> = [
-  { value: "election1", label: "Election 1" },
-  { value: "election2", label: "Election 2" },
-  { value: "election3", label: "Election 3" },
-  { value: "election4", label: "Election 4" },
-];
+const defaultElection = availableElectionRecords.find((record) => !record.is_archived)
+  ?? availableElectionRecords[0];
+
+const ELECTION_OPTIONS: Array<{ value: string; label: string }> = availableElectionRecords.map(
+  (record) => ({
+    value: record.uuid,
+    label: record.short_name?.trim() || record.name,
+  })
+);
 
 const voterDataSets = {
   "sample-canonical": voterSampleCanonical,
@@ -47,14 +45,22 @@ function getVoterListLabel(value: VoterListKey): string {
 }
 
 export default function App() {
-  const [selectedElection, setSelectedElection] = useState<ElectionKey>("election1");
+  const [selectedElection, setSelectedElection] = useState<string>(defaultElection?.uuid ?? "");
   const [selectedVoterList, setSelectedVoterList] = useState<VoterListKey>("sample-canonical");
   const [uploadedVoterData, setUploadedVoterData] = useState<unknown | null>(null);
   const [uploadedVoterFileName, setUploadedVoterFileName] = useState<string | null>(null);
 
-  const selectedElectionData = useMemo(
-    () => electionDataSets[selectedElection],
+  const selectedElectionRecord = useMemo(
+    () =>
+      availableElectionRecords.find((record) => record.uuid === selectedElection)
+      ?? defaultElection
+      ?? null,
     [selectedElection]
+  );
+
+  const selectedElectionData = useMemo(
+    () => selectedElectionRecord?.questions ?? [],
+    [selectedElectionRecord]
   );
 
   const {
@@ -170,7 +176,7 @@ export default function App() {
             electionOptions={ELECTION_OPTIONS}
             templateOptions={TEMPLATE_OPTIONS}
             selectedElection={selectedElection}
-            onSelectedElectionChange={(value) => setSelectedElection(value as ElectionKey)}
+            onSelectedElectionChange={setSelectedElection}
             onTemplateChange={(value) => {
               try {
                 const doc = loadTemplateLayout(value as TemplateId);
