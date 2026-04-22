@@ -26,6 +26,7 @@ import {
   type DragSession,
 } from "./canvasDnd/dragGroup";
 import { exportCanvasPagesToPdf } from "@/services/documentPdfService";
+import { fetchElectionData } from "@/services/apiService";
 
 interface UseAppControllerArgs {
   electionData: RawQuestion[];
@@ -130,7 +131,6 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     setSelectedId(null);
   }, [setSelectedId]);
 
-  
 
   const switchPage = useCallback((nextPageId: string) => {
     switchPageBase(nextPageId);
@@ -407,6 +407,21 @@ export function useAppController({ electionData }: UseAppControllerArgs) {
     deleteSelectedItemsBase(selectedIdsState);
     setSelectedId(null); // Clear selection after deletion
   }, [deleteSelectedItemsBase, selectedIdsState, setSelectedId]);
+
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        const url = 'https://docscreator.votegrity.net/helios/elections/administered/raw'
+        const rawData = await fetchElectionData(url)
+        //TODO: ADD PARSING HERE @TiengLance
+        console.log(`Data fetched:`, rawData)
+      }
+      catch (error) {
+        console.error(`Failed to load election data:`, error)
+      }
+    }
+    initData();
+  }, []);
 
   return {
     canvasItems,
