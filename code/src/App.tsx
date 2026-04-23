@@ -35,8 +35,8 @@ const voterDataSets = {
 type VoterListKey = keyof typeof voterDataSets | "upload";
 
 const VOTER_LIST_OPTIONS: Array<{ value: VoterListKey; label: string }> = [
-  { value: "sample-canonical", label: "Sample Voters (Canonical)" },
-  { value: "sample-columns", label: "Sample Voters (Columns/Rows)" },
+  // { value: "sample-canonical", label: "Sample Voters (Canonical)" },
+  // { value: "sample-columns", label: "Sample Voters (Columns/Rows)" },
   { value: "upload", label: "Upload JSON File" },
 ];
 
@@ -46,7 +46,7 @@ function getVoterListLabel(value: VoterListKey): string {
 
 export default function App() {
   const [selectedElection, setSelectedElection] = useState<string>(defaultElection?.uuid ?? "");
-  const [selectedVoterList, setSelectedVoterList] = useState<VoterListKey>("sample-canonical");
+  const [selectedVoterList, setSelectedVoterList] = useState<VoterListKey>("upload");
   const [uploadedVoterData, setUploadedVoterData] = useState<unknown | null>(null);
   const [uploadedVoterFileName, setUploadedVoterFileName] = useState<string | null>(null);
 
