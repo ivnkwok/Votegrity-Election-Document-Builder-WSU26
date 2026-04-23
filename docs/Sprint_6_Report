@@ -1,0 +1,50 @@
+# Sprint x Report (3/15/26-4/24/26)
+## YouTube link of Sprint * Video (Make this video unlisted)
+## What's New (User Facing)
+* Fully connected information and data binding to the front-end
+* Fully developed product ready for final presention and deployment.
+## Work Summary (Developer Facing)
+We focused on refining our final project. This included polishing off our features so each
+component cohesively works together. Our system is designed to effectively produce documents
+in an efficient and clear way. The product should be ready for handoff and ready for clients
+to properly use and deploy. The project includes proper documentation on the usage and development
+of the system
+## Unfinished Work
+If applicable, explain the work you did not finish in this sprint. For issues/user
+stories in the current sprint that have not been closed, (a) any progress toward
+completion of the issues has been clearly tracked (by checking the checkboxes of
+acceptance criteria), (b) a comment has been added to the issue to explain why the
+issue could not be completed (e.g., "we ran out of time" or "we did not anticipate
+it would be so much work"), and (c) the issue is added to a subsequent sprint, so
+that it can be addressed later.
+There should be no unfinished work. There are some features that could be considered future work, but
+all features listed and requested from the client have been completed to satisfaction as per client feedback.
+We could possibly be more extensive with our documentation but all core features are explained.
+## Completed Issues/User Stories
+Here are links to the issues that we completed in this sprint:
+http://github.com/users/ivnkwok/projects/3?pane=issue&itemId=179247132&issue=ivnkwok%7CWSU-Capstone-2025%7C64
+https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=179249726&issue=ivnkwok%7CWSU-Capstone-2025%7C65
+https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=137576478&issue=ivnkwok%7CWSU-Capstone-2025%7C12
+## Incomplete Issues/User Stories
+These features were discussed but were not within our client's expectations. We decided to focus more on refining our
+complete project rather than trying to add additional features that may result in an unstable system. Doing so allowed
+us to efficiently work effectively on our deployment
+Here are links to issues we worked on but did not complete in this sprint:
+https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=143267915&issue=ivnkwok%7CWSU-Capstone-2025%7C31
+https://github.com/users/ivnkwok/projects/3/views/1?pane=issue&itemId=143268931&issue=ivnkwok%7CWSU-Capstone-2025%7C33
+## Code Files for Review
+Please review the following code files, which were actively developed during this
+sprint, for quality:
+https://github.com/ivnkwok/WSU-Capstone-2025/blob/main/code/src/App.tsx
+https://github.com/ivnkwok/WSU-Capstone-2025/blob/main/code/src/utils/parseElectionData.ts
+https://github.com/ivnkwok/WSU-Capstone-2025/blob/main/code/src/services/apiService.ts
+## Retrospective Summary
+Here's what went well:
+Worked well with other team memmbers
+Clear and concise communication with client
+Deployed our project to Votegrity services
+Here's what we'd like to improve:
+Possibly respond more rapidely to changing developments in deployment
+Being ready for any sudden changes or issues/bugs discovered in code
+Here are changes we plan to implement in the next sprint:
+No plans for future implementation.
