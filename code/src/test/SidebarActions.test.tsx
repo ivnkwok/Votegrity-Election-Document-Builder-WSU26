@@ -9,10 +9,10 @@ function renderSidebarActions(overrides: Partial<React.ComponentProps<typeof Sid
     onLoad: vi.fn(),
     onPreview: vi.fn(),
     voterListOptions: [
-      { value: "sample-canonical", label: "Sample Voters (Canonical)" },
+      { value: "selected-election", label: "Selected Election Users" },
       { value: "upload", label: "Upload JSON File" },
     ],
-    selectedVoterList: "sample-canonical",
+    selectedVoterList: "selected-election",
     uploadedVoterListName: null,
     canRunMailMerge: true,
     isMailMerging: false,

@@ -237,4 +237,49 @@ describe("useAppController drag session behavior", () => {
     expect(result.current.canvasItems).toHaveLength(1);
     expect(result.current.toolStatusMessage).toContain("can only be added once on this page");
   });
+
+  it("blocks Q&A drops until an election with questions is selected", () => {
+    mockPageRect(500, 700);
+
+    const { result } = renderHook(() => useAppController({ electionData: [] }));
+
+    act(() => {
+      result.current.handleDragEnd(createToolDropEvent("question-answer", 100, 120));
+    });
+
+    expect(result.current.canvasItems).toHaveLength(0);
+    expect(result.current.toolStatusMessage).toContain("Select an election with questions");
+  });
+
+  it("preserves source question order when generating Q&A items", () => {
+    mockPageRect(500, 700);
+
+    const electionData = [
+      {
+        id: 2,
+        question: "Consent to electronic notice",
+        answers: ["Yes"],
+      },
+      {
+        id: 1,
+        question: "Board of Directors",
+        answers: ["Alice Example", "Write-in"],
+      },
+    ];
+
+    const { result } = renderHook(() => useAppController({ electionData }));
+
+    act(() => {
+      result.current.handleDragEnd(createToolDropEvent("question-answer", 100, 120));
+    });
+
+    expect(result.current.canvasItems.map((item) => item.content)).toEqual([
+      "Consent to electronic notice",
+      "[ ] Yes",
+      "Board of Directors",
+      "[ ] Alice Example",
+      "[ ]           ",
+    ]);
+    expect(result.current.toolStatusMessage).toBeNull();
+  });
 });

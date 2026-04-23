@@ -51,11 +51,11 @@ vi.mock("@/hooks/useAppController", () => {
   };
 });
 
-vi.mock("@/services/apiService", () => {
+vi.mock("@/services/apiService", async () => {
+  const actual = await vi.importActual<typeof import("@/services/apiService")>("@/services/apiService");
   return {
+    ...actual,
     fetchAdministeredElectionRecords: vi.fn(async () => []),
-    buildElectionUsersUrl: (uuid: string) =>
-      `https://docscreator.votegrity.net/helios/elections/${uuid}/voters/adminV2`,
     fetchElectionUsers: vi.fn(async () => ({ voters: [] })),
   };
 });
@@ -106,7 +106,7 @@ describe("App mail merge uploads", () => {
     expect(uploadInput.value).toBe("");
 
     await openVoterListSourceSelect(user);
-    await user.click(await screen.findByText(/sample voters \(canonical\)/i));
+    await user.click(await screen.findByText(/selected election users/i));
 
     expect(screen.queryByText(/loaded: valid-voters\.json/i)).not.toBeInTheDocument();
   });
