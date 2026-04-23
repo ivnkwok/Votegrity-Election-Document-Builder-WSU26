@@ -63,8 +63,8 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     flags: { isMovable: true, isEditable: false, minQuantity: 1, maxQuantity: 1 },
   },
   {
-    id: "upload-test",
-    label: "Upload Test",
+    id: "upload-image",
+    label: "Upload Image",
     type: "image",
     imageSrc: "",
     defaultWidth: 160,

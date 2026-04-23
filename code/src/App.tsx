@@ -33,8 +33,8 @@ type VoterListKey = keyof typeof voterDataSets | "upload" | "selected-election";
 
 const VOTER_LIST_OPTIONS: Array<{ value: VoterListKey; label: string }> = [
   { value: "selected-election", label: "Selected Election Users" },
-  { value: "sample-canonical", label: "Sample Voters (Canonical)" },
-  { value: "sample-columns", label: "Sample Voters (Columns/Rows)" },
+  // { value: "sample-canonical", label: "Sample Voters (Canonical)" },
+  // { value: "sample-columns", label: "Sample Voters (Columns/Rows)" },
   { value: "upload", label: "Upload JSON File" },
 ];
 
