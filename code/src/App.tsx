@@ -10,58 +10,99 @@ import {
   buildElectionUsersUrl,
   fetchAdministeredElectionRecords,
   fetchElectionUsers,
+  isElectionApiError,
+  type ElectionUsersResponse,
 } from "./services/apiService";
-import allElections from "./data/AllElection.json";
-import voterSampleCanonical from "./data/voterMailMergeSampleCanonical.json";
-import voterSampleColumnsRows from "./data/voterMailMergeSampleColumnsRows.json";
 import type { ElectionRecord } from "./utils/parseElectionData";
 
-const bundledElectionRecords = allElections as ElectionRecord[];
-
-function getUsableElectionRecords(records: ElectionRecord[]): ElectionRecord[] {
-  return records.filter(
-  (record) => Array.isArray(record.questions) && record.questions.length > 0
-  );
-}
-
-const voterDataSets = {
-  "sample-canonical": voterSampleCanonical,
-  "sample-columns": voterSampleColumnsRows,
-} as const;
-
-type VoterListKey = keyof typeof voterDataSets | "upload" | "selected-election";
+type ElectionLoadState = "loading" | "loaded" | "empty" | "failed";
+type ElectionStatusTone = "info" | "muted" | "error";
+type VoterListKey = "upload" | "selected-election";
 
 const VOTER_LIST_OPTIONS: Array<{ value: VoterListKey; label: string }> = [
   { value: "selected-election", label: "Selected Election Users" },
-  // { value: "sample-canonical", label: "Sample Voters (Canonical)" },
-  // { value: "sample-columns", label: "Sample Voters (Columns/Rows)" },
   { value: "upload", label: "Upload JSON File" },
 ];
+
+function getUsableElectionRecords(records: ElectionRecord[]): ElectionRecord[] {
+  return records.filter((record) => Array.isArray(record.questions) && record.questions.length > 0);
+}
 
 function getVoterListLabel(value: VoterListKey): string {
   return VOTER_LIST_OPTIONS.find((option) => option.value === value)?.label ?? value;
 }
 
+function getElectionLoadErrorMessage(error: unknown): string {
+  if (isElectionApiError(error)) {
+    if (error.code === "auth-redirect") {
+      return "Administered elections require an authenticated server session. Sign in on the server, then reload.";
+    }
+
+    if (error.code === "invalid-content-type") {
+      return "The election service returned a non-JSON response. Verify this deployment can reach the authenticated /helios endpoints.";
+    }
+
+    if (error.code === "http-error" && error.status) {
+      return `Could not load administered elections (HTTP ${error.status}).`;
+    }
+
+    if (error.code === "invalid-json") {
+      return "The election service returned invalid JSON.";
+    }
+  }
+
+  if (error instanceof Error && error.message) {
+    return `Could not load administered elections: ${error.message}`;
+  }
+
+  return "Could not load administered elections.";
+}
+
+function getElectionStatusDisplay(
+  electionLoadState: ElectionLoadState,
+  electionLoadErrorMessage: string | null
+): { message: string | null; tone: ElectionStatusTone } {
+  if (electionLoadState === "loading") {
+    return {
+      message: "Loading administered elections...",
+      tone: "info",
+    };
+  }
+
+  if (electionLoadState === "empty") {
+    return {
+      message: "No administered elections are currently available.",
+      tone: "muted",
+    };
+  }
+
+  if (electionLoadState === "failed") {
+    return {
+      message: electionLoadErrorMessage ?? "Could not load administered elections.",
+      tone: "error",
+    };
+  }
+
+  return {
+    message: null,
+    tone: "muted",
+  };
+}
+
 export default function App() {
-  const [electionRecords, setElectionRecords] = useState<ElectionRecord[]>(bundledElectionRecords);
+  const [electionRecords, setElectionRecords] = useState<ElectionRecord[]>([]);
+  const [electionLoadState, setElectionLoadState] = useState<ElectionLoadState>("loading");
+  const [electionLoadErrorMessage, setElectionLoadErrorMessage] = useState<string | null>(null);
   const [selectedElection, setSelectedElection] = useState<string>("");
   const [selectedVoterList, setSelectedVoterList] = useState<VoterListKey>("selected-election");
   const [uploadedVoterData, setUploadedVoterData] = useState<unknown | null>(null);
   const [uploadedVoterFileName, setUploadedVoterFileName] = useState<string | null>(null);
-  const [selectedElectionVoterData, setSelectedElectionVoterData] = useState<unknown | null>(null);
+  const [selectedElectionVoterData, setSelectedElectionVoterData] = useState<ElectionUsersResponse | null>(null);
   const [isLoadingSelectedElectionVoters, setIsLoadingSelectedElectionVoters] = useState(false);
 
   const availableElectionRecords = useMemo(
     () => getUsableElectionRecords(electionRecords),
     [electionRecords]
-  );
-
-  const defaultElection = useMemo(
-    () =>
-      availableElectionRecords.find((record) => !record.is_archived)
-      ?? availableElectionRecords[0]
-      ?? null,
-    [availableElectionRecords]
   );
 
   const electionOptions = useMemo(
@@ -73,21 +114,38 @@ export default function App() {
     [availableElectionRecords]
   );
 
+  const electionStatus = useMemo(
+    () => getElectionStatusDisplay(electionLoadState, electionLoadErrorMessage),
+    [electionLoadErrorMessage, electionLoadState]
+  );
+
   useEffect(() => {
     let isCancelled = false;
 
+    setElectionLoadState("loading");
+    setElectionLoadErrorMessage(null);
+
     void fetchAdministeredElectionRecords()
       .then((data) => {
-        if (isCancelled || !Array.isArray(data)) return;
+        if (isCancelled) return;
 
-        const usableRecords = getUsableElectionRecords(data as ElectionRecord[]);
-        if (usableRecords.length > 0) {
-          setElectionRecords(data as ElectionRecord[]);
+        if (!Array.isArray(data)) {
+          setElectionRecords([]);
+          setElectionLoadState("failed");
+          setElectionLoadErrorMessage("The election service returned an unexpected payload.");
+          return;
         }
+
+        const usableRecords = getUsableElectionRecords(data);
+        setElectionRecords(usableRecords);
+        setElectionLoadState(usableRecords.length > 0 ? "loaded" : "empty");
       })
       .catch((error) => {
         if (isCancelled) return;
         console.error("Failed to load administered elections", error);
+        setElectionRecords([]);
+        setElectionLoadState("failed");
+        setElectionLoadErrorMessage(getElectionLoadErrorMessage(error));
       });
 
     return () => {
@@ -96,26 +154,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!selectedElection && defaultElection?.uuid) {
-      setSelectedElection(defaultElection.uuid);
-      return;
-    }
-
     if (
       selectedElection
       && !availableElectionRecords.some((record) => record.uuid === selectedElection)
-      && defaultElection?.uuid
     ) {
-      setSelectedElection(defaultElection.uuid);
+      setSelectedElection("");
     }
-  }, [availableElectionRecords, defaultElection, selectedElection]);
+  }, [availableElectionRecords, selectedElection]);
 
   const selectedElectionRecord = useMemo(
-    () =>
-      availableElectionRecords.find((record) => record.uuid === selectedElection)
-      ?? defaultElection
-      ?? null,
-    [selectedElection]
+    () => availableElectionRecords.find((record) => record.uuid === selectedElection) ?? null,
+    [availableElectionRecords, selectedElection]
   );
 
   const selectedElectionData = useMemo(
@@ -214,11 +263,7 @@ export default function App() {
       return selectedElectionVoterData;
     }
 
-    if (selectedVoterList === "upload") {
-      return uploadedVoterData;
-    }
-
-    return voterDataSets[selectedVoterList];
+    return uploadedVoterData;
   }, [selectedElectionVoterData, selectedVoterList, uploadedVoterData]);
 
   const canRunMailMerge = useMemo(() => {
@@ -226,11 +271,7 @@ export default function App() {
       return !isLoadingSelectedElectionVoters && selectedElectionVoterData !== null;
     }
 
-    if (selectedVoterList === "upload") {
-      return uploadedVoterData !== null;
-    }
-
-    return true;
+    return uploadedVoterData !== null;
   }, [isLoadingSelectedElectionVoters, selectedElectionVoterData, selectedVoterList, uploadedVoterData]);
 
   const handleVoterListUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,6 +324,9 @@ export default function App() {
             electionOptions={electionOptions}
             templateOptions={TEMPLATE_OPTIONS}
             selectedElection={selectedElection}
+            electionStatusMessage={electionStatus.message}
+            electionStatusTone={electionStatus.tone}
+            isElectionSelectorDisabled={electionLoadState !== "loaded"}
             onSelectedElectionChange={setSelectedElection}
             onTemplateChange={(value) => {
               try {
@@ -324,13 +368,14 @@ export default function App() {
             onRunMailMerge={() => {
               if (!selectedVoterData) {
                 if (selectedVoterList === "selected-election") {
-                  const electionUuid = selectedElectionRecord?.uuid;
-                  const electionUsersUrl = electionUuid ? buildElectionUsersUrl(electionUuid) : null;
-                  alert(
-                    electionUsersUrl
-                      ? `Could not load users for the selected election.\nExpected URL: ${electionUsersUrl}`
-                      : "Could not load users for the selected election."
-                  );
+                  if (!selectedElectionRecord) {
+                    alert("Please select an election before running mail merge.");
+                    return;
+                  }
+
+                  const electionUuid = selectedElectionRecord.uuid;
+                  const electionUsersUrl = buildElectionUsersUrl(electionUuid);
+                  alert(`Could not load users for the selected election.\nExpected URL: ${electionUsersUrl}`);
                   return;
                 }
 
