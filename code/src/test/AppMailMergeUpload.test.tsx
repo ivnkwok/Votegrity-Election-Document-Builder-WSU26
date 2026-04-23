@@ -51,6 +51,15 @@ vi.mock("@/hooks/useAppController", () => {
   };
 });
 
+vi.mock("@/services/apiService", () => {
+  return {
+    fetchAdministeredElectionRecords: vi.fn(async () => []),
+    buildElectionUsersUrl: (uuid: string) =>
+      `https://docscreator.votegrity.net/helios/elections/${uuid}/voters/adminV2`,
+    fetchElectionUsers: vi.fn(async () => ({ voters: [] })),
+  };
+});
+
 vi.mock("@/components/Canvas/Canvas", () => {
   return {
     Canvas: () => <div data-testid="canvas" />,
@@ -135,5 +144,15 @@ describe("App mail merge uploads", () => {
     });
     expect(window.alert).toHaveBeenCalledWith("Could not parse voter list JSON file.");
     expect(screen.queryByText(/loaded:/i)).not.toBeInTheDocument();
+  });
+
+  it("includes selected election users as a voter list source", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await openVoterListSourceSelect(user);
+
+    const matches = await screen.findAllByText(/selected election users/i);
+    expect(matches.length).toBeGreaterThan(0);
   });
 });

@@ -105,6 +105,35 @@ describe("mailMergeService.parseVoterData", () => {
       message: expect.stringContaining("pin"),
     });
   });
+
+  it("parses adminV2 voter rows into the existing address and pin fields", () => {
+    const raw = [
+      {
+        election_uuid: "9f7ffa9c-b294-4bb5-9c31-2bc1341cc61a",
+        name: "Christopher & Rebecca Mann",
+        uuid: "fb9e38bc-3253-4fe5-bcc0-a16ffa01aff0",
+        vote_hash: "BJ58V6/FqYngYm9PK+5R5EXMY+DMLqGbk/9nHTEkTGw",
+        voter_phone_num: "2025550188",
+        voter_address_line1: null,
+        voter_address_line2: null,
+        voter_city: null,
+        voter_login_id: "4436 Roland Springs Drive",
+        voter_state: null,
+        voter_zipcode: null,
+      },
+    ];
+
+    const result = parseVoterData(raw);
+
+    expect(result.totalRows).toBe(1);
+    expect(result.issues).toEqual([]);
+    expect(result.validRecords[0]).toMatchObject({
+      name: "Christopher & Rebecca Mann",
+      addressLine1: "4436 Roland Springs Drive",
+      cityStateZip: "",
+      pin: "2025550188",
+    });
+  });
 });
 
 describe("mailMergeService merge substitution", () => {

@@ -3,6 +3,14 @@ import type { CanvasItem } from "@/lib/utils";
 import type { ToolDefinition } from "@/config/tools";
 import { Button } from "@/components/ui/button";
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -91,24 +99,38 @@ export function AppSidebar({
   onChangeItem,
   onDeleteItem,
 }: AppSidebarProps) {
+  const selectedElectionOption =
+    electionOptions.find((option) => option.value === selectedElection) ?? null;
+
   return (
     <aside className="flex h-full w-[380px] shrink-0 overflow-hidden border-r border-gray-300 bg-white">
       <div className="flex h-full flex-1 flex-col gap-6 overflow-x-hidden overflow-y-auto p-4">
         <div className="space-y-2">
           <div className="text-sm font-medium text-gray-700">Election Data</div>
-          <Select value={selectedElection} onValueChange={onSelectedElectionChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Election" />
-            </SelectTrigger>
-
-            <SelectContent>
-              {electionOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Combobox
+            items={electionOptions}
+            value={selectedElectionOption}
+            onValueChange={(option) => onSelectedElectionChange(option?.value ?? "")}
+            itemToStringLabel={(option) => option.label}
+            itemToStringValue={(option) => option.value}
+          >
+            <ComboboxInput
+              className="w-full"
+              placeholder="Search elections..."
+              aria-label="Election Data"
+              showClear
+            />
+            <ComboboxContent>
+              <ComboboxEmpty>No election found.</ComboboxEmpty>
+              <ComboboxList>
+                {(option: SidebarSelectOption) => (
+                  <ComboboxItem key={option.value} value={option}>
+                    {option.label}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
         </div>
         <div className="space-y-2">
           <div className="text-sm font-medium text-gray-700">Starting Template</div>
