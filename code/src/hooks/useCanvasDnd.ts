@@ -121,10 +121,14 @@ export function useCanvasDnd({
       }
 
       if ((toolDef.toolKind ?? "canvas-item") === "generator" && toolId === "question-answer") {
-        const { questions, answers } = parseElection(electionData);
+        if (electionData.length === 0) {
+          setToolStatusMessage("Select an election with questions before adding Q&A.");
+          return;
+        }
+
+        const questionEntries = parseElection(electionData);
         const newItems = createQuestionAnswerItems({
-          questions,
-          answers,
+          questionEntries,
           startX: translated.left - canvasRect.left,
           startY: translated.top - canvasRect.top,
         });

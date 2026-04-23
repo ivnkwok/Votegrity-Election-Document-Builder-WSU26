@@ -1,27 +1,24 @@
 import type { CanvasItem } from "@/lib/utils";
 import type { ToolDefinition } from "@/config/tools";
-import type { QuestionProperties } from "@/utils/parseElectionData";
+import type { ParsedElectionQuestion } from "@/utils/parseElectionData";
 import { clampToRange } from "./positionUtils";
 
 export function createQuestionAnswerItems(args: {
-  questions: Record<number, QuestionProperties>;
-  answers: Record<number, string[]>;
+  questionEntries: ParsedElectionQuestion[];
   startX: number;
   startY: number;
 }): CanvasItem[] {
-  const { questions, answers, startX, startY } = args;
+  const { questionEntries, startX, startY } = args;
   const newItems: CanvasItem[] = [];
   let currentY = startY;
+  const timestamp = Date.now();
 
-  Object.keys(questions).forEach((qId) => {
-    const idNum = Number(qId);
-    const questionData = questions[idNum];
-
+  questionEntries.forEach((entry) => {
     const qItem: CanvasItem = {
-      id: `question-${idNum}-${Date.now()}`,
+      id: `question-${entry.id}-${timestamp}`,
       type: "text",
       sourceToolId: "question-answer",
-      content: questionData.text,
+      content: entry.question.text,
       x: startX,
       y: currentY,
       width: 400,
@@ -33,13 +30,12 @@ export function createQuestionAnswerItems(args: {
     newItems.push(qItem);
     currentY += 35;
 
-    const questionAnswers = answers[idNum] || [];
-    questionAnswers.forEach((ansText, index) => {
+    entry.answers.forEach((answerText, index) => {
       const aItem: CanvasItem = {
-        id: `answer-${idNum}-${index}-${Date.now()}`,
+        id: `answer-${entry.id}-${index}-${timestamp}`,
         type: "text",
         sourceToolId: "question-answer",
-        content: `[ ] ${ansText}`,
+        content: `[ ] ${answerText}`,
         x: startX + 20,
         y: currentY,
         width: 300,

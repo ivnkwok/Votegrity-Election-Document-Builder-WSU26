@@ -32,11 +32,16 @@ interface SidebarSelectOption {
   label: string;
 }
 
+type ElectionStatusTone = "info" | "muted" | "error";
+
 interface AppSidebarProps {
   tools: ToolDefinition[];
   electionOptions: SidebarSelectOption[];
   templateOptions: SidebarSelectOption[];
   selectedElection: string;
+  electionStatusMessage: string | null;
+  electionStatusTone?: ElectionStatusTone;
+  isElectionSelectorDisabled: boolean;
   onSelectedElectionChange: (value: string) => void;
   onTemplateChange: (value: string) => void;
   pageOrder: string[];
@@ -71,6 +76,9 @@ export function AppSidebar({
   electionOptions,
   templateOptions,
   selectedElection,
+  electionStatusMessage,
+  electionStatusTone = "muted",
+  isElectionSelectorDisabled,
   onSelectedElectionChange,
   onTemplateChange,
   pageOrder,
@@ -101,6 +109,11 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const selectedElectionOption =
     electionOptions.find((option) => option.value === selectedElection) ?? null;
+  const electionStatusClassName = electionStatusTone === "error"
+    ? "border-red-200 bg-red-50 text-red-800"
+    : electionStatusTone === "info"
+      ? "border-sky-200 bg-sky-50 text-sky-800"
+      : "border-gray-200 bg-gray-50 text-gray-600";
 
   return (
     <aside className="flex h-full w-[380px] shrink-0 overflow-hidden border-r border-gray-300 bg-white">
@@ -110,14 +123,16 @@ export function AppSidebar({
           <Combobox
             items={electionOptions}
             value={selectedElectionOption}
+            disabled={isElectionSelectorDisabled}
             onValueChange={(option) => onSelectedElectionChange(option?.value ?? "")}
             itemToStringLabel={(option) => option.label}
             itemToStringValue={(option) => option.value}
           >
             <ComboboxInput
               className="w-full"
-              placeholder="Search elections..."
+              placeholder={selectedElectionOption ? "Search elections..." : "No election selected"}
               aria-label="Election Data"
+              disabled={isElectionSelectorDisabled}
               showClear
             />
             <ComboboxContent>
@@ -131,6 +146,15 @@ export function AppSidebar({
               </ComboboxList>
             </ComboboxContent>
           </Combobox>
+          {electionStatusMessage && (
+            <div
+              className={`rounded-md border px-3 py-2 text-xs ${electionStatusClassName}`}
+              role="status"
+              aria-live="polite"
+            >
+              {electionStatusMessage}
+            </div>
+          )}
         </div>
         <div className="space-y-2">
           <div className="text-sm font-medium text-gray-700">Starting Template</div>

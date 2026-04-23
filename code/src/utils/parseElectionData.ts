@@ -22,22 +22,21 @@ export interface QuestionProperties {
   open?: boolean;
 }
 
-export function parseElection(data: RawQuestion[]) {
-  const questions: Record<number, QuestionProperties> = {};
-  const answers: Record<number, string[]> = {};
+export interface ParsedElectionQuestion {
+  id: number;
+  question: QuestionProperties;
+  answers: string[];
+}
 
-  data.forEach((q) => {
-    questions[q.id] = {
-      text: q.question,
-      max: q.max,
-      min: q.min,
-      open: q.open,
-    };
-
-    answers[q.id] = q.answers.map((a) =>
-      a === "Write-in" ? "          " : a
-    );
-  });
-
-  return { questions, answers };
+export function parseElection(data: RawQuestion[]): ParsedElectionQuestion[] {
+  return data.map((question) => ({
+    id: question.id,
+    question: {
+      text: question.question,
+      max: question.max,
+      min: question.min,
+      open: question.open,
+    },
+    answers: question.answers.map((answer) => (answer === "Write-in" ? "          " : answer)),
+  }));
 }
