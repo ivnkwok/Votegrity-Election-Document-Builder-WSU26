@@ -16,7 +16,6 @@ type CanonicalField =
 const REQUIRED_FIELDS: Array<CanonicalField> = [
   "name",
   "addressLine1",
-  "cityStateZip",
   "pin",
 ];
 
@@ -38,6 +37,7 @@ const FIELD_ALIASES: Record<CanonicalField, string[]> = {
     "street1",
     "mailingaddress1",
     "voteraddressline1",
+    "voterloginid",
   ],
   addressLine2: [
     "addressline2",
@@ -45,6 +45,7 @@ const FIELD_ALIASES: Record<CanonicalField, string[]> = {
     "line2",
     "street2",
     "mailingaddress2",
+    "voteraddressline2",
     "voteraddressline2",
     "unit",
     "apartment",
@@ -67,9 +68,14 @@ const FIELD_ALIASES: Record<CanonicalField, string[]> = {
   pin: [
     "pin",
     "voterpin",
+    "voterphonenum",
+    "phone",
+    "phonenumber",
     "securitypin",
     "voteridpin",
     "postalpin",
+    "votehash",
+    "uuid",
   ],
 };
 
@@ -79,9 +85,9 @@ const COMPOSITE_ADDRESS_ALIASES = [
   "mailingaddress",
 ];
 
-const CITY_ALIASES = ["city", "town", "municipality"];
-const STATE_ALIASES = ["state", "province", "region", "territory"];
-const ZIP_ALIASES = ["zip", "zipcode", "postal", "postalcode", "postcode"];
+const CITY_ALIASES = ["city", "town", "municipality", "votercity"];
+const STATE_ALIASES = ["state", "province", "region", "territory", "voterstate"];
+const ZIP_ALIASES = ["zip", "zipcode", "postal", "postalcode", "postcode", "voterzipcode"];
 
 interface NormalizedFieldCandidate {
   name: string;
@@ -122,7 +128,7 @@ export interface NormalizedVoterRecord {
 export interface VoterValidationIssue {
   rowIndex: number;
   message: string;
-  missingFields?: Array<"name" | "addressLine1" | "cityStateZip" | "pin">;
+  missingFields?: Array<"name" | "addressLine1" | "pin">;
 }
 
 export interface VoterParseResult {
@@ -169,8 +175,16 @@ function readRawAliasValue(lookup: Record<string, unknown>, aliases: string[]): 
 }
 
 function readAliasValue(lookup: Record<string, unknown>, aliases: string[]): string {
-  const value = readRawAliasValue(lookup, aliases);
-  return normalizeScalar(value);
+  for (const alias of aliases) {
+    if (!(alias in lookup)) continue;
+
+    const normalized = normalizeScalar(lookup[alias]);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return "";
 }
 
 function buildCityStateZip(city: string, state: string, zip: string): string {
@@ -391,7 +405,7 @@ export function parseVoterData(rawData: unknown): VoterParseResult {
       issues.push({
         rowIndex,
         message: `Missing required field(s): ${missingFields.map(formatMissingField).join(", ")}.`,
-        missingFields: missingFields as Array<"name" | "addressLine1" | "cityStateZip" | "pin">,
+        missingFields: missingFields as Array<"name" | "addressLine1" | "pin">,
       });
       return;
     }

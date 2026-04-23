@@ -1,5 +1,3 @@
-// parseElection.ts
-
 export interface RawQuestion {
   id: number;
   question: string;
@@ -7,6 +5,14 @@ export interface RawQuestion {
   max?: number;
   min?: number;
   open?: boolean;
+}
+
+export interface ElectionRecord {
+  uuid: string;
+  name: string;
+  short_name?: string;
+  questions: RawQuestion[];
+  is_archived?: boolean;
 }
 
 export interface QuestionProperties {
