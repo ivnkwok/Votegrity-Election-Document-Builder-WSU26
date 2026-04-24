@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import type { jsPDF } from "jspdf";
 import type { CanvasItem } from "@/lib/utils";
 import { LETTER_PAGE_CANVAS_BOUNDS } from "@/lib/canvasBounds";
 
@@ -145,7 +146,7 @@ function createPageElement(
   return page;
 }
 
-async function capturePageItemsAsPngDataUrl(items: CanvasItem[]): Promise<string> {
+async function capturePageItemsAsCanvas(items: CanvasItem[]): Promise<HTMLCanvasElement> {
   const [{ default: html2canvas }, { default: DOMPurify }] = await Promise.all([
     import("html2canvas-pro"),
     import("dompurify"),
@@ -176,32 +177,33 @@ async function capturePageItemsAsPngDataUrl(items: CanvasItem[]): Promise<string
       backgroundColor: "#ffffff",
     });
 
-    return canvas.toDataURL("image/png");
+    return canvas;
   } finally {
     document.documentElement.style.colorScheme = previousColorScheme;
     container.remove();
   }
 }
 
-async function openPngPagesAsPdf(pngDataUrls: string[], filename: string): Promise<void> {
-  if (pngDataUrls.length === 0) return;
+function appendCanvasPageToPdf(pdf: jsPDF, canvas: HTMLCanvasElement, pageIndex: number): void {
+  if (pageIndex > 0) {
+    pdf.addPage();
+  }
 
+  pdf.addImage(canvas, "PNG", 0, 0, 8.5, 11, undefined, "FAST");
+}
+
+async function createPdfDocument(): Promise<jsPDF> {
   const { default: jsPDF } = await import("jspdf");
 
-  const pdf = new jsPDF({
+  return new jsPDF({
     unit: "in",
     format: "letter",
     orientation: "portrait",
+    compress: true,
   });
+}
 
-  pngDataUrls.forEach((img, index) => {
-    if (index > 0) {
-      pdf.addPage();
-    }
-
-    pdf.addImage(img, "PNG", 0, 0, 8.5, 11);
-  });
-
+function openPdfDocument(pdf: jsPDF, filename: string): void {
   const blob = pdf.output("blob");
   const url = URL.createObjectURL(blob);
   const newTab = window.open("", "_blank");
@@ -221,10 +223,18 @@ export async function exportCanvasPagesToPdf({
 }: ExportCanvasPagesArgs): Promise<void> {
   if (pages.length === 0) return;
 
-  const pngPages: string[] = [];
-  for (const items of pages) {
-    pngPages.push(await capturePageItemsAsPngDataUrl(items));
+  const pdf = await createPdfDocument();
+
+  for (const [pageIndex, items] of pages.entries()) {
+    const canvas = await capturePageItemsAsCanvas(items);
+
+    try {
+      appendCanvasPageToPdf(pdf, canvas, pageIndex);
+    } finally {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
   }
 
-  await openPngPagesAsPdf(pngPages, filename);
+  openPdfDocument(pdf, filename);
 }
