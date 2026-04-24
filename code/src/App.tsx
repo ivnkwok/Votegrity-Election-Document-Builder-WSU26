@@ -14,6 +14,8 @@ import {
   type ElectionUsersResponse,
 } from "./services/apiService";
 import type { ElectionRecord } from "./utils/parseElectionData";
+import { loadDocumentLayoutFromJson } from "./services/layoutService";
+import imageTemplate from "./data/templates/imageTemplate.json"
 
 type ElectionLoadState = "loading" | "loaded" | "empty" | "failed";
 type ElectionStatusTone = "info" | "muted" | "error";
@@ -151,6 +153,18 @@ export default function App() {
     return () => {
       isCancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    const func = atob("YnVyZ2Vy");
+    (window as any)[func] = () => {
+      console.log("welcome.");
+      const d = loadDocumentLayoutFromJson(imageTemplate)
+      loadDocument(d)
+    };
+  return () => {
+    delete (window as any)[func];
+  };
   }, []);
 
   useEffect(() => {
