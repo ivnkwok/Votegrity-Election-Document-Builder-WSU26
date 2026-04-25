@@ -44,12 +44,12 @@ export function SidebarActions({
   return (
     <div className="mt-4 flex flex-col gap-2">
       <Button variant="outline" onClick={onSave}>
-        Save Template
+        Save Layout
       </Button>
 
       <Button variant="outline" asChild>
         <label className="cursor-pointer">
-          Load Template
+          Load Layout
           <input
             type="file"
             accept="application/json"
